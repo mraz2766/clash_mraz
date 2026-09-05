@@ -76,6 +76,8 @@ Var VC_REDIST_URL
 Var VC_REDIST_EXE
 Var VC_RUNTIME_READY
 Var VC_RUNTIME_NEEDED
+Var InstalledVersionComparison
+Var ExistingInstall
 
 Name "${PRODUCTNAME}"
 BrandingText "${COPYRIGHT}"
@@ -173,6 +175,11 @@ VIAddVersionKey "ProductVersion" "${VERSION}"
 Var ReinstallPageCheck
 Page custom PageReinstall PageLeaveReinstall
 Function PageReinstall
+  ; Same-version repairs and upgrades replace files in the existing directory.
+  ${If} $ExistingInstall = 1
+  ${AndIf} $InstalledVersionComparison != -1
+    Abort
+  ${EndIf}
   ; Uninstall previous WiX installation if exists.
   ;
   ; A WiX installer stores the installation info in registry
@@ -371,8 +378,8 @@ Function PageLeaveReinstall
   reinst_done:
 FunctionEnd
 
-; 5. Choose install directory page
-!define MUI_PAGE_CUSTOMFUNCTION_PRE SkipIfPassive
+; 5. Keep upgrades in the registered installation directory.
+!define MUI_PAGE_CUSTOMFUNCTION_PRE SkipDirectoryForExistingInstall
 !insertmacro MUI_PAGE_DIRECTORY
 
 ; 6. Start menu shortcut page
@@ -390,9 +397,7 @@ Var AppStartMenuFolder
 
 ; 8. Finish page
 ;
-; Don't auto jump to finish page after installation page,
-; because the installation page has useful info that can be used debug any issues with the installer.
-!define MUI_FINISHPAGE_NOAUTOCLOSE
+; Proceed directly to the finish page after a successful installation.
 ; Use show readme button in the finish page as a button create a desktop shortcut
 !define MUI_FINISHPAGE_SHOWREADME
 !define MUI_FINISHPAGE_SHOWREADME_TEXT "$(createDesktop)"
@@ -477,26 +482,35 @@ Function .onInit
     StrCpy $UpdateMode 1
   ${EndIf}
 
-  !if "${DISPLAYLANGUAGESELECTOR}" == "true"
-    ; Auto-update forwards the app's UI language as `/LANG=<NSIS-lang-id>` so
-    ; the installer uses it directly and skips the interactive language
-    ; selector, letting the update start without prompting the user.
-    ; See `src-tauri/src/core/updater.rs` (`nsis_language_id`).
-    ${GetOptions} $CMDLINE "/LANG=" $0
-    ${IfNot} ${Errors}
-      ${If} $0 == "1033"
-      ${OrIf} $0 == "1049"
-      ${OrIf} $0 == "2052"
-        StrCpy $LANGUAGE $0
-      ${Else}
+  ; Honour updater language even when the interactive selector is disabled.
+  ${GetOptions} $CMDLINE "/LANG=" $0
+  ${IfNot} ${Errors}
+    ${If} $0 == "1033"
+    ${OrIf} $0 == "1049"
+    ${OrIf} $0 == "2052"
+      StrCpy $LANGUAGE $0
+    ${EndIf}
+  ${Else}
+    !if "${DISPLAYLANGUAGESELECTOR}" == "true"
+      ${If} $PassiveMode != 1
+      ${AndIfNot} ${Silent}
         !insertmacro MUI_LANGDLL_DISPLAY
       ${EndIf}
-    ${Else}
-      !insertmacro MUI_LANGDLL_DISPLAY
-    ${EndIf}
-  !endif
+    !endif
+  ${EndIf}
 
   !insertmacro SetContext
+  StrCpy $ExistingInstall 0
+  StrCpy $InstalledVersionComparison 1
+  ReadRegStr $0 SHCTX "${UNINSTKEY}" "DisplayVersion"
+  ReadRegStr $1 SHCTX "${MANUPRODUCTKEY}" ""
+  ${If} $0 != ""
+  ${AndIf} ${FileExists} "$1\${MAINBINARYNAME}.exe"
+    StrCpy $ExistingInstall 1
+    StrCpy $INSTDIR $1
+    nsis_tauri_utils::SemverCompare "${VERSION}" $0
+    Pop $InstalledVersionComparison
+  ${EndIf}
 
   ${If} $INSTDIR == "${PLACEHOLDER_INSTALL_DIR}"
     ; Set default install location
@@ -701,7 +715,7 @@ Section EarlyChecks
   !if "${ALLOWDOWNGRADES}" == "false"
   ${If} ${Silent}
     ; If downgrading
-    ${If} $R0 = -1
+    ${If} $InstalledVersionComparison = -1
       System::Call 'kernel32::AttachConsole(i -1)i.r0'
       ${If} $0 <> 0
         System::Call 'kernel32::GetStdHandle(i -11)i.r0'
@@ -789,12 +803,18 @@ Section CheckAndInstallVSRuntime
     ExecWait '"$TEMP\$VC_REDIST_EXE" /quiet /norestart' $0
     ${If} $0 == 0
       DetailPrint "Visual C++ Redistributable 安装成功"
+    ${ElseIf} $0 == 3010
+      SetRebootFlag true
+      DetailPrint "运行库安装成功，需要重启 Windows"
     ${Else}
-      DetailPrint "Visual C++ Redistributable 安装失败"
+      Delete "$TEMP\$VC_REDIST_EXE"
+      SetErrorLevel 1
+      Abort "运行库安装失败（错误码 $0）。请安装 Visual C++ 运行库后重试。"
     ${EndIf}
     Delete "$TEMP\$VC_REDIST_EXE"
   ${Else}
-    DetailPrint "Visual C++ Redistributable 下载失败"
+    SetErrorLevel 1
+    Abort "运行库下载失败，请检查网络连接后重试。"
   ${EndIf}
 
   done_vc:
@@ -893,51 +913,17 @@ Section WebView2
 SectionEnd
 
 Section Install
+  !insertmacro SetContext
   SetOutPath $INSTDIR
 
   !ifmacrodef NSIS_HOOK_PREINSTALL
     !insertmacro NSIS_HOOK_PREINSTALL
   !endif
 
-  nsExec::Exec 'netsh int tcp res'
-
   !insertmacro CheckIfAppIsRunning "${MAINBINARYNAME}.exe" "${PRODUCTNAME}"
   !insertmacro CheckAllVergeProcesses
 
-  ; Ensure startup folders exist
-  CreateDirectory "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Startup"
-  DetailPrint "Ensured system startup folder exists"
-
-  SetShellVarContext current
-  StrCpy $0 "$SMPROGRAMS\Startup"
-  CreateDirectory "$0"
-  DetailPrint "Ensured user startup folder exists: $0"
-
-  ; Remove stale window-state files
-  DetailPrint "Removing window-state.json / .window-state.json"
-  Delete "$APPDATA\io.github.clash-verge-rev.clash-verge-rev\window-state.json"
-  Delete "$APPDATA\io.github.clash-verge-rev.clash-verge-rev\.window-state.json"
-
-  ; Clean legacy auto-launch registry entries
-  StrCpy $R1 "Software\Microsoft\Windows\CurrentVersion\Run"
-
-  SetRegView 64
-  ReadRegStr $R2 HKCU "$R1" "Clash Verge"
-  ${If} $R2 != ""
-    DeleteRegValue HKCU "$R1" "Clash Verge"
-  ${EndIf}
-  ReadRegStr $R2 HKLM "$R1" "Clash Verge"
-  ${If} $R2 != ""
-    DeleteRegValue HKLM "$R1" "Clash Verge"
-  ${EndIf}
-  ReadRegStr $R2 HKCU "$R1" "clash-verge"
-  ${If} $R2 != ""
-    DeleteRegValue HKCU "$R1" "clash-verge"
-  ${EndIf}
-  ReadRegStr $R2 HKLM "$R1" "clash-verge"
-  ${If} $R2 != ""
-    DeleteRegValue HKLM "$R1" "clash-verge"
-  ${EndIf}
+  ; An upgrade preserves network settings, startup entries and window state.
 
   ; Remove legacy executables
   IfFileExists "$INSTDIR\Clash Verge.exe" 0 +2
@@ -1300,6 +1286,13 @@ Function RestorePreviousInstallLocation
   ReadRegStr $4 SHCTX "${MANUPRODUCTKEY}" ""
   StrCmp $4 "" +2 0
     StrCpy $INSTDIR $4
+FunctionEnd
+
+Function SkipDirectoryForExistingInstall
+  Call SkipIfPassive
+  ${If} $ExistingInstall = 1
+    Abort
+  ${EndIf}
 FunctionEnd
 
 Function Skip

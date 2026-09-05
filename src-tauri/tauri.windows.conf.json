@@ -12,7 +12,7 @@
         "silent": true
       },
       "nsis": {
-        "displayLanguageSelector": true,
+        "displayLanguageSelector": false,
         "installerIcon": "icons/icon.ico",
         "languages": ["SimpChinese", "English", "Russian"],
         "installMode": "perMachine",
