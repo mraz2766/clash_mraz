@@ -142,7 +142,7 @@ export const ClashModeCard = () => {
     p: 1.5,
     fontSize: 13,
     borderRadius: 1,
-    backgroundColor: 'var(--md-surface-container)',
+    backgroundColor: 'transparent',
     wordBreak: 'break-word',
     hyphens: 'auto',
   }

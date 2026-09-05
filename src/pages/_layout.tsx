@@ -240,7 +240,7 @@ const Layout = () => {
           }
         }}
         sx={[
-          ({ palette }) => ({ bgcolor: palette.background.paper }),
+          ({ palette }) => ({ bgcolor: palette.background.default }),
           OS === 'linux'
             ? {
                 borderRadius: '8px',

@@ -259,6 +259,8 @@ export const useCustomTheme = () => {
         'md-text-secondary': muiTheme.palette.text.secondary,
         'md-text-muted': dt.muted,
         'md-outline': dt.outline,
+        'md-outline-soft': dt.outline_soft,
+        'md-surface-subtle': dt.surface_subtle,
         'md-hover': dt.hover,
         'md-success': muiTheme.palette.success.main,
         'md-warning': muiTheme.palette.warning.main,

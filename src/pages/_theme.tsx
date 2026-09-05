@@ -15,6 +15,8 @@ export const defaultTheme = {
   on_primary_container: '#041E49',
   on_primary: '#FFFFFF',
   outline: '#DADCE0',
+  outline_soft: '#E8EAED',
+  surface_subtle: '#F8F9FA',
   muted: '#80868B',
   hover: '#E8EAED',
   font_family:
@@ -37,6 +39,8 @@ export const defaultDarkTheme = {
   on_primary_container: '#D3E3FD',
   on_primary: '#041E49',
   outline: '#3C4043',
+  outline_soft: '#35373A',
+  surface_subtle: '#2C2D30',
   muted: '#9AA0A6',
   hover: 'rgba(255,255,255,0.06)',
 }

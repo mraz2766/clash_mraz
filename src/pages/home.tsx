@@ -311,7 +311,6 @@ const HomePage = () => {
   return (
     <BasePage
       title={t('home.page.title')}
-      contentStyle={{ padding: 2 }}
       header={
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           <Tooltip title={t('home.page.tooltips.lightweightMode')} arrow>
@@ -331,7 +330,7 @@ const HomePage = () => {
         </Box>
       }
     >
-      <Grid container spacing={1.5} columns={{ xs: 6, sm: 6, md: 12 }}>
+      <Grid container spacing={2} columns={{ xs: 6, sm: 6, md: 12 }}>
         {criticalCards}
 
         {nonCriticalCards}

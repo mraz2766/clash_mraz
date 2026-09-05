@@ -922,9 +922,8 @@ export const CurrentProxyCard = () => {
               justifyContent: 'space-between',
               p: 1,
               mb: 2,
-              borderRadius: 1,
-              bgcolor: 'var(--md-surface-container)',
-              border: '1px solid transparent',
+              borderRadius: 'var(--radius-sm)',
+              bgcolor: 'var(--md-surface-subtle)',
             }}
           >
             <Box>

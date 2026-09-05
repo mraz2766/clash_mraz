@@ -46,19 +46,19 @@ export const EnhancedCard = forwardRef<HTMLElement, EnhancedCardProps>(
           flexDirection: 'column',
           borderRadius: 'var(--radius-lg)',
           backgroundColor: 'var(--md-surface)',
-          border: '1px solid var(--md-outline)',
+          border: '1px solid var(--md-outline-soft)',
         }}
         ref={ref}
       >
         <Box
           sx={{
-            px: 2,
-            py: 1,
+            px: 2.5,
+            pt: 2,
+            pb: 1,
+            minHeight: 36,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            borderBottom: 1,
-            borderColor: 'divider',
           }}
         >
           <Box
@@ -115,7 +115,9 @@ export const EnhancedCard = forwardRef<HTMLElement, EnhancedCardProps>(
             flex: 1,
             display: 'flex',
             flexDirection: 'column',
-            p: noContentPadding ? 0 : 2,
+            px: noContentPadding ? 0 : 2.5,
+            pt: noContentPadding ? 0 : 1,
+            pb: noContentPadding ? 0 : 2.5,
             ...(minHeight && { minHeight }),
           }}
         >

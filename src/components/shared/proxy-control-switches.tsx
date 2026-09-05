@@ -88,7 +88,7 @@ const SwitchRow = ({
         p: 1,
         pr: 2,
         borderRadius: 1.5,
-        bgcolor: highlight ? 'var(--md-surface-container)' : 'transparent',
+        bgcolor: highlight ? 'var(--md-surface-subtle)' : 'transparent',
         opacity: disabled ? 0.6 : 1,
         transition: 'background-color var(--md-motion)',
       }}

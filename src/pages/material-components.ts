@@ -41,7 +41,7 @@ export const materialComponents: Components<Theme> = {
   MuiPaper: {
     styleOverrides: {
       root: { backgroundImage: 'none' },
-      outlined: { borderColor: 'var(--md-outline)', borderRadius: 12 },
+      outlined: { borderColor: 'var(--md-outline-soft)', borderRadius: 12 },
     },
   },
   MuiCard: {

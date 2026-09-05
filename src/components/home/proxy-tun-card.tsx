@@ -100,7 +100,7 @@ const TabDescription: FC<TabDescriptionProps> = memo(
           p: 1.5,
           fontSize: 13,
           borderRadius: 1,
-          backgroundColor: 'var(--md-surface-container)',
+          backgroundColor: 'transparent',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',

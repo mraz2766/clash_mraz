@@ -13,7 +13,7 @@
 
     &__left {
       flex: 0 0 208px;
-      background-color: var(--md-surface-container);
+      background-color: var(--md-bg);
       display: flex;
       height: 100%;
       width: 100%;
@@ -26,7 +26,7 @@
       -moz-user-select: none;
       -ms-user-select: none;
       overflow: hidden;
-      border-right: 1px solid var(--divider-color);
+      border-right: none;
 
       .the-logo {
         position: relative;
@@ -212,7 +212,7 @@
       padding: 10px;
       box-sizing: border-box;
       height: 36px;
-      border-bottom: 1px solid var(--divider-color);
+      border-bottom: none;
 
       &-drag-region {
         align-self: stretch;
@@ -245,7 +245,7 @@
       padding: 10px;
       box-sizing: border-box;
       height: 36px;
-      border-bottom: 1px solid var(--divider-color);
+      border-bottom: none;
 
       &-drag-region {
         align-self: stretch;
