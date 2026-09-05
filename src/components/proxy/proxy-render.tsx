@@ -1,8 +1,4 @@
-import {
-  ExpandLessRounded,
-  ExpandMoreRounded,
-  InboxRounded,
-} from '@mui/icons-material'
+import { ExpandMoreRounded, InboxRounded } from '@mui/icons-material'
 import {
   alpha,
   Box,
@@ -206,11 +202,12 @@ export const ProxyRender = memo(function ProxyRender(props: RenderProps) {
                     />
                   </div>
                 </Tooltip>
-                {headState?.open ? (
-                  <ExpandLessRounded />
-                ) : (
-                  <ExpandMoreRounded />
-                )}
+                <ExpandMoreRounded
+                  sx={{
+                    transform: headState?.open ? 'rotate(180deg)' : 'none',
+                    transition: 'transform var(--md-motion)',
+                  }}
+                />
               </Box>
             </Box>
           </Box>

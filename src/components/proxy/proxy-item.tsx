@@ -10,10 +10,12 @@ import {
   type SxProps,
   type Theme,
 } from '@mui/material'
+import { useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { BaseLoading } from '@/components/base'
 import { useProxyDelayState } from '@/hooks/use-proxy-delay-state'
+import { desktopMotion } from '@/lib/motion'
 import delayManager from '@/services/delay'
 import {
   memberDetails,
@@ -65,10 +67,33 @@ export const ProxyItem = (props: Props) => {
     member,
     group.name,
   )
+  const valueRef = useRef<HTMLSpanElement>(null)
+  const previousDelayRef = useRef(delayValue)
+  useEffect(() => {
+    const previous = previousDelayRef.current
+    previousDelayRef.current = delayValue
+    // Do not replay entrance effects when the virtualizer mounts cached rows.
+    if (
+      previous === -1 ||
+      previous === delayValue ||
+      delayValue <= 0 ||
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    )
+      return
+    const animation = valueRef.current?.animate?.(
+      [
+        { opacity: 0, transform: 'translateY(2px)' },
+        { opacity: 1, transform: 'none' },
+      ],
+      { duration: desktopMotion.standard, easing: desktopMotion.easing },
+    )
+    return () => animation?.cancel()
+  }, [delayValue])
 
   return (
     <ListItem sx={sx}>
       <ListItemButton
+        className="proxy-row"
         dense
         disabled={unresolved}
         selected={!unresolved && selected}
@@ -197,7 +222,9 @@ export const ProxyItem = (props: Props) => {
                 ':hover': { bgcolor: alpha(palette.primary.main, 0.15) },
               })}
             >
-              {delayManager.formatDelay(delayValue, timeout)}
+              <span ref={valueRef} className="md-value-change">
+                {delayManager.formatDelay(delayValue, timeout)}
+              </span>
             </Widget>
           )}
 

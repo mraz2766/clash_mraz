@@ -127,7 +127,7 @@ const ProfileDetails = ({
                     minWidth: 0,
                     maxWidth: 'calc(100% - 40px)',
                     ml: 0.5,
-                    fontWeight: 'medium',
+                    fontWeight: 400,
                   }}
                   title={parseUrl(current.url)}
                 >
@@ -236,7 +236,7 @@ const ProfileDetails = ({
                 variant="determinate"
                 value={trafficPercentage}
                 sx={{
-                  height: 8,
+                  height: 6,
                   borderRadius: 4,
                   backgroundColor: alpha(theme.palette.primary.main, 0.12),
                 }}
@@ -332,7 +332,7 @@ export const HomeProfileCard = ({
           minWidth: 0,
           maxWidth: '100%',
           fontWeight: 'medium',
-          fontSize: 18,
+          fontSize: 16,
           '& > span': {
             overflow: 'hidden',
             textOverflow: 'ellipsis',
@@ -362,7 +362,7 @@ export const HomeProfileCard = ({
 
     return (
       <Button
-        variant="outlined"
+        variant="text"
         size="small"
         onClick={goToProfiles}
         endIcon={<StorageOutlined fontSize="small" />}

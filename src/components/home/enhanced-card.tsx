@@ -1,4 +1,4 @@
-import { Box, Typography, alpha, useTheme } from '@mui/material'
+import { Box, Typography, useTheme } from '@mui/material'
 import React, { forwardRef, ReactNode } from 'react'
 
 // 自定义卡片组件接口
@@ -76,12 +76,16 @@ export const EnhancedCard = forwardRef<HTMLElement, EnhancedCardProps>(
                 alignItems: 'center',
                 justifyContent: 'center',
                 borderRadius: 1.5,
-                width: 32,
-                height: 32,
-                mr: 1.5,
+                width: 24,
+                height: 24,
+                mr: 1,
                 flexShrink: 0,
-                backgroundColor: alpha(theme.palette[iconColor].main, 0.12),
-                color: theme.palette[iconColor].main,
+                backgroundColor: 'transparent',
+                '& .MuiSvgIcon-root': { fontSize: 20 },
+                color:
+                  iconColor === 'primary' || iconColor === 'secondary'
+                    ? 'text.secondary'
+                    : theme.palette[iconColor].main,
               }}
             >
               {icon}

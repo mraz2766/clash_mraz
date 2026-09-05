@@ -40,7 +40,12 @@
         align-self: stretch;
         box-sizing: border-box;
 
-        img,
+        img.brand-icon {
+          width: 36px;
+          height: 36px;
+          pointer-events: none;
+        }
+
         svg {
           width: 100%;
           height: 100%;
@@ -302,7 +307,7 @@
         justify-content: center !important;
       }
 
-      .the-logo > div > svg:last-child {
+      .the-logo .brand-name {
         display: none !important;
       }
 

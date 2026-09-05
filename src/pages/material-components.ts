@@ -1,5 +1,8 @@
 import type { Components, Theme } from '@mui/material'
 
+import { DesktopTransition } from '@/components/base/desktop-transition'
+import { desktopMotion } from '@/lib/motion'
+
 // Desktop component geometry; semantic colours come from the theme tokens.
 export const materialComponents: Components<Theme> = {
   MuiButton: {
@@ -11,6 +14,9 @@ export const materialComponents: Components<Theme> = {
         paddingInline: 16,
         textTransform: 'none',
         fontWeight: 500,
+        transition:
+          'background-color var(--md-motion-fast), color var(--md-motion-fast), border-color var(--md-motion-fast), transform var(--md-motion-fast)',
+        '&:active:not(.Mui-disabled)': { transform: 'scale(0.98)' },
       },
       outlined: ({ ownerState }) =>
         ownerState.color === 'primary'
@@ -22,7 +28,16 @@ export const materialComponents: Components<Theme> = {
           : {},
     },
   },
-  MuiIconButton: { styleOverrides: { root: { borderRadius: 8 } } },
+  MuiIconButton: {
+    styleOverrides: {
+      root: {
+        borderRadius: 8,
+        transition:
+          'background-color var(--md-motion-fast), transform var(--md-motion-fast)',
+        '&:active:not(.Mui-disabled)': { transform: 'scale(0.97)' },
+      },
+    },
+  },
   MuiPaper: {
     styleOverrides: {
       root: { backgroundImage: 'none' },
@@ -49,6 +64,7 @@ export const materialComponents: Components<Theme> = {
     },
   },
   MuiDialog: {
+    defaultProps: { slots: { transition: DesktopTransition } },
     styleOverrides: {
       paper: {
         borderRadius: 22,
@@ -66,6 +82,10 @@ export const materialComponents: Components<Theme> = {
     styleOverrides: { root: { padding: '16px 24px', gap: 8 } },
   },
   MuiMenu: {
+    defaultProps: {
+      slots: { transition: DesktopTransition },
+      transitionDuration: desktopMotion.fast,
+    },
     styleOverrides: {
       paper: {
         borderRadius: 12,
@@ -76,7 +96,10 @@ export const materialComponents: Components<Theme> = {
   },
   MuiMenuItem: { styleOverrides: { root: { fontSize: 14, minHeight: 36 } } },
   MuiSnackbar: {
-    defaultProps: { anchorOrigin: { vertical: 'bottom', horizontal: 'right' } },
+    defaultProps: {
+      anchorOrigin: { vertical: 'bottom', horizontal: 'right' },
+      slots: { transition: DesktopTransition },
+    },
   },
   MuiSnackbarContent: {
     styleOverrides: { root: { borderRadius: 10, fontSize: 14 } },
@@ -87,6 +110,17 @@ export const materialComponents: Components<Theme> = {
       head: { backgroundColor: 'var(--md-surface-container)', fontWeight: 500 },
     },
   },
+  MuiTabs: {
+    styleOverrides: {
+      indicator: {
+        transition: 'left var(--md-motion), width var(--md-motion)',
+      },
+    },
+  },
+  MuiTab: {
+    styleOverrides: { root: { transition: 'color var(--md-motion)' } },
+  },
+  MuiCollapse: { defaultProps: { timeout: desktopMotion.standard } },
   MuiListItemButton: {
     styleOverrides: {
       root: {

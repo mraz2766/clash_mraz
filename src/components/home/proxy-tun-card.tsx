@@ -1,17 +1,15 @@
 import {
   ComputerRounded,
   TroubleshootRounded,
-  HelpOutlineRounded,
+  InfoOutlined,
   SvgIconComponent,
 } from '@mui/icons-material'
 import {
   Box,
   Typography,
   Stack,
-  Paper,
+  ButtonBase,
   Tooltip,
-  alpha,
-  useTheme,
   Fade,
 } from '@mui/material'
 import { useState, useMemo, memo, FC } from 'react'
@@ -36,8 +34,9 @@ interface TabButtonProps {
 // Tab组件
 const TabButton: FC<TabButtonProps> = memo(
   ({ isActive, onClick, icon: Icon, label, hasIndicator = false }) => (
-    <Paper
-      elevation={isActive ? 2 : 0}
+    <ButtonBase
+      className="home-choice"
+      aria-pressed={isActive}
       onClick={onClick}
       sx={{
         cursor: 'pointer',
@@ -47,33 +46,22 @@ const TabButton: FC<TabButtonProps> = memo(
         alignItems: 'center',
         justifyContent: 'center',
         gap: 1,
-        bgcolor: isActive ? 'primary.main' : 'background.paper',
-        color: isActive ? 'primary.contrastText' : 'text.primary',
+        bgcolor: isActive ? 'var(--md-primary-container)' : 'transparent',
+        color: isActive ? 'var(--md-on-primary-container)' : 'text.secondary',
         borderRadius: 1.5,
         flex: 1,
-        maxWidth: 160,
-        transition: 'all 0.2s ease-in-out',
+        minHeight: 36,
+        transition:
+          'background-color var(--md-motion), color var(--md-motion), transform var(--md-motion-fast)',
         position: 'relative',
         '&:hover': {
-          transform: 'translateY(-1px)',
-          boxShadow: 1,
+          bgcolor: isActive ? 'var(--md-primary-container)' : 'var(--md-hover)',
         },
-        '&:after': isActive
-          ? {
-              content: '""',
-              position: 'absolute',
-              bottom: -9,
-              left: '50%',
-              width: 2,
-              height: 9,
-              bgcolor: 'primary.main',
-              transform: 'translateX(-50%)',
-            }
-          : {},
+        '&:active': { transform: 'scale(0.985)' },
       }}
     >
       <Icon fontSize="small" />
-      <Typography variant="body2" sx={{ fontWeight: isActive ? 600 : 400 }}>
+      <Typography variant="body2" sx={{ fontWeight: 500 }}>
         {label}
       </Typography>
       {hasIndicator && (
@@ -82,14 +70,14 @@ const TabButton: FC<TabButtonProps> = memo(
             width: 8,
             height: 8,
             borderRadius: '50%',
-            bgcolor: isActive ? '#fff' : 'success.main',
+            bgcolor: 'success.main',
             position: 'absolute',
             top: 8,
             right: 8,
           }}
         />
       )}
-    </Paper>
+    </ButtonBase>
   ),
 )
 
@@ -106,15 +94,13 @@ const TabDescription: FC<TabDescriptionProps> = memo(
         variant="caption"
         component="div"
         sx={{
-          width: '95%',
-          textAlign: 'center',
+          width: '100%',
+          textAlign: 'start',
           color: 'text.secondary',
-          p: 0.8,
+          p: 1.5,
+          fontSize: 13,
           borderRadius: 1,
-          borderColor: 'primary.main',
-          borderWidth: 1,
-          borderStyle: 'solid',
-          backgroundColor: 'background.paper',
+          backgroundColor: 'var(--md-surface-container)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -125,9 +111,7 @@ const TabDescription: FC<TabDescriptionProps> = memo(
       >
         {description}
         <Tooltip title={tooltipTitle}>
-          <HelpOutlineRounded
-            sx={{ fontSize: 14, opacity: 0.7, flexShrink: 0 }}
-          />
+          <InfoOutlined sx={{ fontSize: 14, opacity: 0.7, flexShrink: 0 }} />
         </Tooltip>
       </Typography>
     </Fade>
@@ -136,7 +120,6 @@ const TabDescription: FC<TabDescriptionProps> = memo(
 
 export const ProxyTunCard: FC = () => {
   const { t } = useTranslation()
-  const theme = useTheme()
   const [activeTab, setActiveTab] = useState<string>(
     () => localStorage.getItem(LOCAL_STORAGE_TAB_KEY) || 'system',
   )
@@ -224,8 +207,8 @@ export const ProxyTunCard: FC = () => {
       <Box
         sx={{
           mt: 0,
-          p: 1,
-          bgcolor: alpha(theme.palette.primary.main, 0.04),
+          p: 0,
+          bgcolor: 'transparent',
           borderRadius: 2,
         }}
       >

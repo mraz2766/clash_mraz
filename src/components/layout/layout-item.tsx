@@ -4,11 +4,14 @@ import {
   ListItemIcon,
   ListItemText,
 } from '@mui/material'
-import type { ReactNode } from 'react'
+import { type ReactNode, useLayoutEffect, useRef } from 'react'
 import { useMatch, useNavigate, useResolvedPath } from 'react-router'
 
 import type { SortableItemRenderProps } from '@/components/base/sortable-item'
 import { useVerge } from '@/hooks/use-verge'
+import { desktopMotion } from '@/lib/motion'
+
+const selectedButtons = new WeakMap<HTMLElement, HTMLElement>()
 
 interface Props {
   to: string
@@ -24,6 +27,32 @@ export const LayoutItem = (props: Props) => {
   const resolved = useResolvedPath(to)
   const match = useMatch({ path: resolved.pathname, end: true })
   const navigate = useNavigate()
+  const indicatorRef = useRef<HTMLSpanElement>(null)
+
+  useLayoutEffect(() => {
+    const node = indicatorRef.current
+    const button = node?.parentElement
+    const list = button?.closest<HTMLElement>('.the-menu')
+    if (!match || !node || !button || !list) return
+    const previous = selectedButtons.get(list)
+    selectedButtons.set(list, button)
+    if (
+      !previous?.isConnected ||
+      previous === button ||
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    )
+      return
+    const distance =
+      previous.getBoundingClientRect().top - button.getBoundingClientRect().top
+    const animation = node.animate?.(
+      [{ transform: `translateY(${distance}px)` }, { transform: 'none' }],
+      {
+        duration: desktopMotion.standard,
+        easing: desktopMotion.easing,
+      },
+    )
+    return () => animation?.cancel()
+  }, [match])
 
   const effectiveMenuIcon =
     navCollapsed && menu_icon === 'disable' ? 'monochrome' : menu_icon
@@ -35,8 +64,10 @@ export const LayoutItem = (props: Props) => {
       sx={{ py: 0.5, maxWidth: 250, mx: 'auto', padding: '4px 0px' }}
     >
       <ListItemButton
+        className="md-nav-item"
         ref={sortable?.handleRef}
         selected={!!match}
+        aria-current={match ? 'page' : undefined}
         sx={[
           {
             borderRadius: 'var(--radius-xl)',
@@ -53,7 +84,7 @@ export const LayoutItem = (props: Props) => {
           },
           {
             '&.Mui-selected, &.Mui-selected:hover': {
-              bgcolor: 'var(--md-primary-container)',
+              bgcolor: 'transparent',
             },
             '&.Mui-selected .MuiListItemText-primary, &.Mui-selected .MuiListItemIcon-root':
               { color: 'var(--md-on-primary-container)' },
@@ -64,6 +95,13 @@ export const LayoutItem = (props: Props) => {
         aria-label={navCollapsed ? children : undefined}
         onClick={() => navigate(to)}
       >
+        {match && (
+          <span
+            ref={indicatorRef}
+            className="md-nav-indicator"
+            aria-hidden="true"
+          />
+        )}
         {(effectiveMenuIcon === 'monochrome' || !effectiveMenuIcon) && (
           <ListItemIcon
             sx={{

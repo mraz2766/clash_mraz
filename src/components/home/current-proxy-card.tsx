@@ -29,8 +29,6 @@ import {
   type SelectChangeEvent,
   Tooltip,
   Typography,
-  alpha,
-  useTheme,
 } from '@mui/material'
 import { useLockFn } from 'ahooks'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -301,6 +299,14 @@ const PersistentProxySelect = ({
                 <Typography noWrap>{selectedName}</Typography>
                 <Chip
                   size="small"
+                  variant="outlined"
+                  sx={{
+                    border: 0,
+                    bgcolor: 'transparent',
+                    height: 24,
+                    fontWeight: 500,
+                    fontVariantNumeric: 'tabular-nums',
+                  }}
                   label={delayManager.formatDelay(selectedDelay)}
                   color={convertDelayColor(selectedDelay)}
                 />
@@ -393,9 +399,14 @@ const PersistentProxySelect = ({
                     {!option.disabled && (
                       <Chip
                         size="small"
+                        variant="outlined"
                         label={delayManager.formatDelay(delay)}
                         color={convertDelayColor(delay)}
                         sx={{
+                          border: 0,
+                          bgcolor: 'transparent',
+                          fontWeight: 500,
+                          fontVariantNumeric: 'tabular-nums',
                           minWidth: '60px',
                           height: '22px',
                           flexShrink: 0,
@@ -416,7 +427,6 @@ const PersistentProxySelect = ({
 export const CurrentProxyCard = () => {
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const theme = useTheme()
   const { proxyView } = useProxiesData()
   const { clashConfig } = useClashConfigData()
   const { refreshProxy } = useAppRefreshers()
@@ -890,7 +900,7 @@ export const CurrentProxyCard = () => {
             </IconButton>
           </Tooltip>
           <Button
-            variant="outlined"
+            variant="text"
             size="small"
             onClick={goToProxies}
             sx={{ borderRadius: 1.5 }}
@@ -913,8 +923,8 @@ export const CurrentProxyCard = () => {
               p: 1,
               mb: 2,
               borderRadius: 1,
-              bgcolor: alpha(theme.palette.primary.main, 0.05),
-              border: `1px solid ${alpha(theme.palette.primary.main, 0.1)}`,
+              bgcolor: 'var(--md-surface-container)',
+              border: '1px solid transparent',
             }}
           >
             <Box>
@@ -970,6 +980,14 @@ export const CurrentProxyCard = () => {
             {currentProxy && !isDirectMode && (
               <Chip
                 size="small"
+                variant="outlined"
+                sx={{
+                  border: 0,
+                  bgcolor: 'transparent',
+                  height: 24,
+                  fontWeight: 500,
+                  fontVariantNumeric: 'tabular-nums',
+                }}
                 label={delayManager.formatDelay(currentDelay)}
                 color={convertDelayColor(currentDelay)}
               />

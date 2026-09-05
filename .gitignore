@@ -19,3 +19,8 @@ CLAUDE.md
 .claude
 AGENTS.md
 .zed
+
+# Local distributable installers
+/releases/
+/src-tauri/icons/android/
+/src-tauri/icons/ios/

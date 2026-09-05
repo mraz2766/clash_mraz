@@ -7,6 +7,7 @@ import { Theme as TauriOsTheme } from '@tauri-apps/api/window'
 import { useEffect, useMemo } from 'react'
 
 import { useVerge } from '@/hooks/use-verge'
+import { desktopMotion, motionTokens } from '@/lib/motion'
 import { defaultDarkTheme, defaultTheme } from '@/pages/_theme'
 import { materialComponents } from '@/pages/material-components'
 import { useSetThemeMode, useThemeMode } from '@/services/states'
@@ -210,8 +211,18 @@ export const useCustomTheme = () => {
     muiTheme = createTheme(muiTheme, {
       shape: { borderRadius: 4 },
       transitions: {
-        duration: { short: 180, standard: 200 },
-        easing: { easeInOut: 'cubic-bezier(0.2, 0, 0, 1)' },
+        duration: {
+          shortest: desktopMotion.fast,
+          shorter: desktopMotion.fast,
+          short: desktopMotion.standard,
+          standard: desktopMotion.dialog,
+          enteringScreen: desktopMotion.dialog,
+          leavingScreen: desktopMotion.exit,
+        },
+        easing: {
+          easeInOut: desktopMotion.easing,
+          easeOut: desktopMotion.easing,
+        },
       },
       typography: {
         h4: { fontSize: 24, fontWeight: 500 },
@@ -229,6 +240,9 @@ export const useCustomTheme = () => {
 
     const rootEle = document.documentElement
     if (rootEle) {
+      Object.entries(motionTokens).forEach(([key, value]) =>
+        rootEle.style.setProperty(key, value),
+      )
       const tokens: Record<string, string> = {
         'md-bg': dt.background_color,
         'md-surface': dt.surface,

@@ -12,10 +12,10 @@ notifications:
     'off': System proxy has been disabled.
   systemProxyFailed:
     title: Sistem Vekili
-    body: Sistem vekil sunucusu ayarlanamadı. Nedenini görmek için Clash Verge'i açın.
+    body: Sistem vekil sunucusu ayarlanamadı. Nedenini görmek için Clash'i açın.
   systemProxyGuardStopped:
     title: Sistem Vekili Koruması
-    body: Art arda birkaç başarısızlıktan sonra durdu. Nedenini görmek için Clash Verge'i açın.
+    body: Art arda birkaç başarısızlıktan sonra durdu. Nedenini görmek için Clash'i açın.
   tunModeToggled:
     title: TUN Modu
     'on': TUN mode has been enabled.
@@ -28,18 +28,18 @@ notifications:
     body: Profil yeniden etkinleştirildi.
   appQuit:
     title: Çıkış Yapılmak Üzere
-    body: Clash Verge kapanmak üzere.
+    body: Clash kapanmak üzere.
   appHidden:
     title: Uygulama Gizlendi
-    body: Clash Verge arka planda çalışıyor.
+    body: Clash arka planda çalışıyor.
   updateReady:
-    title: Clash Verge Update
+    title: Clash Update
     body: A new version (v{version}) has been downloaded and is ready to install.
     installNow: Install Now
     later: Later
 service:
-  adminInstallPrompt: Clash Verge hizmetini kurmak için yönetici ayrıcalıkları gerekir.
-  adminUninstallPrompt: Clash Verge hizmetini kaldırmak için yönetici ayrıcalıkları gerekir.
+  adminInstallPrompt: Clash hizmetini kurmak için yönetici ayrıcalıkları gerekir.
+  adminUninstallPrompt: Clash hizmetini kaldırmak için yönetici ayrıcalıkları gerekir.
 launchGuard:
   currentExeError: 'Uygulamanın konumu belirlenemedi: {error}'
   homeDirError: 'Geçerli kullanıcının ana dizini belirlenemedi. Uygulama kapatılacak: {error}'

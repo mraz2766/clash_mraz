@@ -2,7 +2,7 @@ import {
   AccessTimeOutlined,
   CancelOutlined,
   CheckCircleOutlined,
-  HelpOutlined,
+  InfoOutlined,
   PendingOutlined,
   RefreshRounded,
 } from '@mui/icons-material'
@@ -220,7 +220,7 @@ const UnlockPage = () => {
     if (status === 'Yes') return <CheckCircleOutlined />
     if (status === 'No') return <CancelOutlined />
     if (status === 'Soon') return <AccessTimeOutlined />
-    return <HelpOutlined />
+    return <InfoOutlined />
   }
 
   // 边框色

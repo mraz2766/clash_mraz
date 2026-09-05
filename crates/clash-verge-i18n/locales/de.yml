@@ -12,10 +12,10 @@ notifications:
     'off': System proxy has been disabled.
   systemProxyFailed:
     title: Systemproxy
-    body: Der Systemproxy konnte nicht gesetzt werden. Öffnen Sie Clash Verge, um zu sehen, warum.
+    body: Der Systemproxy konnte nicht gesetzt werden. Öffnen Sie Clash, um zu sehen, warum.
   systemProxyGuardStopped:
     title: Systemproxy-Wächter
-    body: Nach mehreren Fehlversuchen in Folge gestoppt. Öffnen Sie Clash Verge, um zu sehen, warum.
+    body: Nach mehreren Fehlversuchen in Folge gestoppt. Öffnen Sie Clash, um zu sehen, warum.
   tunModeToggled:
     title: TUN-Modus
     'on': TUN mode has been enabled.
@@ -28,12 +28,12 @@ notifications:
     body: Profil reaktiviert.
   appQuit:
     title: Beenden steht bevor
-    body: Clash Verge wird gleich beendet.
+    body: Clash wird gleich beendet.
   appHidden:
     title: Anwendung ausgeblendet
-    body: Clash Verge läuft im Hintergrund.
+    body: Clash läuft im Hintergrund.
   updateReady:
-    title: Clash Verge Update
+    title: Clash Update
     body: A new version (v{version}) has been downloaded and is ready to install.
     installNow: Install Now
     later: Later

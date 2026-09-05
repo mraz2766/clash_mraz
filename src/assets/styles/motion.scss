@@ -1,0 +1,31 @@
+// Animate the page once, never each virtual row as it scrolls into view.
+@keyframes md-page-enter {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes md-state-enter {
+  from { opacity: 0; transform: translateY(2px); }
+  to { opacity: 1; transform: none; }
+}
+.base-page { animation: md-page-enter var(--md-motion-page); }
+.proxy-row {
+  transition: background-color var(--md-motion), color var(--md-motion), transform var(--md-motion-fast) !important;
+  &:active:not(.Mui-disabled) { transform: scale(0.985); }
+  .the-delay { font-variant-numeric: tabular-nums; transition: color var(--md-motion); }
+  .the-icon { animation: md-state-enter var(--md-motion); }
+}
+.md-value-change { display: inline-block; }
+.md-nav-indicator {
+  position: absolute; inset: 0; border-radius: inherit;
+  background: var(--md-primary-container); pointer-events: none;
+}
+.md-nav-item > .MuiListItemIcon-root, .md-nav-item > .MuiListItemText-root { position: relative; }
+.md-nav-item .MuiListItemIcon-root, .md-nav-item .MuiListItemText-primary { transition: color var(--md-motion); }
+.brand-name { font-size: 17px; font-weight: 500; white-space: nowrap; color: var(--md-text-primary); pointer-events: none; }
+.brand-icon { width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0; }
+@media (prefers-reduced-motion: reduce) {
+  .base-page, .md-value-change, .proxy-row .the-icon { animation: none; }
+  .proxy-row:active:not(.Mui-disabled), .MuiButton-root:active, .MuiIconButton-root:active { transform: none !important; }
+}
+
+@media (prefers-reduced-motion: reduce) { .home-choice:active { transform: none !important; } }

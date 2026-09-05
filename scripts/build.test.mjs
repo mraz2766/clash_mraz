@@ -1,10 +1,44 @@
 import assert from 'node:assert/strict'
-import { mkdtemp, writeFile, utimes, rm } from 'node:fs/promises'
+import {
+  mkdtemp,
+  writeFile,
+  readFile,
+  readdir,
+  utimes,
+  rm,
+} from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import test from 'node:test'
 
-import { buildOptions, freshInstaller } from './build.mjs'
+import { buildOptions, freshInstaller, publishInstaller } from './build.mjs'
+
+test('every bundled ICO frame uses RGBA PNG encoding accepted by Tauri', async () => {
+  const directory = new URL('../src-tauri/icons/', import.meta.url)
+  const icons = (await readdir(directory))
+    .filter((name) => name.endsWith('.ico'))
+    .map((name) => new URL(name, directory))
+  icons.push(new URL('../src/assets/image/logo.ico', import.meta.url))
+  for (const icon of icons) {
+    const data = await readFile(icon)
+    assert.equal(data.readUInt16LE(2), 1, `${icon}: ICO type`)
+    const count = data.readUInt16LE(4)
+    assert.ok(count > 0, `${icon}: no frames`)
+    for (let i = 0; i < count; i++) {
+      const offset = data.readUInt32LE(6 + i * 16 + 12)
+      assert.equal(
+        data.subarray(offset, offset + 8).toString('hex'),
+        '89504e470d0a1a0a',
+        `${icon}: frame ${i} PNG signature`,
+      )
+      assert.equal(
+        data[offset + 25],
+        6,
+        `${icon}: frame ${i} must be RGBA (PNG color type 6)`,
+      )
+    }
+  }
+})
 
 test('local Windows builds bundle NSIS before forwarded Cargo arguments', () => {
   const result = buildOptions(['--', '--profile', 'fast-release'], 'win32', {})
@@ -16,6 +50,23 @@ test('local Windows builds bundle NSIS before forwarded Cargo arguments', () => 
       .createUpdaterArtifacts,
     false,
   )
+})
+
+test('publishing preserves the installer bytes and replaces the previous local copy', async (t) => {
+  const directory = await mkdtemp(path.join(tmpdir(), 'clash-publish-test-'))
+  t.after(() => rm(directory, { recursive: true, force: true }))
+  const source = path.join(directory, 'Clash.exe')
+  const output = path.join(directory, 'releases')
+  await writeFile(source, 'first fixture')
+  const result = await publishInstaller(source, output)
+  assert.equal(path.dirname(result), output)
+  await writeFile(source, 'second fixture')
+  await publishInstaller(source, output)
+  assert.equal(await readFile(result, 'utf8'), 'second fixture')
+  await assert.rejects(
+    publishInstaller(path.join(directory, 'missing.exe'), output),
+  )
+  assert.equal(await readFile(result, 'utf8'), 'second fixture')
 })
 
 test('CI, other platforms and explicit no-open do not launch installers', () => {

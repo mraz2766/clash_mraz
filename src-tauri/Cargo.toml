@@ -1,10 +1,10 @@
 [package]
 name = "clash-verge"
 version = "2.5.4"
-description = "clash verge"
+description = "Clash 桌面代理管理工具"
 authors = ["zzzgydi", "Tunglies", "wonfen", "MystiPanda"]
 license = "GPL-3.0-only"
-repository = "https://github.com/clash-verge-rev/clash-verge-rev.git"
+repository = "https://github.com/mraz2766/clash_mraz.git"
 default-run = "clash-verge"
 build = "build.rs"
 edition = "2024"

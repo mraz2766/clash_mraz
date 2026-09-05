@@ -3,7 +3,7 @@ import {
   LanguageRounded,
   MultipleStopRounded,
 } from '@mui/icons-material'
-import { Box, Paper, Stack, Typography } from '@mui/material'
+import { Box, ButtonBase, Stack, Typography } from '@mui/material'
 import { useLockFn } from 'ahooks'
 import { type ReactNode, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -108,49 +108,41 @@ export const ClashModeCard = () => {
   const buttonStyles = (mode: ClashMode) => ({
     cursor: 'pointer',
     px: 2,
-    py: 1.2,
+    py: 1,
+    minHeight: 36,
+    flex: 1,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 1,
-    bgcolor: mode === currentMode ? 'primary.main' : 'background.paper',
-    color: mode === currentMode ? 'primary.contrastText' : 'text.primary',
+    bgcolor:
+      mode === currentMode ? 'var(--md-primary-container)' : 'transparent',
+    color:
+      mode === currentMode
+        ? 'var(--md-on-primary-container)'
+        : 'text.secondary',
     borderRadius: 1.5,
-    transition: 'all 0.2s ease-in-out',
+    transition:
+      'background-color var(--md-motion), color var(--md-motion), transform var(--md-motion-fast)',
     position: 'relative',
     overflow: 'visible',
     '&:hover': {
-      transform: 'translateY(-1px)',
-      boxShadow: 1,
+      bgcolor:
+        mode === currentMode
+          ? 'var(--md-primary-container)'
+          : 'var(--md-hover)',
     },
-    '&:active': {
-      transform: 'translateY(1px)',
-    },
-    '&::after':
-      mode === currentMode
-        ? {
-            content: '""',
-            position: 'absolute',
-            bottom: -16,
-            left: '50%',
-            width: 2,
-            height: 16,
-            bgcolor: 'primary.main',
-            transform: 'translateX(-50%)',
-          }
-        : {},
+    '&:active': { transform: 'scale(0.985)' },
   })
 
   const descriptionStyles = {
-    width: '95%',
-    textAlign: 'center',
+    width: '100%',
+    textAlign: 'start',
     color: 'text.secondary',
-    p: 0.8,
+    p: 1.5,
+    fontSize: 13,
     borderRadius: 1,
-    borderColor: 'primary.main',
-    borderWidth: 1,
-    borderStyle: 'solid',
-    backgroundColor: 'background.paper',
+    backgroundColor: 'var(--md-surface-container)',
     wordBreak: 'break-word',
     hyphens: 'auto',
   }
@@ -169,9 +161,10 @@ export const ClashModeCard = () => {
         }}
       >
         {CLASH_MODES.map((mode) => (
-          <Paper
+          <ButtonBase
             key={mode}
-            elevation={mode === currentMode ? 2 : 0}
+            className="home-choice"
+            aria-pressed={mode === currentMode}
             onClick={() => onChangeMode(mode)}
             sx={buttonStyles(mode)}
           >
@@ -180,12 +173,12 @@ export const ClashModeCard = () => {
               variant="body2"
               sx={{
                 textTransform: 'capitalize',
-                fontWeight: mode === currentMode ? 600 : 400,
+                fontWeight: 500,
               }}
             >
               {t(MODE_META[mode].label)}
             </Typography>
-          </Paper>
+          </ButtonBase>
         ))}
       </Stack>
 

@@ -1,132 +1,75 @@
-<h1 align="center">
-  <img src="./src-tauri/icons/icon.png" alt="Clash" width="128" />
-  <br>
-  Continuation of <a href="https://github.com/zzzgydi/clash-verge">Clash Verge</a>
-  <br>
-</h1>
+# Clash
 
-<h3 align="center">
-A Clash Meta GUI based on <a href="https://github.com/tauri-apps/tauri">Tauri</a>.
-</h3>
+<p align="center"><img src="src/assets/image/mascot.png" width="112" alt="Clash 小白鲸 Logo" /></p>
 
-<p align="center">
-  Languages:
-  <a href="./README.md">简体中文</a> ·
-  <a href="./docs/README_en.md">English</a> ·
-  <a href="./docs/README_es.md">Español</a> ·
-  <a href="./docs/README_ru.md">Русский</a> ·
-  <a href="./docs/README_ja.md">日本語</a> ·
-  <a href="./docs/README_ko.md">한국어</a> ·
-  <a href="./docs/README_fa.md">فارسی</a>
-</p>
+一个简洁、柔和、注重效率的桌面代理管理工具。基于 **Clash Verge Rev** 二次开发，使用 React、Material UI 与 Tauri，保留 Mihomo 内核和原有代理管理能力。
 
-## Preview
+[下载安装](https://github.com/mraz2766/clash_mraz/releases) · [使用说明](docs/usage.md) · [Windows 构建](docs/windows-build.md) · [参与开发](CONTRIBUTING.md)
 
-| Dark                             | Light                             |
-| -------------------------------- | --------------------------------- |
-| ![预览](./docs/preview_dark.png) | ![预览](./docs/preview_light.png) |
+## 这一版有什么不同
 
-## Install
+- **适合桌面的 Material 风格**：柔和的浅色与深色主题、语义色彩、清晰的导航与设置分区。
+- **高效的信息布局**：节点默认列表、连接与规则保留表格和虚拟滚动，避免密集的大卡片。
+- **克制的交互反馈**：导航选中滑动、按钮轻压、页面淡入、弹窗与菜单短过渡；尊重系统“减少动态效果”。
+- **统一品牌**：使用你提供的小白鲸形象，应用名称为 `Clash`。
+- **方便的本地打包**：Windows 构建成功后将 EXE 复制到 `releases/`，并打开安装向导。
 
-请到发布页面下载对应的安装包：[Release page](https://github.com/clash-verge-rev/clash-verge-rev/releases)<br>
-Go to the [Release page](https://github.com/clash-verge-rev/clash-verge-rev/releases) to download the corresponding installation package<br>
-Supports Windows (x64/x86), Linux (x64/arm64) and macOS 11+ (intel/apple).
+## 界面预览
 
-#### 我应当怎样选择发行版
+![首页主要卡片，演示数据](docs/preview_home.jpg)
 
-| 版本        | 特征                                     | 链接                                                                                   |
-| :---------- | :--------------------------------------- | :------------------------------------------------------------------------------------- |
-| Stable      | 正式版，高可靠性，适合日常使用。         | [Release](https://github.com/clash-verge-rev/clash-verge-rev/releases)                 |
-| Alpha(废弃) | 测试发布流程。                           | [Alpha](https://github.com/clash-verge-rev/clash-verge-rev/releases/tag/alpha)         |
-| AutoBuild   | 滚动更新版，适合测试反馈，可能存在缺陷。 | [AutoBuild](https://github.com/clash-verge-rev/clash-verge-rev/releases/tag/autobuild) |
+以下截图使用实际前端组件和演示数据生成，不包含私人订阅或真实连接信息。
 
-#### 安装说明和常见问题，请到 [文档页](https://clash-verge-rev.github.io/) 查看
+| 浅色模式 | 深色模式 |
+| --- | --- |
+| ![浅色节点列表](docs/preview_light.jpg) | ![深色节点列表](docs/preview_dark.jpg) |
 
-### TG 频道: [@clash_verge_rev](https://t.me/clash_verge_re)
+## 安装与使用
 
----
+1. 从本仓库 Releases 下载与你的平台和架构匹配的安装包。尚未发布时可以自行构建。
+2. Windows 双击 `Clash_*_x64-setup.exe`，按安装向导完成安装。
+3. 在“订阅”中添加自己的订阅或本地配置，选择需要使用的订阅。
+4. 在“代理”中选择节点，需要时执行延迟测试。
+5. 按自己的使用需求开启系统代理或 TUN；连接、规则和日志页面用于查看当前状态。
 
-## Promotion
+项目不提供代理订阅。macOS 使用对应平台构建的应用；本次 Windows 构建并不代表已完成 macOS 实机验证。
 
-### ✈️ [AI云边 -- 全新架构机场 ClaudeBorder](https://cruise.54678999.xyz/#/register?code=58q5UJZc)
+## 本地开发
 
-🔥热销中使用本链接注册即送 3 天免费试用**，每日 **1GB 流量**：👉 [点此注册](https://cruise.54678999.xyz/#/register?code=58q5UJZc)
-
-#### AI云边 -- 全新架构机场。
-
-- 💻 多次**技术迭代后**全新亮相。
-- 🗺 全**高速稳定**正价节点。
-- 🌏 **海外团队**，不跑路
-- 🚀 线路**冗余**设计，自动化运维**对抗各类封锁
-- 👨‍🦲 团队架构师为**大厂**网络架构师
-- 💰 极致**稳定**，亲民价**价格**
-- 🌐 全面支持**流媒体及各AI访问**
-- 🙋 7*12小时真人客服。解决您的各类问题。
-
-🌐 官网：👉 [https://www.claudeborder.com](https://cruise.54678999.xyz/#/register?code=58q5UJZc)
-
-### 🤖 [GPTKefu —— 与 Crisp 深度整合的 AI 智能客服平台](https://gptkefu.com)
-
-- 🧠 深度理解完整对话上下文 + 图片识别，自动给出专业、精准的回复，告别机械式客服。
-- ♾️ **不限回答数量**，无额度焦虑，区别于其他按条计费的 AI 客服产品。
-- 💬 售前咨询、售后服务、复杂问题解答，全场景轻松覆盖，真实用户案例已验证效果。
-- ⚡ 3 分钟极速接入，零门槛上手，即刻提升客服效率与客户满意度。
-- 🎁 高级套餐免费试用 14 天，先体验后付费：👉 [立即试用](https://gptkefu.com)
-- 📢 智能客服TG 频道：[@crisp_ai](https://t.me/crisp_ai)
-
----
-
-## Features
-
-- 基于性能强劲的 Rust 和 Tauri 2 框架
-- 内置[Clash.Meta(mihomo)](https://github.com/MetaCubeX/mihomo)内核，并支持切换 `Alpha` 版本内核。
-- 简洁美观的用户界面，支持自定义主题颜色、代理组/托盘图标以及 `CSS Injection`。
-- 配置文件管理和增强（Merge 和 Script），配置文件语法提示。
-- 系统代理和守卫、`TUN(虚拟网卡)` 模式。
-- 可视化节点和规则编辑
-- WebDav 配置备份和同步
-
-### FAQ
-
-Refer to [Doc FAQ Page](https://clash-verge-rev.github.io/faq/windows.html)
-
-### Donation
-
-[捐助Clash Verge Rev的开发](https://github.com/sponsors/clash-verge-rev)
-
-## Development
-
-See [CONTRIBUTING.md](./CONTRIBUTING.md) for more details.
-
-To run the development server, execute the following commands after all prerequisites for **Tauri** are installed:
-
-```shell
-pnpm i
-pnpm run prebuild
+```sh
+pnpm install
 pnpm dev
 ```
 
-`pnpm dev` preserves the Development Channel's installed service state: an
-existing service is used, while a previously uninstalled service remains
-uninstalled and the app starts in Sidecar mode. Use `pnpm dev:service` to
-explicitly install or update the isolated development service before launch,
-or `pnpm dev:sidecar` to force the unprivileged Sidecar workflow.
+前端预览：`pnpm web:dev`。桌面能力需要 Tauri 环境，普通浏览器不会启动代理核心。
 
-## Contributions
+```sh
+pnpm typecheck
+pnpm test
+pnpm knip:check
+pnpm build:fast
+```
 
-Issue and PR welcome!
+最后一条命令会生成 Windows EXE，并在成功后打开安装向导。对外可取用的文件位于根目录的 **`releases/`**，无需进入多层 `target` 目录。只想生成而不打开时运行 `pnpm build:fast --no-open`。
 
-## Acknowledgement
+## 兼容与边界
 
-Clash Verge rev was based on or inspired by these projects and so on:
+本轮优化聚焦界面、交互、品牌和本地构建体验。保留代理核心、订阅解析、系统代理、TUN、测速、配置格式及窗口控制逻辑。为兼容已有安装，内部可执行文件名、服务标识、URL 协议和配置目录仍沿用原项目标识；这些并非界面品牌遗漏。
 
-- [zzzgydi/clash-verge](https://github.com/zzzgydi/clash-verge): A Clash GUI based on tauri. Supports Windows, macOS and Linux.
-- [tauri-apps/tauri](https://github.com/tauri-apps/tauri): Build smaller, faster, and more secure desktop applications with a web frontend.
-- [Dreamacro/clash](https://github.com/Dreamacro/clash): A rule-based tunnel in Go.
-- [MetaCubeX/mihomo](https://github.com/MetaCubeX/mihomo): A rule-based tunnel in Go.
-- [Fndroid/clash_for_windows_pkg](https://github.com/Fndroid/clash_for_windows_pkg): A Windows/macOS GUI based on Clash.
-- [vitejs/vite](https://github.com/vitejs/vite): Next generation frontend tooling. It's fast!
+自动更新仍沿用原项目的更新配置与签名校验。自有签名发布流程尚未建立；使用本分支时，建议从本仓库 Releases 手动安装，避免自动更新覆盖定制界面。详见[开发与发布说明](CONTRIBUTING.md)。
 
-## License
+## 文档
 
-GPL-3.0 License. See [License here](./LICENSE) for details.
+- [使用说明与常见问题](docs/usage.md)
+- [Windows 构建与安装包位置](docs/windows-build.md)
+- [视觉与交互规范](docs/ui-design.md)
+- [品牌资源与生成说明](docs/branding.md)
+- [翻译维护](docs/CONTRIBUTING_i18n.md)
+
+## 致谢与许可
+
+本项目基于 [Clash Verge Rev](https://github.com/clash-verge-rev/clash-verge-rev)，继承 [Clash Verge](https://github.com/zzzgydi/clash-verge) 的工作，并使用 [Mihomo](https://github.com/MetaCubeX/mihomo)。感谢原作者及贡献者。
+
+交互设计参考 [Amicro](https://github.com/Subhan-code/Amicro--Micro-transitions-) 的短过渡思路；Logo 简化原则参考 [ip-as-logo-skill](https://github.com/s1dashu/ip-as-logo-skill)，最终形象以用户提供的参考图为准。
+
+代码继续使用 [GPL-3.0-only](LICENSE) 许可证。上游历史更新记录和第三方版权归属保留，不将原项目成果表述为本项目原创。

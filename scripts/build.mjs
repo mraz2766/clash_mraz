@@ -1,5 +1,13 @@
 import { spawn } from 'node:child_process'
-import { access, readdir, stat } from 'node:fs/promises'
+import {
+  access,
+  readdir,
+  stat,
+  mkdir,
+  copyFile,
+  rename,
+  rm,
+} from 'node:fs/promises'
 import { createRequire } from 'node:module'
 import { homedir } from 'node:os'
 import path from 'node:path'
@@ -77,6 +85,32 @@ export async function freshInstaller(directory, startedAt) {
   return candidates[0]
 }
 
+// Publish atomically to one shallow, predictable directory before opening it.
+export async function publishInstaller(source, directory) {
+  await mkdir(directory, { recursive: true })
+  const destination = path.join(directory, path.basename(source))
+  const pending = destination + `.${process.pid}.pending`
+  try {
+    await copyFile(source, pending)
+    try {
+      await rename(pending, destination)
+      return destination
+    } catch (error) {
+      // Windows can lock an EXE while its installer is open. Publish alongside
+      // that file without terminating the user's installation.
+      if (!['EACCES', 'EPERM', 'EBUSY'].includes(error.code)) throw error
+      const available = path.join(
+        directory,
+        `${path.parse(source).name}-${Date.now()}.exe`,
+      )
+      await rename(pending, available)
+      return available
+    }
+  } finally {
+    await rm(pending, { force: true })
+  }
+}
+
 export async function main(args = process.argv.slice(2)) {
   const env = {
     ...process.env,
@@ -147,7 +181,8 @@ export async function main(args = process.argv.slice(2)) {
     env,
   )
   if (options.localWindows) {
-    const installer = await freshInstaller(bundleDirectory, startedAt)
+    const fresh = await freshInstaller(bundleDirectory, startedAt)
+    const installer = await publishInstaller(fresh, path.join(root, 'releases'))
     console.log(`Installer: ${installer}`)
     if (options.shouldOpen) {
       // Pass the path as data, not interpolated PowerShell source. No silent install.
