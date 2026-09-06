@@ -53,11 +53,6 @@
 
 name: "PR AI Slop Review"
 on:
-  pull_request_target:
-    types:
-      - opened
-      - reopened
-      - synchronize
   # roles: all # Roles processed as role check in pre-activation job
   # skip-bots: # Skip-bots processed as bot check in pre-activation job
   # - dependabot # Skip-bots processed as bot check in pre-activation job

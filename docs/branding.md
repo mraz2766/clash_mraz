@@ -6,6 +6,10 @@
 
 原稿位于 `src/assets/image/mascot.png`，1254×1254 像素。由内置 imagegen 根据用户参考图重绘整理，再通过 Tauri 图标工具生成 ICO、ICNS 和各尺寸 PNG。没有将低分辨率截图直接放大后当作高清资源。
 
+2026-09-06 圆角更新：保留未裁切原图为 `src/assets/image/mascot-source.png`，最终 `mascot.png` 使用透明圆角，半径为边长的 22%。运行 `python scripts/round-icons.py`（需要 Pillow）可重建界面 PNG、通用尺寸 PNG、ICO、ICNS 与彩色托盘图标。脚本只裁外轮廓，不重绘白鲸；托盘状态标记放在圆角内侧，单色托盘原本为透明剪影，继续保留。
+
+本次曾使用内置 imagegen 尝试“保持原图，仅把外轮廓改为圆角，外侧输出真实透明背景”，但输出仍有棋盘格像素，因此未采用生成结果。最终按用户明确选择，使用程序裁切原图并输出 RGBA。
+
 ## 资源映射
 
 | 用途 | 文件 |
