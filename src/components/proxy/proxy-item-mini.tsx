@@ -61,13 +61,6 @@ export const ProxyItemMini = (props: Props) => {
             '&:hover .the-check': { display: !showDelay ? 'block' : 'none' },
             '&:hover .the-delay': { display: showDelay ? 'block' : 'none' },
             '&:hover .the-icon': { display: 'none' },
-            '& .the-pin, & .the-unpin': {
-              position: 'absolute',
-              fontSize: '12px',
-              top: '-5px',
-              right: '-5px',
-            },
-            '& .the-unpin': { filter: 'grayscale(1)' },
             '&.Mui-selected': {
               bgcolor: 'var(--md-primary-container)',
               color: 'var(--md-on-primary-container)',
@@ -204,19 +197,6 @@ export const ProxyItemMini = (props: Props) => {
             />
           )}
       </Box>
-      {!unresolved && group.fixed && group.fixed === name && (
-        // 展示 fixed 状态
-        <span
-          className={name === group.now ? 'the-pin' : 'the-unpin'}
-          title={
-            group.type === 'URLTest'
-              ? t('proxies.page.labels.delayCheckReset')
-              : ''
-          }
-        >
-          📌
-        </span>
-      )}
     </ListItemButton>
   )
 }

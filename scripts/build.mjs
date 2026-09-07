@@ -5,6 +5,9 @@ import { homedir } from 'node:os'
 import path from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 
+const lsregister =
+  '/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister'
+
 const root = fileURLToPath(new URL('../', import.meta.url))
 const require = createRequire(import.meta.url)
 const env = {
@@ -107,33 +110,98 @@ export async function main(args = process.argv.slice(2)) {
     archive,
   ])
   console.log(`App: ${source}\nArchive: ${archive}`)
-  if (options.install) {
-    const destination = '/Applications/Clash for Mac.app'
-    const pending = `/Applications/.Clash-${process.pid}.app`
-    const backup = path.join(
-      releases,
-      `Clash-before-${version}-${Date.now()}.app`,
+  if (options.install) await installApp(source, releases, version)
+}
+
+export async function installApp(source, releases, version) {
+  const destination = '/Applications/Clash for Mac.app'
+  const running = await run('ps', ['-axo', 'command='], true)
+  if (
+    running
+      .split('\n')
+      .some((line) =>
+        /^\/Applications\/Clash(?: for Mac| Verge)?\.app\/Contents\/MacOS\/clash-verge(?:$| )/.test(
+          line.trim(),
+        ),
+      )
+  )
+    throw new Error(
+      'Quit Clash and Clash Verge before installing; your configuration will be preserved.',
     )
-    await run('ditto', [source, pending])
-    await run('codesign', ['--verify', '--deep', '--strict', pending])
-    let backedUp = false
+  const pending = `/Applications/.Clash-${process.pid}.app`
+  const backup = path.join(
+    releases,
+    `Clash-before-${version}-${Date.now()}.app`,
+  )
+  await run('ditto', [source, pending])
+  await run('codesign', ['--verify', '--deep', '--strict', pending])
+  let backedUp = false
+  try {
     try {
-      try {
-        await access(destination)
-        await rename(destination, backup)
-        backedUp = true
-      } catch (error) {
-        if (error.code !== 'ENOENT') throw error
-      }
-      await rename(pending, destination)
+      await access(destination)
+      await rename(destination, backup)
+      backedUp = true
     } catch (error) {
-      if (backedUp) await rename(backup, destination)
-      throw error
-    } finally {
-      await rm(pending, { recursive: true, force: true })
+      if (error.code !== 'ENOENT') throw error
     }
-    console.log(`Installed: ${destination}`)
+    await rename(pending, destination)
+  } catch (error) {
+    if (backedUp) await rename(backup, destination)
+    throw error
+  } finally {
+    await rm(pending, { recursive: true, force: true })
   }
+  if (backedUp) {
+    await run('ditto', [
+      '-c',
+      '-k',
+      '--sequesterRsrc',
+      '--keepParent',
+      backup,
+      `${backup}.zip`,
+    ])
+    await run('unzip', ['-tq', `${backup}.zip`], true)
+    await run(lsregister, ['-u', backup])
+    await rm(backup, { recursive: true })
+  }
+  // Old filename used by earlier Mac builds. Only retire our own bundle.
+  const legacy = '/Applications/Clash.app'
+  let legacyExists = true
+  try {
+    await access(legacy)
+  } catch (error) {
+    if (error.code === 'ENOENT') legacyExists = false
+    else throw error
+  }
+  if (legacyExists) {
+    const id = (
+      await run(
+        '/usr/libexec/PlistBuddy',
+        ['-c', 'Print :CFBundleIdentifier', `${legacy}/Contents/Info.plist`],
+        true,
+      )
+    ).trim()
+    if (id === 'io.github.mraz.clash.mac') {
+      const legacyArchive = path.join(
+        releases,
+        `Clash-legacy-${Date.now()}.zip`,
+      )
+      await run('ditto', [
+        '-c',
+        '-k',
+        '--sequesterRsrc',
+        '--keepParent',
+        legacy,
+        legacyArchive,
+      ])
+      await run('unzip', ['-tq', legacyArchive], true)
+      await run(lsregister, ['-u', legacy])
+      await rm(legacy, { recursive: true })
+    }
+  }
+  await run(lsregister, ['-u', source])
+  await run(lsregister, ['-f', destination])
+  console.log(`Installed: ${destination}`)
 }
 if (
   process.argv[1] &&

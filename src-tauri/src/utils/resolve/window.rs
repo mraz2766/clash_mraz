@@ -8,10 +8,10 @@ use crate::{config::Config, core::handle, utils::resolve::window_script::build_w
 use clash_verge_logging::logging;
 use clash_verge_logging::{Type, logging_error};
 
-const DARK_BACKGROUND_COLOR: Color = Color(36, 35, 33, 255); // #242321
-const LIGHT_BACKGROUND_COLOR: Color = Color(250, 249, 245, 255); // #FAF9F5
-const DARK_BACKGROUND_HEX: &str = "#242321";
-const LIGHT_BACKGROUND_HEX: &str = "#FAF9F5";
+const DARK_BACKGROUND_COLOR: Color = Color(36, 36, 36, 255); // #242424
+const LIGHT_BACKGROUND_COLOR: Color = Color(247, 247, 247, 255); // #F7F7F7
+const DARK_BACKGROUND_HEX: &str = "#242424";
+const LIGHT_BACKGROUND_HEX: &str = "#F7F7F7";
 
 const DEFAULT_WIDTH: f64 = 1080.0;
 const DEFAULT_HEIGHT: f64 = 760.0;

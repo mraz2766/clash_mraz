@@ -15,6 +15,6 @@ if ! git diff --quiet "$upstream" HEAD -- '*.rs' Cargo.toml Cargo.lock ':(glob)*
   cargo clippy --all-targets --all-features -- -D warnings
 fi
 if ! git diff --quiet "$upstream" HEAD -- '*.js' '*.jsx' '*.ts' '*.tsx' '*.json' '*.css' '*.scss' '*.html'; then
-  pnpm typecheck
-  pnpm knip:check
+  ./node_modules/.bin/tsc --noEmit
+  ./node_modules/.bin/knip
 fi

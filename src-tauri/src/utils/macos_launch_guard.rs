@@ -216,11 +216,8 @@ fn move_and_relaunch(bundle: &Path, home: &Path) -> LaunchDisposition {
     } else {
         home.join("Applications")
     };
-    let Some(bundle_name) = bundle.file_name() else {
-        show_message(&clash_verge_i18n::t!("launchGuard.bundleNameError"));
-        return LaunchDisposition::Exit;
-    };
-    let destination = destination_root.join(bundle_name);
+    // Keep manual launches and the build installer on the same application path.
+    let destination = destination_root.join("Clash for Mac.app");
     let exists = destination.exists();
     let destination_display = destination.display().to_string();
     let prompt = if exists {

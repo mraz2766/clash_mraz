@@ -4,8 +4,8 @@ set -eu
 export PATH="$HOME/.cargo/bin:$PATH"
 cargo fmt --all -- --check
 if ! git diff --cached --quiet -- src/locales crates/clash-verge-i18n/locales; then
-  pnpm i18n:format
-  pnpm i18n:types
+  node scripts/cleanup-unused-i18n.mjs --align --apply
+  node scripts/generate-i18n-keys.mjs
   git add src/locales crates/clash-verge-i18n/locales src/types/generated
 fi
-pnpm exec lint-staged
+./node_modules/.bin/lint-staged

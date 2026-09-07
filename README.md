@@ -2,14 +2,14 @@
 <h1 align="center">Clash for Mac</h1>
 <p align="center">保留白鲸品牌，为 macOS 定制的代理管理工具。</p>
 
-**Mac 专用分支：`clash-mac` · 当前版本：2.8.2**
+**Mac 专用分支：`clash-mac` · 当前版本：2.8.3**
 
 基于 [Clash Verge Rev](https://github.com/clash-verge-rev/clash-verge-rev) 二次开发，沿用本项目优化后的白鲸 Logo、圆角图标和代理管理能力。Windows 版本保留在 `main`，本分支只构建 macOS 应用。
 
 ## Mac 设计
 
 - 原生红黄绿窗口按钮、融合标题栏、可拖动页头和系统窗口行为。
-- 整体米白色主题，深色模式采用暖炭黑；玻璃侧栏与高对比导航，紧凑连接栏，流量趋势与当前节点并列，诊断信息按需展开。
+- 纯白卡片与浅灰白背景的双白主题，深色模式采用中性炭黑；玻璃侧栏与高对比导航，紧凑连接栏，流量趋势与当前节点并列，诊断信息按需展开。
 - 系统字体、紧凑导航、柔和的工作区层次，沿用现有白鲸 ICNS 和菜单栏图标。
 - `⌘,` 打开设置、`⌘1–8` 切换页面、`⌘B` 折叠侧栏。
 - 导航选中滑动、页面短淡入、控件轻压反馈；遵循减少动态效果与减少透明度偏好。
@@ -21,7 +21,7 @@
 
 本地构建使用临时签名（ad hoc），不包含 Apple Developer ID 公证。系统代理与 TUN 所需服务可能触发 macOS 自身的权限提示。
 
-从 2.7.0 起使用独立 Bundle ID `io.github.mraz.clash.mac`，配置位于 `~/Library/Application Support/io.github.mraz.clash.mac/`。升级安装保留此目录。已有订阅可通过备份恢复或导入配置迁移；应用不会擅自覆盖已有配置。底层服务仍沿用上游服务协议，请退出其他代理客户端后使用。安装脚本保留已存在的 Clash.app 备份。
+从 2.7.0 起使用独立 Bundle ID `io.github.mraz.clash.mac`，配置位于 `~/Library/Application Support/io.github.mraz.clash.mac/`。升级安装保留此目录。已有订阅可通过备份恢复或导入配置迁移；应用不会擅自覆盖已有配置。底层服务仍沿用上游服务协议，请退出其他代理客户端后使用。安装脚本将旧应用保存为 ZIP 备份。
 
 ## 本地构建
 
@@ -44,7 +44,7 @@ pnpm build:install
 | `pnpm build:install` | 构建并安装到 /Applications/Clash for Mac.app |
 | `pnpm release-version 2.8.3` | 同步下一次迭代版本号 |
 
-输出：`target/release/bundle/macos/Clash.app` 与 `releases/Clash_Mac_2.8.2_arm64.zip`。快速构建位于 `target/fast-release/`，Intel 包文件名使用 `x64`。首次构建会下载 Mihomo、服务与地理数据资源。
+输出：`target/release/bundle/macos/Clash.app` 与 `releases/Clash_Mac_2.8.3_arm64.zip`。快速构建位于 `target/fast-release/`，Intel 包文件名使用 `x64`。首次构建会下载 Mihomo、服务与地理数据资源。
 
 每次交付必须更新版本号和 [Changelog](Changelog.md)，并重新构建、验证后安装。构建过程不会自动提交、发布 GitHub Release 或改变代理开关。
 
@@ -64,3 +64,9 @@ pnpm build:install
 - 下载资源较慢：构建进程可设置 `HTTPS_PROXY` 和 `HTTP_PROXY`，使用 Node 24 的 `NODE_USE_ENV_PROXY=1` 让原生 fetch 使用代理。不会修改系统代理设置。
 - 端口被占用或启动切回旧应用：先退出其他代理客户端，再启动 Clash。
 - 修改代理配置：通过设置中的“打开配置目录”定位数据，或在订阅页面导入 YAML；不要直接编辑应用包内的文件。
+
+安装前请退出 Clash。安装脚本将旧版本保存为 ZIP 备份，移除同标识的旧 `/Applications/Clash.app`，仅保留 `/Applications/Clash for Mac.app`；订阅和设置目录不会被删除。不要直接启动 releases 中的历史备份或同时运行其他代理客户端。
+
+## GitHub 文件同步
+
+本分支仅在本机构建，不配置 GitHub Actions 云端构建、自动审查或自动发布。使用 GitHub Desktop 的 Push origin 同步代码；需要分发时可手动上传 `releases/` 中的 ZIP 安装包到 GitHub Release。Git 本地检查仍然保留。
