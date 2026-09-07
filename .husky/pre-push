@@ -1,8 +1,20 @@
-#!/bin/bash
+#!/bin/sh
+set -eu
 
-if ! command -v "cargo-make" >/dev/null 2>&1; then
-  echo "❌ cargo-make is required for pre-push checks."
-  cargo install --force cargo-make
+# GUI Git clients do not load the interactive shell's Rust PATH.
+export PATH="$HOME/.cargo/bin:$PATH"
+
+# Keep the existing policy: compare subsequent pushes with the upstream.
+# Publishing a branch for the first time has no upstream comparison yet.
+if ! upstream=$(git rev-parse --verify '@{u}' 2>/dev/null); then
+  echo "No upstream found; skipping diff-based pre-push checks."
+  exit 0
 fi
 
-cargo make pre-push
+if ! git diff --quiet "$upstream" HEAD -- '*.rs' Cargo.toml Cargo.lock ':(glob)**/Cargo.toml'; then
+  cargo clippy --all-targets --all-features -- -D warnings
+fi
+if ! git diff --quiet "$upstream" HEAD -- '*.js' '*.jsx' '*.ts' '*.tsx' '*.json' '*.css' '*.scss' '*.html'; then
+  pnpm typecheck
+  pnpm knip:check
+fi
