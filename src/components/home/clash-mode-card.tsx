@@ -183,6 +183,7 @@ export const ClashModeCard = () => {
       </Stack>
 
       <Box
+        className="mode-description"
         sx={{
           width: '100%',
           my: 1,

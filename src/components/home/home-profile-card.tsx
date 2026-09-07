@@ -106,7 +106,7 @@ const ProfileDetails = ({
 
   return (
     <Box>
-      <Stack spacing={2}>
+      <Stack spacing={2} className="profile-facts">
         {current.url && (
           <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
             <DnsOutlined fontSize="small" color="action" />

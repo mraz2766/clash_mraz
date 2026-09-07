@@ -1,4 +1,4 @@
-> Mac 分支 2.7.1：沿用现有白鲸 PNG、ICNS 和单色菜单栏图标。下文 Windows ICO 说明为资源制作历史，Mac 应用不再打包 Windows 安装器。
+> Mac 分支 2.8.0：沿用现有白鲸 PNG、ICNS 和单色菜单栏图标。下文 Windows ICO 说明为资源制作历史，Mac 应用不再打包 Windows 安装器。
 
 # 品牌资源
 
