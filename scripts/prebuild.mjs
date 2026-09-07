@@ -22,30 +22,12 @@ const VERSION_CACHE_FILE = path.join(TEMP_DIR, '.version_cache.json')
 const HASH_CACHE_FILE = path.join(TEMP_DIR, '.hash_cache.json')
 
 const PLATFORM_MAP = {
-  'x86_64-pc-windows-msvc': 'win32',
-  'i686-pc-windows-msvc': 'win32',
-  'aarch64-pc-windows-msvc': 'win32',
   'x86_64-apple-darwin': 'darwin',
   'aarch64-apple-darwin': 'darwin',
-  'x86_64-unknown-linux-gnu': 'linux',
-  'i686-unknown-linux-gnu': 'linux',
-  'aarch64-unknown-linux-gnu': 'linux',
-  'armv7-unknown-linux-gnueabihf': 'linux',
-  'riscv64gc-unknown-linux-gnu': 'linux',
-  'loongarch64-unknown-linux-gnu': 'linux',
 }
 const ARCH_MAP = {
-  'x86_64-pc-windows-msvc': 'x64',
-  'i686-pc-windows-msvc': 'ia32',
-  'aarch64-pc-windows-msvc': 'arm64',
   'x86_64-apple-darwin': 'x64',
   'aarch64-apple-darwin': 'arm64',
-  'x86_64-unknown-linux-gnu': 'x64',
-  'i686-unknown-linux-gnu': 'ia32',
-  'aarch64-unknown-linux-gnu': 'arm64',
-  'armv7-unknown-linux-gnueabihf': 'arm',
-  'riscv64gc-unknown-linux-gnu': 'riscv64',
-  'loongarch64-unknown-linux-gnu': 'loong64',
 }
 
 const arg1 = process.argv.slice(2)[0]
@@ -57,6 +39,8 @@ if (process.env.CI && !target) {
 const { platform, arch } = target
   ? { platform: PLATFORM_MAP[target], arch: ARCH_MAP[target] }
   : process
+
+if (platform !== 'darwin') throw new Error('This branch builds macOS only')
 
 const SIDECAR_HOST = target
   ? target
@@ -171,31 +155,13 @@ const META_URL_PREFIX = `https://github.com/MetaCubeX/mihomo/releases/download`
 let META_VERSION
 
 const META_ALPHA_MAP = {
-  'win32-x64': 'mihomo-windows-amd64-v2',
-  'win32-ia32': 'mihomo-windows-386',
-  'win32-arm64': 'mihomo-windows-arm64',
   'darwin-x64': 'mihomo-darwin-amd64-v1-go122',
   'darwin-arm64': 'mihomo-darwin-arm64-go122',
-  'linux-x64': 'mihomo-linux-amd64-v2',
-  'linux-ia32': 'mihomo-linux-386',
-  'linux-arm64': 'mihomo-linux-arm64',
-  'linux-arm': 'mihomo-linux-armv7',
-  'linux-riscv64': 'mihomo-linux-riscv64',
-  'linux-loong64': 'mihomo-linux-loong64',
 }
 
 const META_MAP = {
-  'win32-x64': 'mihomo-windows-amd64-v2',
-  'win32-ia32': 'mihomo-windows-386',
-  'win32-arm64': 'mihomo-windows-arm64',
   'darwin-x64': 'mihomo-darwin-amd64-v2-go122',
   'darwin-arm64': 'mihomo-darwin-arm64-go122',
-  'linux-x64': 'mihomo-linux-amd64-v2',
-  'linux-ia32': 'mihomo-linux-386',
-  'linux-arm64': 'mihomo-linux-arm64',
-  'linux-arm': 'mihomo-linux-armv7',
-  'linux-riscv64': 'mihomo-linux-riscv64',
-  'linux-loong64': 'mihomo-linux-loong64',
 }
 
 // Release discovery
@@ -463,51 +429,6 @@ async function resolveResource(binInfo) {
   log_success(`${file} finished`)
 }
 
-// Windows NSIS plugin
-const resolvePlugin = async () => {
-  const url =
-    'https://nsis.sourceforge.io/mediawiki/images/e/ef/NSIS_Simple_Service_Plugin_Unicode_1.30.zip'
-  const tempDir = path.join(TEMP_DIR, 'SimpleSC')
-  const tempZip = path.join(
-    tempDir,
-    'NSIS_Simple_Service_Plugin_Unicode_1.30.zip',
-  )
-  const tempDll = path.join(tempDir, 'SimpleSC.dll')
-  const pluginDir = path.join(process.env.APPDATA || '', 'Local/NSIS')
-  const pluginPath = path.join(pluginDir, 'SimpleSC.dll')
-  await fsp.mkdir(pluginDir, { recursive: true })
-  await fsp.mkdir(tempDir, { recursive: true })
-  if (!FORCE && fs.existsSync(pluginPath)) return
-  try {
-    if (!fs.existsSync(tempZip)) {
-      await downloadFile(url, tempZip)
-    }
-    const zip = new AdmZip(tempZip)
-    zip
-      .getEntries()
-      .forEach((entry) => log_debug(`"SimpleSC" entry`, entry.entryName))
-    zip.extractAllTo(tempDir, true)
-    if (fs.existsSync(tempDll)) {
-      await fsp.cp(tempDll, pluginPath, { recursive: true, force: true })
-      log_success(`unzip finished: "SimpleSC"`)
-    } else {
-      const files = await fsp.readdir(tempDir)
-      const dll = files.find((f) => f.toLowerCase().endsWith('.dll'))
-      if (dll) {
-        await fsp.cp(path.join(tempDir, dll), pluginPath, {
-          recursive: true,
-          force: true,
-        })
-        log_success(`unzip finished: "SimpleSC" (found ${dll})`)
-      } else {
-        throw new Error('SimpleSC.dll not found in zip')
-      }
-    }
-  } finally {
-    await fsp.rm(tempDir, { recursive: true, force: true })
-  }
-}
-
 // Service executable permissions
 const resolveServicePermission = async () => {
   const serviceExecutables = [
@@ -645,12 +566,6 @@ const resolveGeoIP = () =>
     file: 'geoip.dat',
     downloadURL: `https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/geoip.dat`,
   })
-const resolveEnableLoopback = () =>
-  resolveResource({
-    file: 'enableLoopback.exe',
-    downloadURL: `https://github.com/Kuingsmile/uwp-tool/releases/download/latest/enableLoopback.exe`,
-  })
-
 const resolveSetDnsScript = () =>
   resolveResource({
     file: 'set_dns.sh',
@@ -675,17 +590,10 @@ const tasks = [
       getLatestReleaseVersion().then(() => resolveSidecar(clashMeta())),
     retry: 5,
   },
-  { name: 'plugin', func: resolvePlugin, retry: 5, winOnly: true },
   { name: 'service', func: resolveServiceBundle, retry: 5 },
   { name: 'mmdb', func: resolveMmdb, retry: 5 },
   { name: 'geosite', func: resolveGeosite, retry: 5 },
   { name: 'geoip', func: resolveGeoIP, retry: 5 },
-  {
-    name: 'enableLoopback',
-    func: resolveEnableLoopback,
-    retry: 5,
-    winOnly: true,
-  },
   {
     name: 'service_chmod',
     func: resolveServicePermission,

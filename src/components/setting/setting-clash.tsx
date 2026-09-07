@@ -11,9 +11,7 @@ import { useClash } from '@/hooks/use-clash'
 import { useClashLog } from '@/hooks/use-clash-log'
 import { useDisplayedMixedPort } from '@/hooks/use-displayed-mixed-port'
 import { useVerge } from '@/hooks/use-verge'
-import { invoke_uwp_tool } from '@/services/cmds'
 import { showNotice } from '@/services/notice-service'
-import getSystem from '@/utils/get-system'
 
 import { ClashCoreViewer } from './mods/clash-core-viewer'
 import { ClashPortViewer } from './mods/clash-port-viewer'
@@ -25,8 +23,6 @@ import { NetworkInterfaceViewer } from './mods/network-interface-viewer'
 import { SettingItem, SettingList } from './mods/setting-comp'
 import { TunnelsViewer } from './mods/tunnels-viewer'
 import { WebUIViewer } from './mods/web-ui-viewer'
-
-const isWIN = getSystem() === 'windows'
 
 interface Props {
   onError: (err: Error) => void
@@ -265,19 +261,6 @@ const SettingClash = ({ onError }: Props) => {
       >
         <Typography sx={{ py: '7px', pr: 1 }}>{version}</Typography>
       </SettingItem>
-
-      {isWIN && (
-        <SettingItem
-          onClick={invoke_uwp_tool}
-          label={t('settings.sections.clash.form.fields.openUwpTool')}
-          extra={
-            <TooltipIcon
-              title={t('settings.sections.clash.form.tooltips.openUwpTool')}
-              sx={{ opacity: '0.7' }}
-            />
-          }
-        />
-      )}
 
       <SettingItem
         onClick={onUpdateGeo}

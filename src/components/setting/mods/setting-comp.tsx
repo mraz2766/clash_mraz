@@ -75,7 +75,7 @@ export const SettingList: React.FC<{
     sx={{
       py: 0,
       '& > .MuiListItem-root + .MuiListItem-root': {
-        borderTop: '1px solid var(--md-outline)',
+        borderTop: '1px solid var(--md-outline-soft)',
       },
       '& .MuiListItem-root': { minHeight: 52 },
       '& .MuiListItemButton-root': { minHeight: 52 },
@@ -84,9 +84,9 @@ export const SettingList: React.FC<{
     <ListSubheader
       sx={[
         {
-          background: 'var(--md-surface-container)',
-          fontSize: '16px',
-          fontWeight: 500,
+          background: 'transparent',
+          fontSize: '13px',
+          fontWeight: 650,
         },
         ({ palette }) => {
           return {

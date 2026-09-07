@@ -1,7 +1,5 @@
 import {
-  DnsOutlined,
   HistoryEduOutlined,
-  RouterOutlined,
   SettingsOutlined,
   SpeedOutlined,
 } from '@mui/icons-material'
@@ -262,8 +260,6 @@ const HomePage = () => {
         <HomeProfileCard current={current} onProfileUpdated={mutateProfiles} />,
       ),
       renderCard('proxy', <CurrentProxyCard />),
-      renderCard('network', <NetworkSettingsCard />),
-      renderCard('mode', <ClashModeEnhancedCard />),
     ],
     [current, mutateProfiles, renderCard],
   )
@@ -330,7 +326,35 @@ const HomePage = () => {
         </Box>
       }
     >
-      <Grid container spacing={2} columns={{ xs: 6, sm: 6, md: 12 }}>
+      {(homeCards.network || homeCards.mode) && (
+        <Box
+          className="mac-control-deck"
+          sx={
+            !(homeCards.network && homeCards.mode)
+              ? { gridTemplateColumns: '1fr !important' }
+              : undefined
+          }
+        >
+          {homeCards.network && (
+            <section>
+              <h2>{t('home.page.cards.networkSettings')}</h2>
+              <ProxyTunCard />
+            </section>
+          )}
+          {homeCards.mode && (
+            <section>
+              <h2>{t('home.page.cards.proxyMode')}</h2>
+              <ClashModeCard />
+            </section>
+          )}
+        </Box>
+      )}
+      <Grid
+        className="mac-home-grid"
+        container
+        spacing={2}
+        columns={{ xs: 6, sm: 6, md: 12 }}
+      >
         {criticalCards}
 
         {nonCriticalCards}
@@ -345,36 +369,6 @@ const HomePage = () => {
         />
       )}
     </BasePage>
-  )
-}
-
-// 增强版网络设置卡片组件
-const NetworkSettingsCard = () => {
-  const { t } = useTranslation()
-  return (
-    <EnhancedCard
-      title={t('home.page.cards.networkSettings')}
-      icon={<DnsOutlined />}
-      iconColor="primary"
-      action={null}
-    >
-      <ProxyTunCard />
-    </EnhancedCard>
-  )
-}
-
-// 增强版 Clash 模式卡片组件
-const ClashModeEnhancedCard = () => {
-  const { t } = useTranslation()
-  return (
-    <EnhancedCard
-      title={t('home.page.cards.proxyMode')}
-      icon={<RouterOutlined />}
-      iconColor="info"
-      action={null}
-    >
-      <ClashModeCard />
-    </EnhancedCard>
   )
 }
 

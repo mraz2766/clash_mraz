@@ -65,6 +65,7 @@ export const LayoutItem = (props: Props) => {
     >
       <ListItemButton
         className="md-nav-item"
+        data-destination={to}
         ref={sortable?.handleRef}
         selected={!!match}
         aria-current={match ? 'page' : undefined}
@@ -87,7 +88,7 @@ export const LayoutItem = (props: Props) => {
               bgcolor: 'transparent',
             },
             '&.Mui-selected .MuiListItemText-primary, &.Mui-selected .MuiListItemIcon-root':
-              { color: 'var(--md-on-primary-container)' },
+              { color: 'var(--md-on-primary)' },
             '& .MuiSvgIcon-root': { fontSize: 20 },
           },
         ]}

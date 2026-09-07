@@ -1,5 +1,15 @@
 import { DragDropProvider, KeyboardSensor, PointerSensor } from '@dnd-kit/react'
-import { Box, List, Menu, MenuItem, Paper, ThemeProvider } from '@mui/material'
+import { ViewSidebarRounded } from '@mui/icons-material'
+import {
+  Box,
+  IconButton,
+  List,
+  Menu,
+  MenuItem,
+  Paper,
+  ThemeProvider,
+  Tooltip,
+} from '@mui/material'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -13,7 +23,6 @@ import { LayoutTraffic } from '@/components/layout/layout-traffic'
 import { NoticeManager } from '@/components/layout/notice-manager'
 import { ServiceMigrationDialog } from '@/components/layout/service-migration-dialog'
 import { SysproxyPrivilegeDialog } from '@/components/layout/sysproxy-privilege-dialog'
-import { UpdateButton } from '@/components/layout/update-button'
 import {
   WindowControls,
   WindowResizeHandles,
@@ -23,6 +32,7 @@ import { useVerge } from '@/hooks/use-verge'
 import { useWindowDecorations } from '@/hooks/use-window'
 import { useThemeMode } from '@/services/states'
 import getSystem from '@/utils/get-system'
+import { version as appVersion } from '@root/package.json'
 
 import {
   useCustomTheme,
@@ -123,6 +133,37 @@ const Layout = () => {
     setMenuContextPosition(null)
     void patchVerge({ collapse_navbar: !navCollapsed })
   }, [navCollapsed, patchVerge])
+
+  useEffect(() => {
+    if (OS !== 'macos') return
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (!event.metaKey || event.altKey || event.ctrlKey || event.shiftKey)
+        return
+      const target = event.target
+      if (
+        target instanceof HTMLElement &&
+        target.closest(
+          'input, textarea, [contenteditable="true"], [role="dialog"], .monaco-editor',
+        )
+      )
+        return
+      if (event.key === ',') {
+        event.preventDefault()
+        navigate('/settings')
+      } else if (event.key.toLowerCase() === 'b') {
+        event.preventDefault()
+        handleToggleNavCollapsed()
+      } else if (/^[1-8]$/.test(event.key)) {
+        const destination = menuOrder[Number(event.key) - 1]
+        if (destination) {
+          event.preventDefault()
+          navigate(destination)
+        }
+      }
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [handleToggleNavCollapsed, menuOrder, navigate])
 
   const customTitlebar = useMemo(
     () =>
@@ -257,6 +298,23 @@ const Layout = () => {
 
         <div className="layout-content">
           <div className="layout-content__left">
+            <div className="mac-window-toolbar" data-tauri-drag-region="true">
+              <Tooltip
+                title={`${t(navCollapsed ? 'layout.components.navigation.menu.expandNavBar' : 'layout.components.navigation.menu.collapseNavBar')} (⌘B)`}
+              >
+                <IconButton
+                  size="small"
+                  onClick={handleToggleNavCollapsed}
+                  aria-label={t(
+                    navCollapsed
+                      ? 'layout.components.navigation.menu.expandNavBar'
+                      : 'layout.components.navigation.menu.collapseNavBar',
+                  )}
+                >
+                  <ViewSidebarRounded fontSize="small" />
+                </IconButton>
+              </Tooltip>
+            </div>
             <div className="the-logo" data-tauri-drag-region="false">
               <div
                 data-tauri-drag-region="true"
@@ -276,7 +334,7 @@ const Layout = () => {
                 />
                 <span className="brand-name">Clash</span>
               </div>
-              <UpdateButton className="the-newbtn" />
+              <span className="mac-edition">for Mac · {appVersion}</span>
             </div>
 
             {menuUnlocked && (

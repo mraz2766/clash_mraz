@@ -1145,23 +1145,25 @@ export const EnhancedCanvasTrafficGraph = memo(
             )}
           </Box>
 
-          <Box
-            sx={{
-              position: 'absolute',
-              bottom: 6,
-              left: 8,
-              fontSize: '9px',
-              color: 'text.disabled',
-              opacity: 0.6,
-              lineHeight: 1.2,
-            }}
-          >
-            {t('home.components.traffic.diagnostics', {
-              points: displayData.length,
-              compressed: samplerStats.compressedBufferSize,
-              fps: currentFPS,
-            })}
-          </Box>
+          {import.meta.env.DEV && (
+            <Box
+              sx={{
+                position: 'absolute',
+                bottom: 6,
+                left: 8,
+                fontSize: '9px',
+                color: 'text.disabled',
+                opacity: 0.6,
+                lineHeight: 1.2,
+              }}
+            >
+              {t('home.components.traffic.diagnostics', {
+                points: displayData.length,
+                compressed: samplerStats.compressedBufferSize,
+                fps: currentFPS,
+              })}
+            </Box>
+          )}
 
           {tooltipData.visible && (
             <Box

@@ -64,7 +64,7 @@ export const MiscViewer = forwardRef<DialogRef>((props, ref) => {
         app_log_max_size: values.appLogMaxSize,
         app_log_max_count: values.appLogMaxCount,
         auto_close_connection: values.autoCloseConnection,
-        auto_check_update: values.autoCheckUpdate,
+        auto_check_update: false,
         enable_builtin_enhanced: values.enableBuiltinEnhanced,
         proxy_layout_column: values.proxyLayoutColumn,
         enable_auto_delay_detection: values.enableAutoDelayDetection,
@@ -195,19 +195,6 @@ export const MiscViewer = forwardRef<DialogRef>((props, ref) => {
               setValues((v) => ({ ...v, autoCloseConnection: c }))
             }
             sx={{ marginLeft: 'auto' }}
-          />
-        </ListItem>
-
-        <ListItem sx={{ padding: '5px 2px' }}>
-          <ListItemText
-            primary={t('settings.modals.misc.fields.autoCheckUpdate')}
-          />
-          <Switch
-            edge="end"
-            checked={values.autoCheckUpdate}
-            onChange={(_, c) =>
-              setValues((v) => ({ ...v, autoCheckUpdate: c }))
-            }
           />
         </ListItem>
 

@@ -28,7 +28,6 @@ for destination in ICONS.glob('*.png'):
     with Image.open(destination) as previous:
         size = previous.size
     master.resize(size, Image.Resampling.LANCZOS).save(destination)
-master.save(ICONS / 'icon.ico', sizes=SIZES)
 master.save(ICONS / 'icon.icns')
 master.save(ASSETS / 'logo.ico', sizes=SIZES)
 master.save(ICONS / 'tray-icon.ico', sizes=SIZES)

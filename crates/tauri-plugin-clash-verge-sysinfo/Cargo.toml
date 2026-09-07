@@ -16,8 +16,5 @@ sysinfo = { version = "0.39.6", features = ["network", "system"] }
 [target.'cfg(not(windows))'.dependencies]
 libc = "0.2.189"
 
-[target.'cfg(windows)'.dependencies]
-deelevate = { workspace = true }
-
 [lints]
 workspace = true

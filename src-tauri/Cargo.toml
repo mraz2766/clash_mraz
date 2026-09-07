@@ -1,6 +1,6 @@
 [package]
 name = "clash-verge"
-version = "2.5.4"
+version = "2.7.1"
 description = "Clash 桌面代理管理工具"
 authors = ["zzzgydi", "Tunglies", "wonfen", "MystiPanda"]
 license = "GPL-3.0-only"
@@ -25,7 +25,7 @@ clippy = ["tauri/test"]
 tracing = []
 
 [package.metadata.bundle]
-identifier = "io.github.clash-verge-rev.clash-verge-rev"
+identifier = "io.github.mraz.clash.mac"
 
 [build-dependencies]
 tauri-build = { version = "2.6.3", features = [] }
@@ -137,18 +137,9 @@ objc2-app-kit = { version = "0.3.2", features = [
   "NSText",
 ] }
 
-[target.'cfg(windows)'.dependencies]
-deelevate = { workspace = true }
-runas = "=1.2.0"
-winreg = "0.56.0"
-windows-service = "0.8.1"
-windows = { version = "0.62.2", features = ["Win32_Globalization"] }
-windows-sys.workspace = true
-
 [target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
 tauri-plugin-autostart = "2.5.1"
 tauri-plugin-global-shortcut = "2.3.2"
-tauri-plugin-updater = "2.10.1"
 
 [dev-dependencies]
 criterion = { workspace = true }

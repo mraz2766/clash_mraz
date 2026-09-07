@@ -4,9 +4,7 @@ export const disableWebViewShortcuts = () => {
       ['F5', 'F7'].includes(event.key) ||
       (event.altKey && ['ArrowLeft', 'ArrowRight'].includes(event.key)) ||
       ((event.ctrlKey || event.metaKey) &&
-        ['F', 'G', 'H', 'J', 'P', 'Q', 'R', 'U'].includes(
-          event.key.toUpperCase(),
-        ))
+        ['F', 'G', 'J', 'P', 'R', 'U'].includes(event.key.toUpperCase()))
 
     if (disabledShortcuts) {
       event.preventDefault()

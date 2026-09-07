@@ -8,13 +8,13 @@ use crate::{config::Config, core::handle, utils::resolve::window_script::build_w
 use clash_verge_logging::logging;
 use clash_verge_logging::{Type, logging_error};
 
-const DARK_BACKGROUND_COLOR: Color = Color(46, 48, 61, 255); // #2E303D
-const LIGHT_BACKGROUND_COLOR: Color = Color(245, 245, 245, 255); // #F5F5F5
-const DARK_BACKGROUND_HEX: &str = "#2E303D";
-const LIGHT_BACKGROUND_HEX: &str = "#F5F5F5";
+const DARK_BACKGROUND_COLOR: Color = Color(29, 31, 33, 255); // #1D1F21
+const LIGHT_BACKGROUND_COLOR: Color = Color(247, 245, 242, 255); // #F7F5F2
+const DARK_BACKGROUND_HEX: &str = "#1D1F21";
+const LIGHT_BACKGROUND_HEX: &str = "#F7F5F2";
 
-const DEFAULT_WIDTH: f64 = 940.0;
-const DEFAULT_HEIGHT: f64 = 700.0;
+const DEFAULT_WIDTH: f64 = 1080.0;
+const DEFAULT_HEIGHT: f64 = 760.0;
 
 const MINIMAL_WIDTH: f64 = 520.0;
 const MINIMAL_HEIGHT: f64 = 520.0;
@@ -98,6 +98,13 @@ pub async fn build_new_window() -> Result<WebviewWindow, String> {
         logging_error!(Type::Window, window.show());
         logging_error!(Type::Window, window.set_focus());
     });
+
+    #[cfg(target_os = "macos")]
+    {
+        builder = builder
+            .title_bar_style(tauri::TitleBarStyle::Overlay)
+            .hidden_title(true);
+    }
 
     if let Some(theme) = resolved_theme {
         builder = builder.theme(Some(theme));

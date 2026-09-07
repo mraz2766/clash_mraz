@@ -871,7 +871,7 @@ export const CurrentProxyCard = () => {
       }
       iconColor={currentProxy ? 'primary' : undefined}
       action={
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.25 }}>
           <Tooltip
             title={t('home.components.currentProxy.actions.refreshDelay')}
           >

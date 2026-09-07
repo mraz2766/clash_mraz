@@ -269,6 +269,7 @@ export const useCustomTheme = () => {
       for (const [name, value] of Object.entries(tokens))
         rootEle.style.setProperty('--' + name, value)
       rootEle.style.setProperty('color-scheme', mode)
+      rootEle.setAttribute('data-theme', mode)
       const backgroundColor = dt.background_color
       const selectColor = dt.on_primary
       const scrollColor = alpha(dt.muted, 0.45)

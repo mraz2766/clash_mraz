@@ -1,13 +1,5 @@
 import { spawn } from 'node:child_process'
-import {
-  access,
-  readdir,
-  stat,
-  mkdir,
-  copyFile,
-  rename,
-  rm,
-} from 'node:fs/promises'
+import { access, mkdir, readFile, rename, rm } from 'node:fs/promises'
 import { createRequire } from 'node:module'
 import { homedir } from 'node:os'
 import path from 'node:path'
@@ -15,14 +7,16 @@ import { fileURLToPath, pathToFileURL } from 'node:url'
 
 const root = fileURLToPath(new URL('../', import.meta.url))
 const require = createRequire(import.meta.url)
-
-function run(command, args, env, capture = false) {
+const env = {
+  ...process.env,
+  PATH: `${homedir()}/.cargo/bin:${process.env.PATH}`,
+  NODE_OPTIONS: '--max-old-space-size=4096',
+}
+function run(command, args, capture = false) {
   return new Promise((resolve, reject) => {
     const child = spawn(command, args, {
       cwd: root,
       env,
-      shell: false,
-      windowsHide: true,
       stdio: capture ? ['ignore', 'pipe', 'inherit'] : 'inherit',
     })
     let output = ''
@@ -30,183 +24,123 @@ function run(command, args, env, capture = false) {
       output += chunk
     })
     child.once('error', reject)
-    child.once('exit', (code, signal) => {
-      if (code === 0) resolve(output)
-      else
-        reject(
-          new Error(`${path.basename(command)} failed (${signal ?? code})`),
-        )
-    })
+    child.once('exit', (code) =>
+      code === 0
+        ? resolve(output)
+        : reject(new Error(`${command} exited ${code}`)),
+    )
   })
 }
-
-export function buildOptions(args, platform, env) {
-  const forwarded = args.filter((arg) => arg !== '--no-open')
-  const localWindows = platform === 'win32' && !env.CI && !args.includes('--ci')
-  const shouldOpen = localWindows && !args.includes('--no-open')
-  const split = forwarded.indexOf('--')
-  const tauriArgs = split === -1 ? forwarded : forwarded.slice(0, split)
-  const cargoArgs = split === -1 ? [] : forwarded.slice(split)
-  if (localWindows) {
-    if (forwarded.includes('--no-bundle'))
-      throw new Error('Local Windows builds must produce an installer.')
-    tauriArgs.push('--bundles', 'nsis')
-    // Local installers do not need the upstream private updater signing key.
-    // Signed CI releases retain the original Tauri configuration.
-    if (!env.TAURI_SIGNING_PRIVATE_KEY) {
-      tauriArgs.push(
-        '--config',
-        JSON.stringify({ bundle: { createUpdaterArtifacts: false } }),
-      )
-    }
-  }
-  return {
-    localWindows,
-    shouldOpen,
-    args: ['build', ...tauriArgs, ...cargoArgs],
-  }
-}
-
-export async function freshInstaller(directory, startedAt) {
-  const files = await readdir(directory)
-  const candidates = []
-  for (const name of files) {
-    if (!name.toLowerCase().endsWith('.exe')) continue
-    const file = path.join(directory, name)
-    const info = await stat(file)
-    if (info.isFile() && info.size > 0 && info.mtimeMs >= startedAt)
-      candidates.push(file)
-  }
-  if (candidates.length !== 1) {
+export function buildOptions(args, platform) {
+  if (platform !== 'darwin')
+    throw new Error('clash-mac must be built on macOS.')
+  if (args.includes('--no-bundle'))
+    throw new Error('Mac builds must produce an app bundle.')
+  if (args.some((arg) => /^(-t|--target|--debug|-d)(=|$)/.test(arg)))
     throw new Error(
-      `Expected one installer from this build in ${directory}; found ${candidates.length}. No installer was opened.`,
+      'Use a native macOS release build; cross-target and debug bundles are unsupported.',
     )
-  }
-  return candidates[0]
-}
-
-// Publish atomically to one shallow, predictable directory before opening it.
-export async function publishInstaller(source, directory) {
-  await mkdir(directory, { recursive: true })
-  const destination = path.join(directory, path.basename(source))
-  const pending = destination + `.${process.pid}.pending`
-  try {
-    await copyFile(source, pending)
-    try {
-      await rename(pending, destination)
-      return destination
-    } catch (error) {
-      // Windows can lock an EXE while its installer is open. Publish alongside
-      // that file without terminating the user's installation.
-      if (!['EACCES', 'EPERM', 'EBUSY'].includes(error.code)) throw error
-      const available = path.join(
-        directory,
-        `${path.parse(source).name}-${Date.now()}.exe`,
-      )
-      await rename(pending, available)
-      return available
-    }
-  } finally {
-    await rm(pending, { force: true })
+  return {
+    install: args.includes('--install'),
+    args: [
+      'build',
+      ...args.filter((arg) => arg !== '--install' && arg !== '--no-open'),
+      '--bundles',
+      'app',
+    ],
   }
 }
-
 export async function main(args = process.argv.slice(2)) {
-  const env = {
-    ...process.env,
-    NODE_OPTIONS: process.env.NODE_OPTIONS || '--max-old-space-size=4096',
-  }
-  // Also supports a Rust installation made without modifying the system PATH.
-  const pathKey =
-    Object.keys(env).find((key) => key.toLowerCase() === 'path') || 'PATH'
-  const cargoBin = path.join(
-    env.CARGO_HOME || path.join(homedir(), '.cargo'),
-    'bin',
+  const options = buildOptions(args, process.platform)
+  const version = JSON.parse(
+    await readFile(path.join(root, 'package.json'), 'utf8'),
+  ).version
+  const tauriVersion = JSON.parse(
+    await readFile(path.join(root, 'src-tauri/tauri.conf.json'), 'utf8'),
+  ).version
+  const manifest = await readFile(
+    path.join(root, 'src-tauri/Cargo.toml'),
+    'utf8',
   )
-  env[pathKey] = [cargoBin, env[pathKey]].filter(Boolean).join(path.delimiter)
-  const options = buildOptions(args, process.platform, env)
-  const getArg = (flag) => {
-    const index = args.indexOf(flag)
-    return index === -1
-      ? args.find((arg) => arg.startsWith(flag + '='))?.slice(flag.length + 1)
-      : args[index + 1]
-  }
-  const target = getArg('--target') || getArg('-t')
-  const profile =
-    getArg('--profile') ||
-    (args.includes('--debug') || args.includes('-d') ? 'debug' : 'release')
-  let bundleDirectory
-  if (options.localWindows) {
-    await run('cargo', ['--version'], env)
-    const rustInfo = await run('rustc', ['-vV'], env, true)
-    const host = target || rustInfo.match(/^host: (.+)$/m)?.[1]?.trim()
-    if (!host?.endsWith('-windows-msvc'))
-      throw new Error('A Windows MSVC target is required for an EXE installer.')
-    const sidecar = path.join(
-      root,
-      'src-tauri/sidecar',
-      `verge-mihomo-${host}.exe`,
+  const rustVersion = manifest.match(/^version = "([^"]+)"/m)?.[1]
+  if (version !== tauriVersion || version !== rustVersion)
+    throw new Error(
+      'Version mismatch: run pnpm release-version before building.',
     )
+  const rustInfo = await run('rustc', ['-vV'], true)
+  const host = rustInfo.match(/^host: (.+)$/m)?.[1]?.trim()
+  if (!host?.endsWith('apple-darwin'))
+    throw new Error('An Apple Rust toolchain is required.')
+  await run(process.execPath, ['scripts/prebuild.mjs', host])
+  await run(process.execPath, [
+    require.resolve('@tauri-apps/cli/tauri.js'),
+    ...options.args,
+  ])
+  const metadata = JSON.parse(
+    await run(
+      'cargo',
+      ['metadata', '--no-deps', '--format-version', '1'],
+      true,
+    ),
+  )
+  const profileIndex = args.indexOf('--profile')
+  const profile = profileIndex >= 0 ? args[profileIndex + 1] : 'release'
+  const source = path.join(
+    metadata.target_directory,
+    profile,
+    'bundle/macos/Clash.app',
+  )
+  await access(path.join(source, 'Contents/MacOS/clash-verge'))
+  await run('codesign', ['--verify', '--deep', '--strict', source])
+  const releases = path.join(root, 'releases')
+  await mkdir(releases, { recursive: true })
+  const archive = path.join(
+    releases,
+    `Clash_Mac_${version}_${process.arch}.zip`,
+  )
+  await run('ditto', [
+    '-c',
+    '-k',
+    '--sequesterRsrc',
+    '--keepParent',
+    source,
+    archive,
+  ])
+  console.log(`App: ${source}\nArchive: ${archive}`)
+  if (options.install) {
+    const destination = '/Applications/Clash for Mac.app'
+    const pending = `/Applications/.Clash-${process.pid}.app`
+    const backup = path.join(
+      releases,
+      `Clash-before-${version}-${Date.now()}.app`,
+    )
+    await run('ditto', [source, pending])
+    await run('codesign', ['--verify', '--deep', '--strict', pending])
+    let backedUp = false
     try {
-      await access(sidecar)
-      await access(
-        path.join(root, 'src-tauri/resources/clash-verge-service.exe'),
-      )
-    } catch {
-      await run(
-        process.execPath,
-        [path.join(root, 'scripts/prebuild.mjs'), host],
-        env,
-      )
+      try {
+        await access(destination)
+        await rename(destination, backup)
+        backedUp = true
+      } catch (error) {
+        if (error.code !== 'ENOENT') throw error
+      }
+      await rename(pending, destination)
+    } catch (error) {
+      if (backedUp) await rename(backup, destination)
+      throw error
+    } finally {
+      await rm(pending, { recursive: true, force: true })
     }
-    const metadata = JSON.parse(
-      await run(
-        'cargo',
-        ['metadata', '--no-deps', '--format-version', '1'],
-        env,
-        true,
-      ),
-    )
-    bundleDirectory = path.join(
-      metadata.target_directory,
-      ...(target ? [target] : []),
-      profile,
-      'bundle/nsis',
-    )
-  }
-  const startedAt = Date.now()
-  await run(
-    process.execPath,
-    [require.resolve('@tauri-apps/cli/tauri.js'), ...options.args],
-    env,
-  )
-  if (options.localWindows) {
-    const fresh = await freshInstaller(bundleDirectory, startedAt)
-    const installer = await publishInstaller(fresh, path.join(root, 'releases'))
-    console.log(`Installer: ${installer}`)
-    if (options.shouldOpen) {
-      // Pass the path as data, not interpolated PowerShell source. No silent install.
-      await run(
-        'powershell.exe',
-        [
-          '-NoProfile',
-          '-NonInteractive',
-          '-Command',
-          'Start-Process -FilePath $env:CLASH_BUILD_INSTALLER -ErrorAction Stop',
-        ],
-        { ...env, CLASH_BUILD_INSTALLER: installer },
-      )
-      console.log('Installer opened. Complete installation in its window.')
-    }
+    console.log(`Installed: ${destination}`)
   }
 }
-
 if (
   process.argv[1] &&
   import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href
 ) {
   main().catch((error) => {
-    console.error(error.message)
+    console.error(error)
     process.exitCode = 1
   })
 }
