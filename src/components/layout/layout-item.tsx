@@ -88,7 +88,7 @@ export const LayoutItem = (props: Props) => {
               bgcolor: 'transparent',
             },
             '&.Mui-selected .MuiListItemText-primary, &.Mui-selected .MuiListItemIcon-root':
-              { color: 'var(--md-on-primary)' },
+              { color: 'var(--md-on-primary-container)' },
             '& .MuiSvgIcon-root': { fontSize: 20 },
           },
         ]}

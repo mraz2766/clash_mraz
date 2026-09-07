@@ -10,7 +10,7 @@
 
 ## 版本规范
 
-首个 Mac 版为 2.6.0，当前修订为 2.8.0。每次用户可见迭代递增 patch；功能版本递增 minor。用 `pnpm release-version 2.8.1` 同步 package.json、Tauri 与 Rust 包版本，随后更新 Changelog。Cargo 构建会同步锁文件中的应用版本。
+首个 Mac 版为 2.6.0，当前修订为 2.8.2。每次用户可见迭代递增 patch；功能版本递增 minor。用 `pnpm release-version 2.8.3` 同步 package.json、Tauri 与 Rust 包版本，随后更新 Changelog。Cargo 构建会同步锁文件中的应用版本。
 
 ## 验证
 
@@ -22,7 +22,7 @@
 
 ## 从旧版恢复配置
 
-2.8.0 配置目录为 `~/Library/Application Support/io.github.mraz.clash.mac/`。旧版目录为 `~/Library/Application Support/io.github.clash-verge-rev.clash-verge-rev/`。迁移前退出应用并备份两边目录；复制 `verge.yaml`、`profiles.yaml` 和整个 `profiles/`，可选复制窗口状态。不要覆盖目标目录中更新的配置，不要复制进程锁、套接字或运行时临时配置。重启后检查订阅、选中配置及主题保存。
+2.8.2 配置目录为 `~/Library/Application Support/io.github.mraz.clash.mac/`。旧版目录为 `~/Library/Application Support/io.github.clash-verge-rev.clash-verge-rev/`。迁移前退出应用并备份两边目录；复制 `verge.yaml`、`profiles.yaml` 和整个 `profiles/`，可选复制窗口状态。不要覆盖目标目录中更新的配置，不要复制进程锁、套接字或运行时临时配置。重启后检查订阅、选中配置及主题保存。
 
 本次本机恢复的原始备份保存在 `~/Library/Application Support/Clash Mac Backups/2.6.0-preinstall/`，不随 Git 提交。迁移使用独立副本，不是符号链接。
 

@@ -1,13 +1,13 @@
 // Mac edition: warm translucent sidebar and a quiet, continuous workspace.
 :root {
-  --mac-sidebar: rgba(224, 232, 237, .82);
+  --mac-sidebar: rgba(247, 246, 240, .82);
   --mac-glass-edge: rgba(255, 255, 255, .65);
-  --mac-toolbar: rgba(247, 245, 242, .86);
+  --mac-toolbar: rgba(250, 249, 245, .86);
 }
 :root[data-theme='dark'] {
-  --mac-sidebar: rgba(33, 40, 46, .88);
-  --mac-glass-edge: rgba(177, 204, 223, .1);
-  --mac-toolbar: rgba(29, 31, 33, .88);
+  --mac-sidebar: rgba(42, 40, 35, .88);
+  --mac-glass-edge: rgba(215, 210, 198, .1);
+  --mac-toolbar: rgba(36, 35, 33, .88);
 }
 .macos.layout {
   background: var(--md-bg);
@@ -42,12 +42,12 @@
     .MuiListItem-root { padding-top: 2px; padding-bottom: 2px; }
     .md-nav-item { min-height: 38px; border-radius: 9px; }
     .md-nav-indicator {
-      background: var(--md-primary);
-      box-shadow: inset 0 1px 0 var(--mac-glass-edge), 0 2px 5px rgba(15, 59, 76, .05);
+      background: var(--md-primary-container);
+      box-shadow: inset 0 1px 0 var(--mac-glass-edge), 0 2px 5px rgba(76, 57, 30, .06);
     }
     .MuiListItemText-primary { font-size: 13px; }
     .MuiListItemIcon-root { color: var(--md-primary); }
-    .md-nav-item[aria-current='page'] { color: var(--md-on-primary); .MuiListItemIcon-root { color: inherit; } }
+    .md-nav-item[aria-current='page'] { color: var(--md-on-primary-container); .MuiListItemIcon-root { color: inherit; } }
     .the-traffic { padding-top: 14px; padding-bottom: 10px; border-top: 1px solid var(--md-outline-soft); }
   }
   .layout-content__right .the-content { top: 0; }
@@ -82,8 +82,8 @@
   -webkit-backdrop-filter: blur(24px);
 }
 @media (prefers-reduced-transparency: reduce) {
-  :root { --mac-sidebar: #e0e8ed; --mac-toolbar: #f7f5f2; }
-  :root[data-theme='dark'] { --mac-sidebar: #21282e; --mac-toolbar: #1d1f21; }
+  :root { --mac-sidebar: #f7f6f0; --mac-toolbar: #faf9f5; }
+  :root[data-theme='dark'] { --mac-sidebar: #2a2823; --mac-toolbar: #242321; }
   .macos.layout .layout-content__left, .macos.layout .base-page > header,
   .MuiDialog-paper, .MuiMenu-paper { backdrop-filter: none; -webkit-backdrop-filter: none; }
 }
@@ -109,6 +109,7 @@
   }
   .mac-home-workspace { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(280px, 1fr); gap: 16px; margin-bottom: 16px; container-type: inline-size; }
   .mac-home-workspace > section { min-width: 0; }
+  .home-node { align-self: start; }
   .home-traffic > div, .home-node > div { border-radius: 12px; }
   .traffic-headline, .traffic-footnote { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
   .traffic-headline { padding: 0 0 16px; .metric-value { font-size: 25px; line-height: 1.4; } }
