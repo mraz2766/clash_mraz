@@ -16,6 +16,7 @@ import {
   Box,
   Button,
   Chip,
+  CircularProgress,
   ClickAwayListener,
   FormControl,
   IconButton,
@@ -38,8 +39,10 @@ import { useNavigate } from 'react-router'
 import { EnhancedCard } from '@/components/home/enhanced-card'
 import type { ProxySortType } from '@/components/proxy/use-filter-sort'
 import { useGroupDelays } from '@/hooks/use-group-delays'
+import { useMacText } from '@/hooks/use-mac-text'
 import { useProfiles } from '@/hooks/use-profiles'
 import { useProxySelection } from '@/hooks/use-proxy-selection'
+import { useProxySelectionStatus } from '@/hooks/use-proxy-selection-status'
 import { useVerge } from '@/hooks/use-verge'
 import {
   useAppRefreshers,
@@ -59,6 +62,8 @@ import {
 } from '@/types/proxy-view'
 import { debugLog } from '@/utils/debug'
 import { compareByDelay, DEFAULT_DELAY_TIMEOUT } from '@/utils/delay'
+
+import { RouteInspector } from './route-inspector'
 
 const STORAGE_KEY_GROUP = 'clash-verge-selected-proxy-group'
 const STORAGE_KEY_SORT_TYPE = 'clash-verge-proxy-sort-type'
@@ -394,6 +399,8 @@ const PersistentProxySelect = ({
 }
 
 export const CurrentProxyCard = () => {
+  const text = useMacText()
+  const pending = useProxySelectionStatus()
   const { t } = useTranslation()
   const navigate = useNavigate()
   const { proxyView } = useProxiesData()
@@ -824,7 +831,7 @@ export const CurrentProxyCard = () => {
 
   return (
     <EnhancedCard
-      title={t('home.components.currentProxy.title')}
+      title={text('关注的代理组', 'Watched group')}
       icon={
         <Tooltip
           title={
@@ -872,14 +879,39 @@ export const CurrentProxyCard = () => {
             variant="text"
             size="small"
             onClick={goToProxies}
-            sx={{ borderRadius: 1.5 }}
+            sx={{ borderRadius: 1.5, minWidth: 24, px: 0.5 }}
             endIcon={<ChevronRight fontSize="small" />}
           >
-            {t('layout.components.navigation.tabs.proxies')}
+            {text('管理', 'Manage')}
           </Button>
         </Box>
       }
     >
+      <Typography
+        variant="body2"
+        color="text.secondary"
+        sx={{ fontSize: 12, mb: 1.5 }}
+      >
+        {text(
+          '规则模式下，不同网站可能使用不同出口。',
+          'In rule mode, websites may use different routes.',
+        )}
+      </Typography>
+      {pending && (
+        <Box
+          role="status"
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1,
+            mb: 1.5,
+            fontSize: 12,
+          }}
+        >
+          <CircularProgress size={14} />
+          {text('正在切换至', 'Switching to')} {pending.proxyName}
+        </Box>
+      )}
       {isCoreDataPending ? (
         <Box sx={{ py: 4, height: 24 }} />
       ) : currentProxy || (!isDirectMode && selectedGroup) ? (
@@ -1018,6 +1050,7 @@ export const CurrentProxyCard = () => {
           </Typography>
         </Box>
       )}
+      <RouteInspector />
     </EnhancedCard>
   )
 }

@@ -54,7 +54,10 @@ const SettingVergeAdvanced = ({ onError: _ }: Props) => {
   }, [])
 
   return (
-    <SettingList title={t('settings.components.verge.advanced.title')}>
+    <SettingList
+      category="advanced"
+      title={t('settings.components.verge.advanced.title')}
+    >
       <ThemeViewer ref={themeRef} />
       <ConfigViewer ref={configRef} />
       <HotkeyViewer ref={hotkeyRef} />
@@ -64,6 +67,7 @@ const SettingVergeAdvanced = ({ onError: _ }: Props) => {
       <LiteModeViewer ref={liteModeRef} />
 
       <SettingItem
+        category="backup"
         onClick={() => backupRef.current?.open()}
         label={t('settings.components.verge.advanced.fields.backupSetting')}
         extra={

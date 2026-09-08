@@ -293,21 +293,30 @@ const HomePage = () => {
           )}
         </Box>
       )}
+      {homeCards.traffic && (
+        <section className="home-metrics">
+          <EnhancedTrafficStats view="summary" />
+        </section>
+      )}
       <Box
         className="mac-home-workspace"
         sx={
-          !(homeCards.traffic && homeCards.proxy)
+          !(
+            homeCards.traffic &&
+            (verge?.traffic_graph ?? true) &&
+            homeCards.proxy
+          )
             ? { gridTemplateColumns: '1fr !important' }
             : undefined
         }
       >
-        {homeCards.traffic && (
+        {homeCards.traffic && (verge?.traffic_graph ?? true) && (
           <section className="home-traffic">
             <EnhancedCard
               title={t('home.page.cards.trafficStats')}
               icon={<SpeedOutlined />}
             >
-              <EnhancedTrafficStats />
+              <EnhancedTrafficStats view="detail" />
             </EnhancedCard>
           </section>
         )}

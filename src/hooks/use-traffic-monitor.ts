@@ -210,6 +210,11 @@ class TrafficWorkerClient {
 
         this.worker.onerror = (error) => {
           debugLog(`[TrafficWorkerClient] Worker error: ${String(error)}`)
+          // WKWebView may reject module workers asynchronously on tauri://.
+          // Recover with the same sampler instead of leaving an empty chart.
+          this.worker?.terminate()
+          this.worker = null
+          this.startInline(initMessage)
         }
 
         this.ready = true

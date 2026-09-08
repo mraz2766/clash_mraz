@@ -34,6 +34,7 @@ pub struct IVerge {
     pub startup_script: Option<String>,
 
     pub traffic_graph: Option<bool>,
+    pub traffic_graph_colorful: Option<bool>,
 
     /// show memory info (only for Clash Meta)
     pub enable_memory_usage: Option<bool>,
@@ -329,6 +330,7 @@ impl IVerge {
             env_type: Some("powershell".into()),
             start_page: Some("/".into()),
             traffic_graph: Some(true),
+            traffic_graph_colorful: Some(true),
             enable_memory_usage: Some(true),
             enable_group_icon: Some(true),
             pause_render_traffic_stats_on_blur: Some(true),
@@ -414,6 +416,7 @@ impl IVerge {
         patch!(start_page);
         patch!(startup_script);
         patch!(traffic_graph);
+        patch!(traffic_graph_colorful);
         patch!(enable_memory_usage);
         patch!(enable_group_icon);
         patch!(pause_render_traffic_stats_on_blur);

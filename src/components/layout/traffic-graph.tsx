@@ -2,6 +2,8 @@ import { useTheme } from '@mui/material'
 import { useEffect, useImperativeHandle, useRef, type Ref } from 'react'
 import { Traffic } from 'tauri-plugin-mihomo-api'
 
+import { useTrafficColors } from '@/hooks/use-traffic-colors'
+
 const maxPoint = 30
 
 const refLineAlpha = 1
@@ -45,6 +47,7 @@ export function TrafficGraph({ ref }: { ref?: Ref<TrafficRef> }) {
   const requestDrawRef = useRef<(animate?: boolean) => void>(() => {})
 
   const { palette } = useTheme()
+  const trafficColors = useTrafficColors()
 
   useImperativeHandle(ref, () => ({
     appendData: (data: Traffic) => {
@@ -97,10 +100,10 @@ export function TrafficGraph({ ref }: { ref?: Ref<TrafficRef> }) {
 
     if (!context) return
 
-    const { primary, secondary, divider } = palette
+    const { divider } = palette
     const refLineColor = divider || 'rgba(0, 0, 0, 0.12)'
-    const upLineColor = secondary.main || '#9c27b0'
-    const downLineColor = primary.main || '#5b5c9d'
+    const upLineColor = trafficColors.up
+    const downLineColor = trafficColors.down
 
     const cancelPendingDraw = () => {
       if (frameTimer !== null) {
@@ -189,6 +192,7 @@ export function TrafficGraph({ ref }: { ref?: Ref<TrafficRef> }) {
       context.beginPath()
       context.globalAlpha = upLineAlpha
       context.lineWidth = upLineWidth
+      context.setLineDash([4, 3])
       context.strokeStyle = upLineColor
       if (lineStyle) {
         drawBezier(list, 'up')
@@ -201,6 +205,7 @@ export function TrafficGraph({ ref }: { ref?: Ref<TrafficRef> }) {
       context.beginPath()
       context.globalAlpha = downLineAlpha
       context.lineWidth = downLineWidth
+      context.setLineDash([])
       context.strokeStyle = downLineColor
       if (lineStyle) {
         drawBezier(list, 'down')
@@ -273,7 +278,7 @@ export function TrafficGraph({ ref }: { ref?: Ref<TrafficRef> }) {
       resizeObserver?.disconnect()
       cancelPendingDraw()
     }
-  }, [palette])
+  }, [palette, trafficColors])
 
   return <canvas ref={canvasRef} style={{ width: '100%', height: '100%' }} />
 }

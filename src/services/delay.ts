@@ -1,3 +1,4 @@
+import i18n from 'i18next'
 import {
   delayProxyByName,
   healthcheckNodeInProvider,
@@ -406,11 +407,11 @@ class DelayManager {
       case 'untested':
         return '-'
       case 'testing':
-        return 'testing'
+        return i18n.language?.startsWith('zh') ? '测速中' : 'Testing'
       case 'timeout':
-        return 'Timeout'
+        return i18n.language?.startsWith('zh') ? '超时' : 'Timeout'
       case 'error':
-        return 'Error'
+        return i18n.language?.startsWith('zh') ? '连接失败' : 'Failed'
       case 'measured':
         return `${delay}`
     }

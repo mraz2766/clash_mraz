@@ -88,7 +88,7 @@ const SettingClash = ({ onError }: Props) => {
   })
 
   return (
-    <SettingList title={t('settings.sections.clash.title')}>
+    <SettingList category="network" title={t('settings.sections.clash.title')}>
       <WebUIViewer ref={webRef} />
       <ClashPortViewer ref={portRef} />
       <ControllerViewer ref={ctrlRef} />

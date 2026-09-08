@@ -107,9 +107,9 @@
     .home-choice { min-height: 32px; padding: 6px; border-radius: 7px; }
     .home-choice[aria-pressed='true'] { background: var(--md-primary-container); box-shadow: inset 0 1px 0 var(--mac-glass-edge); }
   }
-  .mac-home-workspace { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(280px, 1fr); gap: 16px; margin-bottom: 16px; container-type: inline-size; }
+  .mac-home-workspace { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-bottom: 16px; container-type: inline-size; }
   .mac-home-workspace > section { min-width: 0; }
-  .home-node { align-self: start; }
+  .home-node { align-self: stretch; }
   .home-traffic > div, .home-node > div { border-radius: 12px; }
   .traffic-headline, .traffic-footnote { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
   .traffic-headline { padding: 0 0 16px; .metric-value { font-size: 25px; line-height: 1.4; } }
@@ -137,3 +137,53 @@
   .macos.layout .mac-home-grid, .macos.layout .mac-home-workspace { animation: none; }
   .macos.layout .home-choice, .macos.layout .MuiButton-root { transition: none; transform: none; }
 }
+
+// Shared Mac surfaces: pure white content, neutral workspace, restrained motion.
+.macos.layout {
+  .base-page { container: mac-page / inline-size; }
+  .mac-home-workspace, .mac-home-grid { animation: none; }
+  .mac-control-deck { gap: 20px; margin-bottom: 16px; }
+  .mac-control-deck h2, .traffic-metric .MuiTypography-caption { font-size: 12px; }
+  .mac-control-deck .mode-description { margin: 6px 0 0; }
+  .mac-control-deck .mode-description > .MuiTypography-root { font-size: 12px; }
+  .traffic-headline .metric-value { font-size: clamp(20px, 3cqi, 27px); white-space: nowrap; }
+  .traffic-footnote .metric-value { white-space: nowrap; font-size: 13px; }
+  .traffic-headline { gap: 16px; }
+  .home-node > div > div:first-child { flex-wrap: wrap; gap: 4px 8px; }
+  .home-node > div > div:first-child > div:first-child { flex: 1 0 145px; }
+  .home-node .MuiChip-root { font-variant-numeric: tabular-nums; }
+  .MuiIconButton-root { transition: background-color var(--md-motion), color var(--md-motion), transform var(--md-motion-fast); }
+  .MuiIconButton-root:active { transform: scale(.94); }
+  .MuiButtonBase-root:focus-visible { outline: 2px solid var(--md-primary); outline-offset: 2px; }
+  .settings-toolbar { position: sticky; top: 0; z-index: 5; background: var(--md-bg); padding: 0 0 12px; }
+  .settings-toolbar .MuiTabs-root { margin-top: 12px; }
+  .settings-toolbar .MuiTab-root { min-width: 76px; min-height: 42px; padding: 8px 14px; text-transform: none; font-size: 13px; }
+  .settings-results > .MuiList-root { background: var(--md-surface); border-radius: 12px; margin-bottom: 16px; }
+  .settings-results .MuiListItemText-root { min-width: 0; margin-right: 16px; }
+  .settings-results:has(> .MuiList-root) > .settings-empty { display: none; }
+  .settings-empty { text-align: center; padding: 40px 16px; }
+}
+.mac-segmented.MuiToggleButtonGroup-root {
+  background: var(--md-surface-container); border-radius: 9px; padding: 3px; gap: 3px;
+  .MuiToggleButton-root { border: 0; border-radius: 7px !important; min-width: 54px; padding: 5px 12px; font-size: 13px; text-transform: none; color: var(--md-text-secondary); transition: background-color var(--md-motion), color var(--md-motion), box-shadow var(--md-motion); }
+  .MuiToggleButton-root.Mui-selected { background: var(--md-surface); color: var(--md-text-primary); box-shadow: 0 1px 4px #00000012; }
+}
+@container mac-page (max-width: 740px) {
+  .macos.layout .mac-home-workspace { grid-template-columns: minmax(0, 1fr); }
+  .macos.layout .home-node { order: -1; }
+  .macos.layout .traffic-headline .metric-value { font-size: 25px; }
+}
+@container mac-page (max-width: 540px) {
+  .macos.layout .mac-control-deck { grid-template-columns: 1fr; gap: 12px; }
+  .macos.layout .mac-control-deck > section + section { border-left: 0; padding-left: 0; }
+  .macos.layout .home-subscription .profile-facts { grid-template-columns: 1fr; }
+  .macos.layout .traffic-headline .metric-value { font-size: 20px; }
+}
+@keyframes mac-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .macos.layout .MuiCollapse-root { transition-duration: 0ms !important; }
+  .mac-segmented .MuiToggleButton-root { transition: none; }
+}
+.macos.layout .home-metrics { margin-bottom: 16px; padding: 0 4px; }
+.macos.layout .home-metrics .traffic-headline { padding-bottom: 0; }
+.macos.layout .home-metrics .traffic-headline .metric-value { font-size: 27px; }

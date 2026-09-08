@@ -7,6 +7,7 @@ import type { BoxProps, SvgIconProps, TypographyProps } from '@mui/material'
 import { Box, Typography } from '@mui/material'
 import { useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useLocation } from 'react-router'
 
 import { LightweightTrafficErrorBoundary } from '@/components/shared/traffic-error-boundary'
 import { useMemoryData } from '@/hooks/use-memory-data'
@@ -21,7 +22,9 @@ export const LayoutTraffic = () => {
   const { t } = useTranslation()
   const { verge } = useVerge()
 
-  const trafficGraph = verge?.traffic_graph ?? true
+  const location = useLocation()
+  const trafficGraph =
+    (verge?.traffic_graph ?? true) && location.pathname !== '/'
   const displayMemory = verge?.enable_memory_usage ?? true
 
   const trafficRef = useRef<TrafficRef>(null)

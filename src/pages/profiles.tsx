@@ -16,7 +16,7 @@ import {
   RefreshRounded,
   TextSnippetOutlined,
 } from '@mui/icons-material'
-import { Box, Button, Divider, Grid, IconButton, Stack } from '@mui/material'
+import { Box, Button, Grid, IconButton, Stack } from '@mui/material'
 import { TauriEvent } from '@tauri-apps/api/event'
 import { readText } from '@tauri-apps/plugin-clipboard-manager'
 import { readTextFile } from '@tauri-apps/plugin-fs'
@@ -39,7 +39,9 @@ import {
   type ProfileViewerRef,
 } from '@/components/profile/profile-viewer'
 import { ConfigViewer } from '@/components/setting/mods/config-viewer'
+import { MacDisclosure } from '@/components/shared/mac-disclosure'
 import { useListen } from '@/hooks/use-listen'
+import { useMacText } from '@/hooks/use-mac-text'
 import { useProfiles } from '@/hooks/use-profiles'
 import {
   createProfile,
@@ -58,11 +60,7 @@ import {
   revalidateQueries,
   useQuery,
 } from '@/services/query-client'
-import {
-  useLoadingCache,
-  useSetLoadingCache,
-  useThemeMode,
-} from '@/services/states'
+import { useLoadingCache, useSetLoadingCache } from '@/services/states'
 import { debugLog } from '@/utils/debug'
 
 // 与 src-tauri/src/main.rs 的 worker_limit 上限(8)保持一致，避免前后端更新风暴不对齐
@@ -84,6 +82,7 @@ const debugProfileSwitch = (action: string, profile: string, extra?: any) => {
 }
 
 const ProfilePage = () => {
+  const text = useMacText()
   const { t } = useTranslation()
   const location = useLocation()
   const { addListener } = useListen()
@@ -691,12 +690,6 @@ const ProfilePage = () => {
     }
   })
 
-  const mode = useThemeMode()
-  const isLight = mode === 'light'
-  const dividercolor = isLight
-    ? 'rgba(0, 0, 0, 0.06)'
-    : 'rgba(255, 255, 255, 0.06)'
-
   // 卸载后不再执行尚未发送的切换意图。
   useEffect(() => {
     profilePageMountedRef.current = true
@@ -735,6 +728,15 @@ const ProfilePage = () => {
                 color="inherit"
                 title={t('profiles.page.actions.updateAll')}
                 onClick={onUpdateAll}
+                disabled={loadingCache.size > 0}
+                sx={{
+                  '& svg': {
+                    animation:
+                      loadingCache.size > 0
+                        ? 'mac-spin 900ms linear infinite'
+                        : 'none',
+                  },
+                }}
               >
                 <RefreshRounded />
               </IconButton>
@@ -914,7 +916,7 @@ const ProfilePage = () => {
               mb: 1.5,
               display: 'grid',
               overflow: 'hidden',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
               gap: 1,
               px: 0.5,
             }}
@@ -956,36 +958,35 @@ const ProfilePage = () => {
             ))}
           </Box>
         </DragDropProvider>
-        <Divider
-          variant="middle"
-          flexItem
-          sx={{ width: `calc(100% - 32px)`, borderColor: dividercolor }}
-        ></Divider>
-        <Box sx={{ mt: 1.5, mb: '10px' }}>
-          <Grid container spacing={{ xs: 1, lg: 1 }}>
-            <Grid size={{ xs: 12, sm: 6, md: 6, lg: 6 }}>
-              <ProfileMore
-                id="Merge"
-                onSave={async (prev, curr) => {
-                  if (prev !== curr) {
-                    await onEnhance(false)
-                  }
-                }}
-              />
+        <MacDisclosure
+          title={text('高级：覆写与脚本', 'Advanced: overrides and scripts')}
+        >
+          <Box sx={{ mt: 1.5, mb: '10px' }}>
+            <Grid container spacing={{ xs: 1, lg: 1 }}>
+              <Grid size={{ xs: 12, sm: 6, md: 6, lg: 6 }}>
+                <ProfileMore
+                  id="Merge"
+                  onSave={async (prev, curr) => {
+                    if (prev !== curr) {
+                      await onEnhance(false)
+                    }
+                  }}
+                />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6, md: 6, lg: 6 }}>
+                <ProfileMore
+                  id="Script"
+                  logInfo={chainLogs['Script']}
+                  onSave={async (prev, curr) => {
+                    if (prev !== curr) {
+                      await onEnhance(false)
+                    }
+                  }}
+                />
+              </Grid>
             </Grid>
-            <Grid size={{ xs: 12, sm: 6, md: 6, lg: 6 }}>
-              <ProfileMore
-                id="Script"
-                logInfo={chainLogs['Script']}
-                onSave={async (prev, curr) => {
-                  if (prev !== curr) {
-                    await onEnhance(false)
-                  }
-                }}
-              />
-            </Grid>
-          </Grid>
-        </Box>
+          </Box>
+        </MacDisclosure>
       </Box>
 
       <ProfileViewer

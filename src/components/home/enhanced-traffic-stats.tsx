@@ -6,14 +6,7 @@ import {
   LinkRounded,
   MemoryRounded,
 } from '@mui/icons-material'
-import {
-  Box,
-  PaletteColor,
-  Paper,
-  Typography,
-  alpha,
-  useTheme,
-} from '@mui/material'
+import { Box, PaletteColor, Paper, Typography, useTheme } from '@mui/material'
 import { ReactNode, memo, useMemo, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -98,6 +91,7 @@ const CompactStatCard = memo(
           className="metric-value"
           sx={{
             fontVariantNumeric: 'tabular-nums',
+            whiteSpace: 'nowrap',
             letterSpacing: '-.5px',
             fontWeight: 600,
           }}
@@ -115,9 +109,12 @@ const CompactStatCard = memo(
 // 添加显示名称
 CompactStatCard.displayName = 'CompactStatCard'
 
-export const EnhancedTrafficStats = () => {
+export const EnhancedTrafficStats = ({
+  view = 'full',
+}: {
+  view?: 'full' | 'summary' | 'detail'
+}) => {
   const { t } = useTranslation()
-  const theme = useTheme()
   const { verge } = useVerge()
   const trafficRef = useRef<EnhancedCanvasTrafficGraphRef>(null)
   const pageVisible = useVisibility()
@@ -167,7 +164,7 @@ export const EnhancedTrafficStats = () => {
 
   // 渲染流量图表 - 使用useMemo缓存渲染结果
   const trafficGraphComponent = useMemo(() => {
-    if (!trafficGraph || !pageVisible) return null
+    if (!trafficGraph || !pageVisible || view === 'summary') return null
 
     return (
       <Paper
@@ -175,7 +172,8 @@ export const EnhancedTrafficStats = () => {
         sx={{
           height: 158,
           cursor: 'pointer',
-          border: `1px solid ${alpha(theme.palette.divider, 0.2)}`,
+          border: 'none',
+          backgroundColor: 'transparent',
           borderRadius: 2,
           overflow: 'hidden',
         }}
@@ -186,7 +184,7 @@ export const EnhancedTrafficStats = () => {
         </div>
       </Paper>
     )
-  }, [trafficGraph, pageVisible, theme.palette.divider])
+  }, [trafficGraph, pageVisible, view])
 
   // 使用useMemo计算统计卡片配置
   const statCards = useMemo(() => {
@@ -247,17 +245,21 @@ export const EnhancedTrafficStats = () => {
         console.error('[EnhancedTrafficStats] 组件错误:', error, errorInfo)
       }}
     >
-      <Box className="traffic-headline">
-        {statCards.slice(0, 3).map((card) => (
-          <CompactStatCard key={card.title} {...card} />
-        ))}
-      </Box>
-      {trafficGraph && trafficGraphComponent}
-      <Box className="traffic-footnote">
-        {statCards.slice(3).map((card) => (
-          <CompactStatCard key={card.title} {...card} />
-        ))}
-      </Box>
+      {view !== 'detail' && (
+        <Box className="traffic-headline">
+          {statCards.slice(0, 3).map((card) => (
+            <CompactStatCard key={card.title} {...card} />
+          ))}
+        </Box>
+      )}
+      {view !== 'summary' && trafficGraph && trafficGraphComponent}
+      {(view !== 'summary' || !trafficGraph) && (
+        <Box className="traffic-footnote">
+          {statCards.slice(3).map((card) => (
+            <CompactStatCard key={card.title} {...card} />
+          ))}
+        </Box>
+      )}
     </TrafficErrorBoundary>
   )
 }

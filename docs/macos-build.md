@@ -6,11 +6,11 @@
 2. 执行 `pnpm install --frozen-lockfile`。
 3. 退出正在运行的 Clash for Mac，然后执行 `pnpm build:install`。脚本预取本机架构的核心、服务、地理数据和 DNS 脚本，再构建前端与 Rust。
 4. 构建结果为 `target/release/bundle/macos/Clash.app`。通过代码签名完整性验证后，在 `releases` 生成带版本号与架构的 ZIP。
-5. 安装前复制到隐藏的临时应用目录并验证，将已有应用移动到 `releases/Clash-before-<版本>-<时间>.app` 备份，再替换 `/Applications/Clash for Mac.app`。配置不随应用替换而删除。
+5. 安装前复制到隐藏的临时应用目录并验证，将已有应用移动到 临时备份路径，安装后验证并归档为 `releases/Clash-before-<版本>-<时间>.app.zip`，移除可启动的备份应用，再替换 `/Applications/Clash for Mac.app`。配置不随应用替换而删除。
 
 ## 版本规范
 
-首个 Mac 版为 2.6.0，当前修订为 2.8.2。每次用户可见迭代递增 patch；功能版本递增 minor。用 `pnpm release-version 2.8.3` 同步 package.json、Tauri 与 Rust 包版本，随后更新 Changelog。Cargo 构建会同步锁文件中的应用版本。
+首个 Mac 版为 2.6.0，当前修订为 2.9.0。每次用户可见迭代递增 patch；功能版本递增 minor。用 `pnpm release-version 2.9.1` 同步 package.json、Tauri 与 Rust 包版本，随后更新 Changelog。Cargo 构建会同步锁文件中的应用版本。
 
 ## 验证
 
@@ -18,11 +18,11 @@
 
 ## 发布范围
 
-本地应用为 ad hoc 签名，尚未使用 Developer ID 和 Apple 公证。不要把本地签名包描述成已公证应用。Mac TUN 和服务安装继续沿用系统权限流程。手动 GitHub 工作流仅作为远程构建入口，无 push 或 PR 自动发布。
+本地应用为 ad hoc 签名，尚未使用 Developer ID 和 Apple 公证。不要把本地签名包描述成已公证应用。Mac TUN 和服务安装继续沿用系统权限流程。本分支没有 GitHub Actions 工作流，仅本地构建和手动上传文件。
 
 ## 从旧版恢复配置
 
-2.8.2 配置目录为 `~/Library/Application Support/io.github.mraz.clash.mac/`。旧版目录为 `~/Library/Application Support/io.github.clash-verge-rev.clash-verge-rev/`。迁移前退出应用并备份两边目录；复制 `verge.yaml`、`profiles.yaml` 和整个 `profiles/`，可选复制窗口状态。不要覆盖目标目录中更新的配置，不要复制进程锁、套接字或运行时临时配置。重启后检查订阅、选中配置及主题保存。
+2.9.0 配置目录为 `~/Library/Application Support/io.github.mraz.clash.mac/`。旧版目录为 `~/Library/Application Support/io.github.clash-verge-rev.clash-verge-rev/`。迁移前退出应用并备份两边目录；复制 `verge.yaml`、`profiles.yaml` 和整个 `profiles/`，可选复制窗口状态。不要覆盖目标目录中更新的配置，不要复制进程锁、套接字或运行时临时配置。重启后检查订阅、选中配置及主题保存。
 
 本次本机恢复的原始备份保存在 `~/Library/Application Support/Clash Mac Backups/2.6.0-preinstall/`，不随 Git 提交。迁移使用独立副本，不是符号链接。
 

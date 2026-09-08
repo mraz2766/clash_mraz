@@ -1,3 +1,4 @@
+import i18n from 'i18next'
 import { useCallback, useRef } from 'react'
 import {
   closeConnection,
@@ -12,7 +13,10 @@ import {
 } from '@/hooks/use-record-selection'
 import { useVerge } from '@/hooks/use-verge'
 import { syncTrayProxySelection } from '@/services/cmds'
+import { showNotice } from '@/services/notice-service'
 import { debugLog } from '@/utils/debug'
+
+import { setProxySelectionStatus } from './use-proxy-selection-status'
 
 // 缓存连接清理
 const cleanupConnections = async (previousProxy: string) => {
@@ -73,6 +77,7 @@ export const useProxySelection = (options: ProxySelectionOptions = {}) => {
         debugLog(`[ProxySelection] 代理切换: ${groupName} -> ${proxyName}`)
       }
 
+      setProxySelectionStatus({ groupName, proxyName })
       try {
         if (isFixedProxy) {
           await unfixedProxy(groupName)
@@ -80,6 +85,15 @@ export const useProxySelection = (options: ProxySelectionOptions = {}) => {
           await selectNodeForGroup(groupName, proxyName)
         }
         onSuccess?.()
+        const zh = i18n.language.startsWith('zh')
+        showNotice.success(
+          isFixedProxy
+            ? zh
+              ? '已恢复自动选择'
+              : 'Automatic selection restored'
+            : `${zh ? '已切换至' : 'Switched to'} ${proxyName}`,
+          1800,
+        )
         syncTraySelection()
         if (isFixedProxy) {
           await forgetSelection(groupName)
@@ -100,6 +114,9 @@ export const useProxySelection = (options: ProxySelectionOptions = {}) => {
           error,
         )
         onError?.(error)
+        showNotice.error(error)
+      } finally {
+        setProxySelectionStatus(null)
       }
     },
     [

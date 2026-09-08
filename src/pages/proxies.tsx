@@ -1,5 +1,5 @@
 import { LanOutlined, LanRounded, WarningRounded } from '@mui/icons-material'
-import { Box, Button, ButtonGroup } from '@mui/material'
+import { Box, Button } from '@mui/material'
 import { useLockFn } from 'ahooks'
 import { useCallback, useEffect, useReducer, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next'
 import { BasePage, TooltipIcon } from '@/components/base'
 import { ProviderButton } from '@/components/proxy/provider-button'
 import { ProxyGroups } from '@/components/proxy/proxy-groups'
+import { ModeControl } from '@/components/shared/mode-control'
 import {
   useAppRefreshers,
   useClashConfigData,
@@ -156,18 +157,7 @@ const ProxyPage = () => {
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <ProviderButton />
 
-          <ButtonGroup size="small">
-            {MODES.map((mode) => (
-              <Button
-                key={mode}
-                variant={mode === curMode ? 'contained' : 'outlined'}
-                onClick={() => onChangeMode(mode)}
-                sx={{ textTransform: 'capitalize' }}
-              >
-                {t(`proxies.page.modes.${mode}`)}
-              </Button>
-            ))}
-          </ButtonGroup>
+          <ModeControl value={curMode} onChange={onChangeMode} />
 
           <Button
             size="small"

@@ -867,6 +867,7 @@ interface IVergeConfig {
   clash_core?: string
   theme_mode?: 'light' | 'dark' | 'system'
   traffic_graph?: boolean
+  traffic_graph_colorful?: boolean
   enable_memory_usage?: boolean
   enable_group_icon?: boolean
   pause_render_traffic_stats_on_blur?: boolean

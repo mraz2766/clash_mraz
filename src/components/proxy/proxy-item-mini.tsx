@@ -1,9 +1,18 @@
 import { CheckCircleOutlineRounded } from '@mui/icons-material'
-import { alpha, Box, ListItemButton, styled, Typography } from '@mui/material'
+import {
+  alpha,
+  Box,
+  CircularProgress,
+  ListItemButton,
+  styled,
+  Typography,
+} from '@mui/material'
 import { useTranslation } from 'react-i18next'
 
 import { BaseLoading } from '@/components/base'
+import { useMacText } from '@/hooks/use-mac-text'
 import { useProxyDelayState } from '@/hooks/use-proxy-delay-state'
+import { useProxySelectionStatus } from '@/hooks/use-proxy-selection-status'
 import delayManager from '@/services/delay'
 import {
   memberDetails,
@@ -24,6 +33,10 @@ interface Props {
 // 多列布局
 export const ProxyItemMini = (props: Props) => {
   const { group, member, selected, showType = true, onClick } = props
+  const pending = useProxySelectionStatus()
+  const text = useMacText()
+  const switching =
+    pending?.groupName === group.name && pending.proxyName === member.ref.name
   const details = memberDetails(member)
   const unresolved = member.kind === 'unresolved'
   const name = member.ref.name
@@ -40,6 +53,8 @@ export const ProxyItemMini = (props: Props) => {
 
   return (
     <ListItemButton
+      aria-busy={switching}
+      aria-pressed={selected}
       dense
       disabled={unresolved}
       selected={!unresolved && selected}
@@ -70,6 +85,17 @@ export const ProxyItemMini = (props: Props) => {
         },
       ]}
     >
+      {switching ? (
+        <CircularProgress
+          size={14}
+          aria-label={text('切换中', 'Switching')}
+          sx={{ mr: 1 }}
+        />
+      ) : selected ? (
+        <CheckCircleOutlineRounded
+          sx={{ fontSize: 16, mr: 1, flexShrink: 0 }}
+        />
+      ) : null}
       <Box title={`${name}\n${now ?? ''}`} sx={{ overflow: 'hidden' }}>
         <Typography
           variant="body2"
@@ -185,17 +211,6 @@ export const ProxyItemMini = (props: Props) => {
             {delayManager.formatDelay(delayValue, timeout)}
           </Widget>
         )}
-        {!unresolved &&
-          type !== 'Direct' &&
-          delayValue !== -2 &&
-          delayValue < 0 &&
-          selected && (
-            // 展示已选择的 icon
-            <CheckCircleOutlineRounded
-              className="the-icon"
-              sx={{ fontSize: 16, mr: 0.5, display: 'block' }}
-            />
-          )}
       </Box>
     </ListItemButton>
   )

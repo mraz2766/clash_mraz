@@ -1,10 +1,11 @@
 import { ContentCopyRounded } from '@mui/icons-material'
-import { Button, Input, MenuItem, Select } from '@mui/material'
+import { Button, Input, MenuItem, Select, Switch } from '@mui/material'
 import { open } from '@tauri-apps/plugin-dialog'
 import { useCallback, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { DialogRef, TooltipIcon } from '@/components/base'
+import { useMacText } from '@/hooks/use-mac-text'
 import { useVerge } from '@/hooks/use-verge'
 import { navigationItems } from '@/pages/_navigation-meta'
 import { copyClashEnv } from '@/services/cmds'
@@ -50,6 +51,7 @@ const languageOptions = supportedLanguages.map((code) => {
 
 const SettingVergeBasic = ({ onError }: Props) => {
   const { t } = useTranslation()
+  const text = useMacText()
 
   const { verge, patchVerge, mutateVerge } = useVerge()
   const {
@@ -104,6 +106,7 @@ const SettingVergeBasic = ({ onError }: Props) => {
       </SettingItem>
 
       <SettingItem
+        category="appearance"
         label={t('settings.components.verge.basic.fields.themeMode')}
       >
         <GuardState
@@ -113,6 +116,52 @@ const SettingVergeBasic = ({ onError }: Props) => {
           onGuard={(e) => patchVerge({ theme_mode: e })}
         >
           <ThemeModeSwitch />
+        </GuardState>
+      </SettingItem>
+
+      <SettingItem
+        category="appearance"
+        label={text('显示流量图', 'Show traffic charts')}
+      >
+        <GuardState
+          value={verge?.traffic_graph ?? true}
+          valueProps="checked"
+          onCatch={onError}
+          onFormat={(e: React.ChangeEvent<HTMLInputElement>) =>
+            e.target.checked
+          }
+          onGuard={(e) => patchVerge({ traffic_graph: e })}
+        >
+          <Switch
+            slotProps={{
+              input: {
+                'aria-label': text('显示流量图', 'Show traffic charts'),
+              },
+            }}
+          />
+        </GuardState>
+      </SettingItem>
+      <SettingItem
+        category="appearance"
+        label={text('流量图配色', 'Traffic chart colors')}
+      >
+        <GuardState
+          value={verge?.traffic_graph_colorful === false ? 'mono' : 'soft'}
+          onCatch={onError}
+          onFormat={(e: any) => e.target.value}
+          onGuard={(e) => patchVerge({ traffic_graph_colorful: e === 'soft' })}
+        >
+          <Select
+            size="small"
+            inputProps={{
+              'aria-label': text('流量图配色', 'Traffic chart colors'),
+            }}
+          >
+            <MenuItem value="soft">
+              {text('低饱和彩色', 'Soft colors')}
+            </MenuItem>
+            <MenuItem value="mono">{text('单色', 'Monochrome')}</MenuItem>
+          </Select>
         </GuardState>
       </SettingItem>
 
@@ -151,6 +200,7 @@ const SettingVergeBasic = ({ onError }: Props) => {
       )}
 
       <SettingItem
+        category="advanced"
         label={t('settings.components.verge.basic.fields.copyEnvType')}
         extra={
           <TooltipIcon icon={ContentCopyRounded} onClick={onCopyClashEnv} />
@@ -196,6 +246,7 @@ const SettingVergeBasic = ({ onError }: Props) => {
       </SettingItem>
 
       <SettingItem
+        category="advanced"
         label={t('settings.components.verge.basic.fields.startupScript')}
       >
         <GuardState
@@ -249,16 +300,19 @@ const SettingVergeBasic = ({ onError }: Props) => {
       </SettingItem>
 
       <SettingItem
+        category="appearance"
         onClick={() => themeRef.current?.open()}
         label={t('settings.components.verge.basic.fields.themeSetting')}
       />
 
       <SettingItem
+        category="appearance"
         onClick={() => layoutRef.current?.open()}
         label={t('settings.components.verge.basic.fields.layoutSetting')}
       />
 
       <SettingItem
+        category="advanced"
         onClick={() => miscRef.current?.open()}
         label={t('settings.components.verge.basic.fields.misc')}
       />
