@@ -1,16 +1,14 @@
-> Mac 分支 2.8.2：沿用现有白鲸 PNG、ICNS 和单色菜单栏图标。下文 Windows ICO 说明为资源制作历史，Mac 应用不再打包 Windows 安装器。
+> Mac 分支 2.9.1：统一使用蓝白绒毛海豚的上半身特写。Mac 应用不打包 Windows 安装器。
 
 # 品牌资源
 
 ## 名称与形象
 
-显示名称统一为 **Clash**。Logo 采用用户提供的奶油白小白鲸、灰蓝背景，保留圆润额头、短吻、微笑和简化鳍部。
+显示名称统一为 **Clash**。Logo 采用用户提供的蓝白绒毛海豚：深蓝身体、奶白腹部、黑色眼睛与红色笑嘴，保留圆润额头、短吻、背鳍和双侧胸鳍。
 
-原稿位于 `src/assets/image/mascot.png`，1254×1254 像素。由内置 imagegen 根据用户参考图重绘整理，再通过 Tauri 图标工具生成 ICO、ICNS 和各尺寸 PNG。没有将低分辨率截图直接放大后当作高清资源。
+未裁圆角的高清原稿位于 `src/assets/image/mascot-source.png`，最终展示图位于 `src/assets/image/mascot.png`，均为 1254×1254 像素。内置 imagegen 仅按用户要求将参考图重构为上半身近景，保留原有材质与配色；随后由仓库脚本派生 ICO、ICNS 和各尺寸 PNG。
 
-2026-09-06 圆角更新：保留未裁切原图为 `src/assets/image/mascot-source.png`，最终 `mascot.png` 使用透明圆角，半径为边长的 22%。运行 `python scripts/round-icons.py`（需要 Pillow）可重建界面 PNG、通用尺寸 PNG、ICO、ICNS 与彩色托盘图标。脚本只裁外轮廓，不重绘白鲸；托盘状态标记放在圆角内侧，单色托盘原本为透明剪影，继续保留。
-
-本次曾使用内置 imagegen 尝试“保持原图，仅把外轮廓改为圆角，外侧输出真实透明背景”，但输出仍有棋盘格像素，因此未采用生成结果。最终按用户明确选择，使用程序裁切原图并输出 RGBA。
+最终 `mascot.png` 使用透明圆角，半径为边长的 22%。运行 `python scripts/round-icons.py`（需要 Pillow）可重建界面 PNG、通用尺寸 PNG、ICO、ICNS、彩色托盘图标与 macOS 单色模板图标。脚本只负责裁切和格式派生，不重绘海豚。
 
 ## 资源映射
 
@@ -18,9 +16,8 @@
 | --- | --- |
 | 界面与 README 原稿 | `src/assets/image/mascot.png` |
 | 浏览器图标 | `src/assets/image/logo.ico` |
-| Windows 应用与安装程序 | `src-tauri/icons/icon.ico` |
 | macOS 应用 | `src-tauri/icons/icon.icns` |
-| Linux / 通用图标 | `src-tauri/icons/*Logo.png` 与尺寸 PNG |
+| 通用尺寸 | `src-tauri/icons/32x32.png`、`64x64.png`、`128x128.png`、`128x128@2x.png` 与 `icon.png` |
 | 普通托盘 | `src-tauri/icons/tray-icon.ico` |
 | 系统代理托盘 | `src-tauri/icons/tray-icon-sys.ico`，蓝色圆形标记 |
 | TUN 托盘 | `src-tauri/icons/tray-icon-tun.ico`，绿色方形标记 |
@@ -32,17 +29,17 @@
 
 ## 生成提示词记录
 
-使用内置 imagegen，未使用外部 API 或下载字体。主提示词含义：忠实重绘用户参考中的奶油白小白鲸，朝右、圆润额头与短吻、微笑、左下方简化鳍，灰蓝背景；去除截图外框，输出不透明方形高清 PNG，无文字和多余装饰。
+使用内置 imagegen，未使用外部 API 或下载字体。主提示词含义：严格参考用户提供的蓝白绒毛海豚，保留绒面纤维、奶白腹部、黑眼睛、红色嘴部和友好表情；将海豚放大为头部与上半身特写，允许裁去下半身和尾部，方形近白背景，无文字和多余装饰。
 
 托盘提示词：使用同一白鲸轮廓生成透明背景黑色剪影；普通状态无标记，系统代理增加右上圆环，TUN 增加右上方形标记。彩色版本分别使用蓝色圆形和绿色方形。
 
-图形简化思路参考 [ip-as-logo-skill](https://github.com/s1dashu/ip-as-logo-skill)。最终形象以用户选定的参考图为准，未采用此前探索的企鹅方向。
+最终形象直接以用户选定的参考图为准，不采用扁平化 IP Logo 方案。
 
 ## 保留的内部名称
 
 `clash-verge` 可执行文件、系统服务、应用标识、配置目录、协议和历史迁移字符串保留兼容性。原作者、第三方依赖和历史记录中的名称保留真实归属。
 
-界面导航使用 `src/assets/image/brand-icon.png`（128×128，约 14 KB），高清 `mascot.png` 仅用于文档和图标原稿，避免导航加载约 1 MB 的原图。
+界面导航使用 `src/assets/image/brand-icon.png`（128×128），高清 `mascot.png` 仅用于文档和图标原稿，避免导航加载完整原图。
 
 ICO 编码要求：内嵌 PNG 必须使用 RGBA（PNG color type 6）。从 RGB 原稿转换时，先转为 RGBA 再写入 ICO。`pnpm test` 会检查全部应用与托盘 ICO 的每个图像帧，防止 Tauri 解码报错再次出现。
 
