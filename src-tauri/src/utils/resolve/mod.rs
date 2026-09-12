@@ -22,10 +22,28 @@ use clash_verge_signal;
 
 pub mod dns;
 mod scheme;
+mod startup_gate;
 pub(crate) mod window;
 mod window_script;
 
 static RESOLVE_DONE: AtomicBool = AtomicBool::new(false);
+static INITIAL_CORE_SETTLED: AtomicBool = AtomicBool::new(false);
+
+/// User requests wait outside the configuration/lifecycle locks so startup can finish.
+pub(crate) async fn wait_for_initial_core() {
+    let settled = startup_gate::wait_until_settled(
+        || INITIAL_CORE_SETTLED.load(Ordering::Acquire) || Handle::global().is_exiting(),
+        std::time::Duration::from_secs(30),
+    )
+    .await;
+    if !settled {
+        logging!(
+            warn,
+            Type::Setup,
+            "System proxy request reached the initial core startup deadline; checking current readiness"
+        );
+    }
+}
 
 pub(crate) fn init_work_dir_and_logger() -> anyhow::Result<()> {
     AsyncHandler::block_on(async {
@@ -74,6 +92,7 @@ pub(crate) fn resolve_setup_async() {
 
         let core_init = AsyncHandler::spawn(|| async {
             init_core_manager().await;
+            INITIAL_CORE_SETTLED.store(true, Ordering::Release);
         });
 
         let _ = futures::join!(

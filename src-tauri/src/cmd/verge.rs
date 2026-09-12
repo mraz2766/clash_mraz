@@ -16,6 +16,9 @@ pub async fn get_verge_config() -> CmdResult<SharedDraft<IVerge>> {
 /// 修改Verge配置
 #[tauri::command]
 pub async fn patch_verge_config(payload: IVerge) -> CmdResult {
+    if payload.enable_system_proxy == Some(true) {
+        crate::utils::resolve::wait_for_initial_core().await;
+    }
     let operation = system_proxy_operation(&payload);
     let result = match operation {
         Some(operation) => notification::asking_for(operation, Box::pin(feat::patch_verge(&payload, false))).await,

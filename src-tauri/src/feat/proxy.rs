@@ -27,6 +27,9 @@ pub async fn toggle_system_proxy() -> Option<bool> {
     }
 
     let requested = !current;
+    if requested {
+        crate::utils::resolve::wait_for_initial_core().await;
+    }
     let patch_result = notification::asking_for(
         toggle_operation(requested),
         Box::pin(super::patch_verge(
