@@ -134,7 +134,7 @@ const ProxyControlSwitches = ({
   const { uninstallServiceAndStartSidecar } = useServiceUninstaller()
   const { indicator: systemProxyIndicator, toggleSystemProxy } =
     useSystemProxyState()
-  const { runState, isTunModeAvailable, isLoading } = useSystemState()
+  const { runState, isTunModeAvailable } = useSystemState()
   // Offer to uninstall only a service that is actually there and working.
   const isServiceInstallReady = runState.serviceUsable
 
@@ -143,14 +143,8 @@ const ProxyControlSwitches = ({
 
   const { enable_tun_mode } = verge ?? {}
 
-  // Enabling needs a running core; disabling only writes OS state and must stay available.
-  const handleSystemProxyToggle = async (value: boolean) => {
-    if (value && !isLoading && runState.mode === 'NotRunning') {
-      showNotice.error('settings.feedback.errors.sysproxy.coreNotReady')
-      return false
-    }
-    await toggleSystemProxy(value)
-  }
+  // Cached Run State may still say NotRunning during startup. The backend waits
+  // for initial startup and validates live readiness before enabling the proxy.
 
   const handleTunToggle = async (value: boolean) => {
     if (value && !isTunModeAvailable) {
@@ -184,7 +178,7 @@ const ProxyControlSwitches = ({
           active={systemProxyIndicator}
           infoTitle={t('settings.sections.proxyControl.tooltips.systemProxy')}
           onInfoClick={() => sysproxyRef.current?.open()}
-          onToggle={handleSystemProxyToggle}
+          onToggle={toggleSystemProxy}
           onError={onError}
           highlight={systemProxyIndicator}
         />
