@@ -8,14 +8,21 @@ use serde_yaml_ng::Mapping;
 use sysproxy::{Autoproxy, Sysproxy};
 use tauri_plugin_clash_verge_sysinfo;
 
+const MISSING_PROXY_SETTINGS: &str = "Proxy settings not found in preferences or DynamicStore";
+
+fn proxy_read_means_disabled(error: &sysproxy::Error) -> bool {
+    proxy_control::is_missing_network_service(error)
+        || matches!(error, sysproxy::Error::ParseStr(message) if message == MISSING_PROXY_SETTINGS)
+}
+
 #[tauri::command]
 pub async fn get_sys_proxy() -> CmdResult<Mapping> {
     logging!(debug, Type::Network, "异步获取系统代理配置");
 
     Sysopt::global().wait_idle().await;
-    // With no network service there is no proxy configured anywhere, which reads as disabled.
+    // Missing network service or proxy dictionary means the OS has no proxy to report.
     let sys_proxy = match Sysproxy::get_system_proxy() {
-        Err(error) if proxy_control::is_missing_network_service(&error) => Sysproxy::default(),
+        Err(error) if proxy_read_means_disabled(&error) => Sysproxy::default(),
         other => other.stringify_err()?,
     };
     let Sysproxy {
@@ -45,7 +52,7 @@ pub async fn get_sys_proxy() -> CmdResult<Mapping> {
 pub async fn get_auto_proxy() -> CmdResult<Mapping> {
     Sysopt::global().wait_idle().await;
     let auto_proxy = match Autoproxy::get_auto_proxy() {
-        Err(error) if proxy_control::is_missing_network_service(&error) => Autoproxy::default(),
+        Err(error) if proxy_read_means_disabled(&error) => Autoproxy::default(),
         other => other.stringify_err()?,
     };
     let Autoproxy { ref enable, ref url } = auto_proxy;
@@ -101,4 +108,23 @@ pub fn get_network_interfaces_info() -> CmdResult<Vec<NetworkInterface>> {
     }
 
     Ok(result)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{MISSING_PROXY_SETTINGS, proxy_read_means_disabled};
+
+    #[test]
+    fn absent_macos_proxy_dictionary_reads_as_disabled() {
+        assert!(proxy_read_means_disabled(&sysproxy::Error::ParseStr(
+            MISSING_PROXY_SETTINGS.to_owned(),
+        )));
+    }
+
+    #[test]
+    fn unrelated_parse_failures_are_still_reported() {
+        assert!(!proxy_read_means_disabled(&sysproxy::Error::ParseStr(
+            "Not a dictionary".to_owned(),
+        )));
+    }
 }

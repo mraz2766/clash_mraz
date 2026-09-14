@@ -1,4 +1,4 @@
-"""从保留的原图生成圆角品牌资源、桌面图标与 macOS 单色托盘图标。"""
+"""从用户提供的白鲸原图生成圆角品牌资源与 macOS 托盘图标。"""
 from pathlib import Path
 from PIL import Image, ImageDraw, ImageChops
 
@@ -6,6 +6,30 @@ ROOT = Path(__file__).resolve().parent.parent
 ASSETS = ROOT / 'src/assets/image'
 ICONS = ROOT / 'src-tauri/icons'
 SIZES = [(n, n) for n in (16, 20, 24, 32, 48, 64, 128, 256)]
+
+
+def crop_subject(source):
+    """裁掉原图的大块近白留白，让白鲸在小尺寸图标中保持清晰。"""
+    image = source.convert('RGB')
+    background = Image.new('RGB', image.size, image.getpixel((0, 0)))
+    difference = ImageChops.difference(image, background).convert('L')
+    mask = difference.point(lambda value: 255 if value > 12 else 0)
+    bounds = mask.getbbox()
+    if bounds is None:
+        return image
+
+    left, top, right, bottom = bounds
+    padding = round(max(right - left, bottom - top) * .10)
+    side = max(right - left, bottom - top) + padding * 2
+    center_x = (left + right) / 2
+    center_y = (top + bottom) / 2
+    crop = (
+        round(center_x - side / 2),
+        round(center_y - side / 2),
+        round(center_x + side / 2),
+        round(center_y + side / 2),
+    )
+    return image.crop(crop).resize(source.size, Image.Resampling.LANCZOS)
 
 
 def rounded(source):
@@ -50,7 +74,8 @@ def monochrome(source, kind='common'):
     return image
 
 
-master = rounded(Image.open(ASSETS / 'mascot-source.png'))
+source = crop_subject(Image.open(ASSETS / 'mascot-source.png'))
+master = rounded(source)
 master.save(ASSETS / 'mascot.png')
 master.resize((128, 128), Image.Resampling.LANCZOS).save(ASSETS / 'brand-icon.png')
 for destination in ICONS.glob('*.png'):
@@ -76,9 +101,9 @@ for kind, color in [('sys', '#1A73E8'), ('tun', '#188038')]:
     variant.save(ASSETS / f'tray-{kind}.png')
     variant.save(ICONS / f'tray-icon-{kind}.ico', sizes=SIZES)
 
-# macOS 模板图标只保留海豚轮廓，并用圆环/圆角方形区分状态。
+# macOS 模板图标只保留白鲸轮廓，并用圆环/圆角方形区分状态。
 for kind in ('common', 'sys', 'tun'):
-    variant = monochrome(Image.open(ASSETS / 'mascot-source.png'), kind)
+    variant = monochrome(source, kind)
     asset_name = 'tray-mono.png' if kind == 'common' else f'tray-{kind}-mono.png'
     icon_name = 'tray-icon-mono.ico' if kind == 'common' else f'tray-icon-{kind}-mono.ico'
     variant.save(ASSETS / asset_name)
