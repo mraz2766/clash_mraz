@@ -1,6 +1,8 @@
 import i18n from 'i18next'
 import {
+  delayGroup,
   delayProxyByName,
+  getGroupByName,
   healthcheckNodeInProvider,
   type ProxyDelay,
 } from 'tauri-plugin-mihomo-api'
@@ -256,14 +258,38 @@ class DelayManager {
   }
 
   async unifiedDelayCheck(
-    name: string,
+    member: InteractableProxyMember,
+    apiName: string,
     url: string,
     timeout: number,
-    providerName?: string,
-  ) {
+  ): Promise<ProxyDelay> {
+    const name = member.ref.name
+    const automaticGroupType =
+      member.kind === 'group'
+        ? member.group.type.toLowerCase().replaceAll('-', '')
+        : ''
+    if (['urltest', 'fallback', 'loadbalance'].includes(automaticGroupType)) {
+      const delays = await delayGroup(name, url, timeout, true)
+      const refreshedGroup = await getGroupByName(name)
+      const selectedDelay = refreshedGroup.now
+        ? delays[refreshedGroup.now]
+        : undefined
+      const availableDelays = Object.values(delays).filter((delay) => delay > 0)
+
+      return {
+        delay:
+          selectedDelay ??
+          (refreshedGroup.now === undefined && availableDelays.length > 0
+            ? Math.min(...availableDelays)
+            : 0),
+      }
+    }
+
+    const providerName =
+      member.kind === 'node' ? providerNameOf(member.node) : undefined
     if (providerName)
-      return healthcheckNodeInProvider(providerName, name, url, timeout)
-    return delayProxyByName(name, url, timeout)
+      return healthcheckNodeInProvider(providerName, apiName, url, timeout)
+    return delayProxyByName(apiName, url, timeout)
   }
 
   /** A single test may notify immediately; a batch defers notification until it settles. */
@@ -283,8 +309,6 @@ class DelayManager {
     timeout: number,
   ): Promise<DelayUpdate> {
     const name = member.ref.name
-    const providerName =
-      member.kind === 'node' ? providerNameOf(member.node) : undefined
     const apiName =
       member.kind === 'node' && member.node.source.kind === 'provider'
         ? member.node.source.proxyName
@@ -306,7 +330,7 @@ class DelayManager {
       })
 
       const result = await Promise.race([
-        this.unifiedDelayCheck(apiName, url, timeout, providerName),
+        this.unifiedDelayCheck(member, apiName, url, timeout),
         timeoutPromise,
       ])
 

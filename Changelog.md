@@ -1,3 +1,8 @@
+# 2.9.4 · 自动组即时重选 · 2026-09-14
+
+- 修复 URLTest、Fallback 和 LoadBalance 自动组测速时只检查旧选中路径、不会立即重测成员的问题。
+- 点击自动组或“测速全部”时改为调用 Mihomo 组级健康检查，保留用户手动固定状态，并按重选后的实际节点显示延迟。
+
 # 2.9.3 · 系统代理空状态修复 · 2026-09-14
 
 - 修复 macOS 未保存系统代理字典时，启动页重复弹出 `Proxy settings not found in preferences or DynamicStore` 的问题。

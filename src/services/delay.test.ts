@@ -1,7 +1,10 @@
+import { delayGroup, getGroupByName } from 'tauri-plugin-mihomo-api'
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
 vi.mock('tauri-plugin-mihomo-api', () => ({
+  delayGroup: vi.fn(async () => ({ fast: 72 })),
   delayProxyByName: vi.fn(async () => ({ delay: 120 })),
+  getGroupByName: vi.fn(async () => ({ now: 'fast' })),
   healthcheckNodeInProvider: vi.fn(async () => ({ delay: 120 })),
 }))
 
@@ -21,12 +24,26 @@ const node = (name: string) =>
     },
   }) as unknown as ResolvedProxyMember
 
+const automaticGroup = (name: string) =>
+  ({
+    kind: 'group',
+    ref: { kind: 'group', name },
+    group: {
+      name,
+      type: 'URLTest',
+      now: 'dead',
+      history: [],
+      members: [],
+    },
+  }) as unknown as ResolvedProxyMember
+
 const flush = () => new Promise((resolve) => setTimeout(resolve, 0))
 
 let settles = 0
 let unsubscribe: () => void
 
 beforeEach(() => {
+  vi.clearAllMocks()
   settles = 0
   unsubscribe = delayManager.addGroupListener('g', () => {
     settles += 1
@@ -57,5 +74,22 @@ describe('group delay completion', () => {
     expect(settles).toBe(1)
     expect(other).toBe(0)
     stop()
+  })
+
+  test('rechecks an automatic group before reporting its selected path', async () => {
+    const result = await delayManager.checkDelay(
+      automaticGroup('automatic') as never,
+      'g',
+      5000,
+    )
+
+    expect(result.delay).toBe(72)
+    expect(delayGroup).toHaveBeenCalledWith(
+      'automatic',
+      'http://cp.cloudflare.com/generate_204',
+      5000,
+      true,
+    )
+    expect(getGroupByName).toHaveBeenCalledWith('automatic')
   })
 })

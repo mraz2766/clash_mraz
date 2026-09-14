@@ -2,7 +2,7 @@
 <h1 align="center">Clash for Mac</h1>
 <p align="center">保留白鲸品牌，为 macOS 定制的代理管理工具。</p>
 
-**Mac 专用分支：`clash-mac` · 当前版本：2.9.3**
+**Mac 专用分支：`clash-mac` · 当前版本：2.9.4**
 
 基于 [Clash Verge Rev](https://github.com/clash-verge-rev/clash-verge-rev) 二次开发，沿用本项目优化后的白鲸 Logo、圆角图标和代理管理能力。Windows 版本保留在 `main`，本分支只构建 macOS 应用。
 
@@ -49,9 +49,9 @@ pnpm build:install
 | `pnpm build` | 完整构建 .app 和带版本号的 ZIP |
 | `pnpm build:fast` | 快速迭代构建 |
 | `pnpm build:install` | 构建并安装到 /Applications/Clash for Mac.app |
-| `pnpm release-version 2.9.3` | 同步下一次迭代版本号 |
+| `pnpm release-version 2.9.4` | 同步下一次迭代版本号 |
 
-输出：`target/release/bundle/macos/Clash.app` 与 `releases/Clash_Mac_2.9.3_arm64.zip`。快速构建位于 `target/fast-release/`，Intel 包文件名使用 `x64`。首次构建会下载 Mihomo、服务与地理数据资源。
+输出：`target/release/bundle/macos/Clash.app` 与 `releases/Clash_Mac_2.9.4_arm64.zip`。快速构建位于 `target/fast-release/`，Intel 包文件名使用 `x64`。首次构建会下载 Mihomo、服务与地理数据资源。
 
 每次交付必须更新版本号和 [Changelog](Changelog.md)，并重新构建、验证后安装。构建过程不会自动提交、发布 GitHub Release 或改变代理开关。
 
