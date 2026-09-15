@@ -368,7 +368,13 @@ pub(super) async fn init_dns_config() -> Result<()> {
         ("fallback".into(), Value::Sequence(vec![])),
         (
             "nameserver-policy".into(),
-            Value::Mapping(serde_yaml_ng::Mapping::new()),
+            Value::Mapping(serde_yaml_ng::Mapping::from_iter([(
+                "geosite:cn".into(),
+                Value::Sequence(vec![
+                    Value::String("https://dns.alidns.com/dns-query#DIRECT".into()),
+                    Value::String("https://doh.pub/dns-query#DIRECT".into()),
+                ]),
+            )])),
         ),
         (
             "proxy-server-nameserver".into(),

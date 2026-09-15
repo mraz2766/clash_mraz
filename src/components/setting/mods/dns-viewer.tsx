@@ -169,7 +169,12 @@ const DEFAULT_DNS_CONFIG = {
     'https://dns.alidns.com/dns-query',
   ],
   fallback: [],
-  'nameserver-policy': {},
+  'nameserver-policy': {
+    'geosite:cn': [
+      'https://dns.alidns.com/dns-query#DIRECT',
+      'https://doh.pub/dns-query#DIRECT',
+    ],
+  },
   'proxy-server-nameserver': [
     'https://doh.pub/dns-query',
     'https://dns.alidns.com/dns-query',
