@@ -29,6 +29,13 @@ export interface DelayUpdate {
 }
 
 const CACHE_TTL = 30 * 60 * 1000
+export const DEFAULT_LATENCY_TEST_URL = 'http://1.1.1.1/generate_204'
+
+const isAutomaticGroup = (member: InteractableProxyMember) => {
+  if (member.kind !== 'group') return false
+  const type = member.group.type.toLowerCase().replaceAll('-', '')
+  return ['urltest', 'fallback', 'loadbalance'].includes(type)
+}
 
 class DelayManager {
   private cache = new Map<string, DelayUpdate>()
@@ -164,7 +171,7 @@ class DelayManager {
     debugLog(
       `[DelayManager] 获取测试URL，组: ${group}, URL: ${url || '未设置'}`,
     )
-    return url || 'http://cp.cloudflare.com/generate_204'
+    return url || DEFAULT_LATENCY_TEST_URL
   }
 
   setListener(
@@ -264,11 +271,7 @@ class DelayManager {
     timeout: number,
   ): Promise<ProxyDelay> {
     const name = member.ref.name
-    const automaticGroupType =
-      member.kind === 'group'
-        ? member.group.type.toLowerCase().replaceAll('-', '')
-        : ''
-    if (['urltest', 'fallback', 'loadbalance'].includes(automaticGroupType)) {
+    if (isAutomaticGroup(member)) {
       const delays = await delayGroup(name, url, timeout, true)
       const refreshedGroup = await getGroupByName(name)
       const selectedDelay = refreshedGroup.now
@@ -369,11 +372,18 @@ class DelayManager {
       this.setDelay(name, group, -2)
     })
 
+    // A group-level check already probes every member. Running it alongside the
+    // same nodes creates duplicate QUIC/TUIC handshakes and can cancel otherwise
+    // healthy checks, so automatic groups run after the ordinary node pool.
+    const automaticGroups = proxies.filter(isAutomaticGroup)
+    const ordinaryMembers = proxies.filter(
+      (member) => !isAutomaticGroup(member),
+    )
     let index = 0
     const startTime = Date.now()
 
     const help = async (): Promise<void> => {
-      const currMember = proxies[index++]
+      const currMember = ordinaryMembers[index++]
       if (!currMember) return
       const currName = currMember.ref.name
 
@@ -400,7 +410,7 @@ class DelayManager {
       return help()
     }
 
-    const actualConcurrency = Math.min(concurrency, names.length, 10)
+    const actualConcurrency = Math.min(concurrency, ordinaryMembers.length, 10)
     debugLog(`[DelayManager] 实际并发数: ${actualConcurrency}`)
 
     const promiseList: Promise<void>[] = []
@@ -410,6 +420,9 @@ class DelayManager {
 
     try {
       await Promise.all(promiseList)
+      for (const automaticGroup of automaticGroups) {
+        await this.measureDelay(automaticGroup, group, timeout)
+      }
     } finally {
       // Always release the batch and notify; otherwise failures leave stale sort state.
       const remaining = (this.activeBatches.get(group) ?? 1) - 1

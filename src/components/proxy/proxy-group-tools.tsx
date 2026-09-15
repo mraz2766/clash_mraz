@@ -18,7 +18,7 @@ import { useTranslation } from 'react-i18next'
 
 import { useMacText } from '@/hooks/use-mac-text'
 import { useVerge } from '@/hooks/use-verge'
-import delayManager from '@/services/delay'
+import delayManager, { DEFAULT_LATENCY_TEST_URL } from '@/services/delay'
 
 import { BaseSearchBox, type SearchState } from '../base'
 
@@ -59,8 +59,7 @@ export const ProxyGroupTools = memo(function ProxyGroupTools({
   const [anchor, setAnchor] = useState<HTMLElement | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const defaultUrl =
-    verge?.default_latency_test?.trim() ||
-    'http://cp.cloudflare.com/generate_204'
+    verge?.default_latency_test?.trim() || DEFAULT_LATENCY_TEST_URL
   useEffect(() => {
     delayManager.setUrl(groupName, testUrl?.trim() || url || defaultUrl)
   }, [groupName, testUrl, url, defaultUrl])

@@ -1,4 +1,8 @@
-import { delayGroup, getGroupByName } from 'tauri-plugin-mihomo-api'
+import {
+  delayGroup,
+  delayProxyByName,
+  getGroupByName,
+} from 'tauri-plugin-mihomo-api'
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
 vi.mock('tauri-plugin-mihomo-api', () => ({
@@ -86,10 +90,33 @@ describe('group delay completion', () => {
     expect(result.delay).toBe(72)
     expect(delayGroup).toHaveBeenCalledWith(
       'automatic',
-      'http://cp.cloudflare.com/generate_204',
+      'http://1.1.1.1/generate_204',
       5000,
       true,
     )
     expect(getGroupByName).toHaveBeenCalledWith('automatic')
+  })
+
+  test('does not overlap automatic group checks with ordinary node checks', async () => {
+    const events: string[] = []
+    vi.mocked(delayProxyByName).mockImplementationOnce(async () => {
+      events.push('node:start')
+      await new Promise((resolve) => setTimeout(resolve, 10))
+      events.push('node:end')
+      return { delay: 80 }
+    })
+    vi.mocked(delayGroup).mockImplementationOnce(async () => {
+      events.push('group:start')
+      return { fast: 72 }
+    })
+
+    await delayManager.checkListDelay(
+      [automaticGroup('automatic'), node('fast')] as never,
+      'g',
+      5000,
+      2,
+    )
+
+    expect(events).toEqual(['node:start', 'node:end', 'group:start'])
   })
 })
