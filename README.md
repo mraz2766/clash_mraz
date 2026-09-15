@@ -2,7 +2,7 @@
 <h1 align="center">Clash for Mac</h1>
 <p align="center">保留白鲸品牌，为 macOS 定制的代理管理工具。</p>
 
-**Mac 专用分支：`clash-mac` · 当前版本：2.9.6**
+**Mac 专用分支：`clash-mac` · 当前版本：2.9.7**
 
 基于 [Clash Verge Rev](https://github.com/clash-verge-rev/clash-verge-rev) 二次开发，沿用本项目优化后的白鲸 Logo、圆角图标和代理管理能力。Windows 版本保留在 `main`，本分支只构建 macOS 应用。
 
@@ -18,6 +18,7 @@
 ## 日常操作
 
 - 首页“关注的代理组”显示该组的当前选择，不代表所有网站的出口。点击“检查网站出口”，输入已访问的网站域名，可查看 Clash 捕获的活动和近期连接及其规则、路由链；没有记录不代表直连。
+- 固定节点时，代理 DNS 应跟随主选择组，避免仍由自动组解析；自动组适合容灾，稳定使用时可在主选择组固定到已验证的节点。
 - 代理组常用测速直接显示，搜索、排序、定位节点和测速地址在“更多操作”菜单中；右下角可跳转到指定代理组。
 - 设置按通用、外观、网络、备份、高级分类，搜索框会跨分类查找。
 - 订阅显示使用状态、剩余流量和到期时间；覆写与脚本在高级折叠区域中。
@@ -49,9 +50,9 @@ pnpm build:install
 | `pnpm build` | 完整构建 .app 和带版本号的 ZIP |
 | `pnpm build:fast` | 快速迭代构建 |
 | `pnpm build:install` | 构建并安装到 /Applications/Clash for Mac.app |
-| `pnpm release-version 2.9.6` | 同步下一次迭代版本号 |
+| `pnpm release-version 2.9.7` | 同步下一次迭代版本号 |
 
-输出：`target/release/bundle/macos/Clash.app` 与 `releases/Clash_Mac_2.9.6_arm64.zip`。快速构建位于 `target/fast-release/`，Intel 包文件名使用 `x64`。首次构建会下载 Mihomo、服务与地理数据资源。
+输出：`target/release/bundle/macos/Clash.app` 与 `releases/Clash_Mac_2.9.7_arm64.zip`。快速构建位于 `target/fast-release/`，Intel 包文件名使用 `x64`。首次构建会下载 Mihomo、服务与地理数据资源。
 
 每次交付必须更新版本号和 [Changelog](Changelog.md)，并重新构建、验证后安装。构建过程不会自动提交、发布 GitHub Release 或改变代理开关。
 
