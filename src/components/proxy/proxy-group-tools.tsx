@@ -1,20 +1,22 @@
-import AccessTimeRounded from '@mui/icons-material/AccessTimeRounded'
-import MyLocationRounded from '@mui/icons-material/MyLocationRounded'
-import NetworkCheckRounded from '@mui/icons-material/NetworkCheckRounded'
-import SearchOffRounded from '@mui/icons-material/SearchOffRounded'
-import SearchRounded from '@mui/icons-material/SearchRounded'
-import SortByAlphaRounded from '@mui/icons-material/SortByAlphaRounded'
-import SortRounded from '@mui/icons-material/SortRounded'
-import VisibilityOffRounded from '@mui/icons-material/VisibilityOffRounded'
-import VisibilityRounded from '@mui/icons-material/VisibilityRounded'
-import WifiTetheringOffRounded from '@mui/icons-material/WifiTetheringOffRounded'
-import WifiTetheringRounded from '@mui/icons-material/WifiTetheringRounded'
-import { Box, IconButton, type SxProps, TextField } from '@mui/material'
+import {
+  MoreHorizRounded,
+  NetworkCheckRounded,
+  CloseRounded,
+} from '@mui/icons-material'
+import {
+  Box,
+  IconButton,
+  Menu,
+  MenuItem,
+  type SxProps,
+  TextField,
+} from '@mui/material'
 import { useDebounceFn } from 'ahooks'
-import { memo, useEffect, useRef } from 'react'
+import { memo, useEffect, useRef, useState } from 'react'
 import { flushSync } from 'react-dom'
 import { useTranslation } from 'react-i18next'
 
+import { useDesktopText } from '@/hooks/use-desktop-text'
 import { useVerge } from '@/hooks/use-verge'
 import delayManager from '@/services/delay'
 
@@ -32,236 +34,194 @@ interface Props {
   onCheckDelay: () => void
   onHeadState: (val: Partial<HeadState>) => void
 }
-
-export const ProxyGroupTools = memo(function ProxyGroupTools(props: Props) {
+export const ProxyGroupTools = memo(function ProxyGroupTools({
+  sx,
+  url,
+  groupName,
+  headState,
+  onCheckDelay,
+  onHeadState,
+  onLocation,
+}: Props) {
+  const { t } = useTranslation()
+  const text = useDesktopText()
+  const { verge } = useVerge()
   const {
-    sx,
-    url,
-    groupName,
-    headState,
-    onCheckDelay,
-    onHeadState,
-    onLocation,
-  } = props
-
-  const {
-    showType,
-    sortType,
-    filterText,
     textState,
     testUrl,
+    filterText,
     filterMatchCase,
     filterMatchWholeWord,
     filterUseRegularExpression,
+    sortType,
+    showType,
   } = headState
-
-  const { t } = useTranslation()
-
-  const { verge } = useVerge()
-  const defaultLatencyUrl =
+  const [anchor, setAnchor] = useState<HTMLElement | null>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
+  const defaultUrl =
     verge?.default_latency_test?.trim() ||
     'http://cp.cloudflare.com/generate_204'
-
-  const inputRef = useRef<HTMLInputElement>(null)
-
   useEffect(() => {
-    delayManager.setUrl(groupName, testUrl?.trim() || url || defaultLatencyUrl)
-  }, [groupName, testUrl, defaultLatencyUrl, url])
-
-  // 过滤输入是高频操作，且每次都会触发整组代理的重新过滤/排序与虚拟列表重渲染，
-  // 因此对写入 headState 的动作做防抖，避免每输入一个字符就过滤一次。
+    delayManager.setUrl(groupName, testUrl?.trim() || url || defaultUrl)
+  }, [groupName, testUrl, url, defaultUrl])
   const { run: applyFilter, flush: flushFilter } = useDebounceFn(
-    (state: SearchState) => {
+    (state: SearchState) =>
       onHeadState({
         filterText: state.text,
         filterMatchCase: state.matchCase,
         filterMatchWholeWord: state.matchWholeWord,
         filterUseRegularExpression: state.useRegularExpression,
-      })
-    },
-    { wait: 600 },
+      }),
+    { wait: 180 },
   )
-
-  // 关闭过滤框或卸载时立即应用最后一次输入，避免丢失未生效的过滤条件。
   useEffect(() => {
     if (textState !== 'filter') flushFilter()
   }, [textState, flushFilter])
   useEffect(() => () => flushFilter(), [flushFilter])
-
+  useEffect(() => {
+    if (textState) inputRef.current?.focus()
+  }, [textState])
+  const expand = () => {
+    if (!headState.open) {
+      // eslint-disable-next-line @eslint-react/dom-no-flush-sync
+      flushSync(() => onHeadState({ open: true }))
+    }
+  }
+  const action = (fn: () => void) => {
+    setAnchor(null)
+    fn()
+  }
   return (
     <Box
       sx={{
         display: 'flex',
-        justifyContent: 'end',
         alignItems: 'center',
         gap: 0.5,
-        height: 36,
-        flex: 1,
-        ml: 2,
+        ml: 'auto',
         ...sx,
       }}
+      onClick={(event) => event.stopPropagation()}
     >
       {textState === 'filter' && (
-        <Box sx={{ flex: '1 1 auto' }}>
+        <Box sx={{ width: 160 }}>
           <BaseSearchBox
             inputRef={inputRef}
             defaultValue={filterText}
             matchCase={filterMatchCase}
             matchWholeWord={filterMatchWholeWord}
             useRegularExpression={filterUseRegularExpression}
-            onClick={(e) => {
-              e.preventDefault()
-              e.stopPropagation()
-            }}
             onSearch={(_, state) => applyFilter(state)}
           />
         </Box>
       )}
-
       {textState === 'url' && (
         <TextField
           inputRef={inputRef}
-          autoComplete="new-password"
-          hiddenLabel
-          autoSave="off"
-          value={testUrl}
           size="small"
-          variant="outlined"
+          value={testUrl}
+          onChange={(event) => onHeadState({ testUrl: event.target.value })}
           placeholder={t('proxies.page.placeholders.delayCheckUrl')}
-          onClick={(e) => {
-            e.preventDefault()
-            e.stopPropagation()
+          slotProps={{
+            htmlInput: {
+              'aria-label': t('proxies.page.placeholders.delayCheckUrl'),
+            },
           }}
-          onChange={(e) => onHeadState({ testUrl: e.target.value })}
-          sx={{ flex: '1 1 auto', input: { py: 0.65, px: 1 } }}
+          sx={{ width: 180 }}
         />
+      )}
+      {textState && (
+        <IconButton
+          size="small"
+          aria-label={t('shared.actions.close')}
+          onClick={() => onHeadState({ textState: null })}
+        >
+          <CloseRounded fontSize="small" />
+        </IconButton>
       )}
       <IconButton
         size="small"
-        color="inherit"
-        title={t('proxies.page.tooltips.locate')}
-        onClick={(e) => {
-          e.preventDefault()
-          e.stopPropagation()
-          if (!headState.open)
-            // eslint-disable-next-line @eslint-react/dom-no-flush-sync
-            flushSync(() => onHeadState({ open: true }))
-          onLocation()
-        }}
-      >
-        <MyLocationRounded fontSize="inherit" />
-      </IconButton>
-
-      <IconButton
-        size="small"
-        color="inherit"
         title={t('proxies.page.tooltips.delayCheck')}
-        onClick={(e) => {
-          e.preventDefault()
-          e.stopPropagation()
-          if (!headState.open)
-            // eslint-disable-next-line @eslint-react/dom-no-flush-sync
-            flushSync(() => onHeadState({ open: true }))
-          // Remind the user that it is custom test url
-          if (testUrl?.trim() && textState !== 'filter') {
-            onHeadState({ textState: 'url' })
-          }
+        aria-label={t('proxies.page.tooltips.delayCheck')}
+        onClick={() => {
+          expand()
           onCheckDelay()
         }}
       >
-        <NetworkCheckRounded fontSize="inherit" />
+        <NetworkCheckRounded fontSize="small" />
       </IconButton>
-
       <IconButton
         size="small"
-        color="inherit"
-        title={
-          [
-            t('proxies.page.tooltips.sortDefault'),
-            t('proxies.page.tooltips.sortDelay'),
-            t('proxies.page.tooltips.sortName'),
-          ][sortType]
-        }
-        onClick={(e) => {
-          e.preventDefault()
-          e.stopPropagation()
-          if (!headState.open)
-            // eslint-disable-next-line @eslint-react/dom-no-flush-sync
-            flushSync(() => onHeadState({ open: true }))
-          onHeadState({
-            sortType: ((sortType + 1) % 3) as ProxySortType,
-          })
-        }}
+        title={text('更多操作', 'More actions')}
+        aria-label={text('更多操作', 'More actions')}
+        aria-haspopup="menu"
+        aria-expanded={Boolean(anchor)}
+        onClick={(event) => setAnchor(event.currentTarget)}
       >
-        {sortType !== 1 && sortType !== 2 && <SortRounded fontSize="inherit" />}
-        {sortType === 1 && <AccessTimeRounded fontSize="inherit" />}
-        {sortType === 2 && <SortByAlphaRounded fontSize="inherit" />}
+        <MoreHorizRounded fontSize="small" />
       </IconButton>
-
-      <IconButton
-        size="small"
-        color="inherit"
-        title={t('proxies.page.tooltips.delayCheckUrl')}
-        onClick={(e) => {
-          e.preventDefault()
-          e.stopPropagation()
-          onHeadState({
-            textState: textState === 'url' ? null : 'url',
-          })
-          setTimeout(() => inputRef.current?.focus())
-        }}
+      <Menu
+        anchorEl={anchor}
+        open={Boolean(anchor)}
+        onClose={() => setAnchor(null)}
       >
-        {textState === 'url' ? (
-          <WifiTetheringRounded fontSize="inherit" />
-        ) : (
-          <WifiTetheringOffRounded fontSize="inherit" />
-        )}
-      </IconButton>
-
-      <IconButton
-        size="small"
-        color="inherit"
-        title={
-          showType
+        <MenuItem
+          onClick={() =>
+            action(() => {
+              expand()
+              onLocation()
+            })
+          }
+        >
+          {t('proxies.page.tooltips.locate')}
+        </MenuItem>
+        <MenuItem
+          onClick={() =>
+            action(() => {
+              expand()
+              onHeadState({ textState: 'filter' })
+            })
+          }
+        >
+          {t('proxies.page.tooltips.filter')}
+        </MenuItem>
+        {([0, 1, 2] as ProxySortType[]).map((value) => (
+          <MenuItem
+            key={value}
+            selected={sortType === value}
+            onClick={() =>
+              action(() => {
+                expand()
+                onHeadState({ sortType: value })
+              })
+            }
+          >
+            {
+              [
+                t('proxies.page.tooltips.sortDefault'),
+                t('proxies.page.tooltips.sortDelay'),
+                t('proxies.page.tooltips.sortName'),
+              ][value]
+            }
+          </MenuItem>
+        ))}
+        <MenuItem
+          onClick={() => action(() => onHeadState({ textState: 'url' }))}
+        >
+          {t('proxies.page.tooltips.delayCheckUrl')}
+        </MenuItem>
+        <MenuItem
+          onClick={() =>
+            action(() => {
+              expand()
+              onHeadState({ showType: !showType })
+            })
+          }
+        >
+          {showType
             ? t('proxies.page.tooltips.showBasic')
-            : t('proxies.page.tooltips.showDetail')
-        }
-        onClick={(e) => {
-          e.preventDefault()
-          e.stopPropagation()
-          if (!headState.open)
-            // eslint-disable-next-line @eslint-react/dom-no-flush-sync
-            flushSync(() => onHeadState({ open: true }))
-          onHeadState({ showType: !showType })
-        }}
-      >
-        {showType ? (
-          <VisibilityRounded fontSize="inherit" />
-        ) : (
-          <VisibilityOffRounded fontSize="inherit" />
-        )}
-      </IconButton>
-
-      <IconButton
-        size="small"
-        color="inherit"
-        title={t('proxies.page.tooltips.filter')}
-        onClick={(e) => {
-          e.preventDefault()
-          e.stopPropagation()
-          if (!headState.open && textState !== 'filter')
-            // eslint-disable-next-line @eslint-react/dom-no-flush-sync
-            flushSync(() => onHeadState({ open: true }))
-          onHeadState({ textState: textState === 'filter' ? null : 'filter' })
-          setTimeout(() => inputRef.current?.focus())
-        }}
-      >
-        {textState === 'filter' ? (
-          <SearchOffRounded fontSize="inherit" />
-        ) : (
-          <SearchRounded fontSize="inherit" />
-        )}
-      </IconButton>
+            : t('proxies.page.tooltips.showDetail')}
+        </MenuItem>
+      </Menu>
     </Box>
   )
 })

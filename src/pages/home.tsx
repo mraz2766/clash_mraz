@@ -1,7 +1,6 @@
 import {
-  DnsOutlined,
+  ExpandMoreRounded,
   HistoryEduOutlined,
-  RouterOutlined,
   SettingsOutlined,
   SpeedOutlined,
 } from '@mui/icons-material'
@@ -20,7 +19,7 @@ import {
   Skeleton,
   Tooltip,
 } from '@mui/material'
-import { Suspense, lazy, useCallback, useMemo, useState } from 'react'
+import { Suspense, lazy, useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { BasePage } from '@/components/base'
@@ -55,16 +54,6 @@ const LazyTestCard = lazy(preloadTestCard)
 const LazyIpInfoCard = lazy(preloadIpInfoCard)
 const LazyClashInfoCard = lazy(preloadClashInfoCard)
 const LazySystemInfoCard = lazy(preloadSystemInfoCard)
-
-// Used by bootstrap to initiate optional card imports without blocking render.
-// eslint-disable-next-line react-refresh/only-export-components
-export const preloadHomePageCards = () =>
-  Promise.all([
-    preloadTestCard().catch(() => {}),
-    preloadIpInfoCard().catch(() => {}),
-    preloadClashInfoCard().catch(() => {}),
-    preloadSystemInfoCard().catch(() => {}),
-  ])
 
 // 定义首页卡片设置接口
 interface HomeCardsSettings {
@@ -242,72 +231,13 @@ const HomePage = () => {
     setSettingsOpen(true)
   }, [])
 
-  const renderCard = useCallback(
-    (cardKey: string, component: React.ReactNode, size: number = 6) => {
-      if (!homeCards[cardKey]) return null
+  const [diagnosticsOpen, setDiagnosticsOpen] = useState(false)
+  const hasDiagnostics =
+    homeCards.test ||
+    homeCards.ip ||
+    homeCards.clashinfo ||
+    homeCards.systeminfo
 
-      return (
-        <Grid size={size} key={cardKey}>
-          {component}
-        </Grid>
-      )
-    },
-    [homeCards],
-  )
-
-  const criticalCards = useMemo(
-    () => [
-      renderCard(
-        'profile',
-        <HomeProfileCard current={current} onProfileUpdated={mutateProfiles} />,
-      ),
-      renderCard('proxy', <CurrentProxyCard />),
-      renderCard('network', <NetworkSettingsCard />),
-      renderCard('mode', <ClashModeEnhancedCard />),
-    ],
-    [current, mutateProfiles, renderCard],
-  )
-
-  const nonCriticalCards = useMemo(
-    () => [
-      renderCard(
-        'traffic',
-        <EnhancedCard
-          title={t('home.page.cards.trafficStats')}
-          icon={<SpeedOutlined />}
-          iconColor="secondary"
-        >
-          <EnhancedTrafficStats />
-        </EnhancedCard>,
-        12,
-      ),
-      renderCard(
-        'test',
-        <Suspense fallback={<Skeleton variant="rectangular" height={200} />}>
-          <LazyTestCard />
-        </Suspense>,
-      ),
-      renderCard(
-        'ip',
-        <Suspense fallback={<Skeleton variant="rectangular" height={200} />}>
-          <LazyIpInfoCard />
-        </Suspense>,
-      ),
-      renderCard(
-        'clashinfo',
-        <Suspense fallback={<Skeleton variant="rectangular" height={200} />}>
-          <LazyClashInfoCard />
-        </Suspense>,
-      ),
-      renderCard(
-        'systeminfo',
-        <Suspense fallback={<Skeleton variant="rectangular" height={200} />}>
-          <LazySystemInfoCard />
-        </Suspense>,
-      ),
-    ],
-    [t, renderCard],
-  )
   return (
     <BasePage
       title={t('home.page.title')}
@@ -330,11 +260,131 @@ const HomePage = () => {
         </Box>
       }
     >
-      <Grid container spacing={2} columns={{ xs: 6, sm: 6, md: 12 }}>
-        {criticalCards}
-
-        {nonCriticalCards}
-      </Grid>
+      {(homeCards.network || homeCards.mode) && (
+        <Box
+          className="workspace-control-deck"
+          sx={
+            !(homeCards.network && homeCards.mode)
+              ? { gridTemplateColumns: '1fr !important' }
+              : undefined
+          }
+        >
+          {homeCards.network && (
+            <section>
+              <h2>{t('home.page.cards.networkSettings')}</h2>
+              <ProxyTunCard />
+            </section>
+          )}
+          {homeCards.mode && (
+            <section>
+              <h2>{t('home.page.cards.proxyMode')}</h2>
+              <ClashModeCard />
+            </section>
+          )}
+        </Box>
+      )}
+      {homeCards.traffic && (
+        <section className="home-metrics">
+          <EnhancedTrafficStats view="summary" />
+        </section>
+      )}
+      <Box
+        className="workspace-home-workspace"
+        sx={
+          !(
+            homeCards.traffic &&
+            (verge?.traffic_graph ?? true) &&
+            homeCards.proxy
+          )
+            ? { gridTemplateColumns: '1fr !important' }
+            : undefined
+        }
+      >
+        {homeCards.traffic && (verge?.traffic_graph ?? true) && (
+          <section className="home-traffic">
+            <EnhancedCard
+              title={t('home.page.cards.trafficStats')}
+              icon={<SpeedOutlined />}
+            >
+              <EnhancedTrafficStats view="detail" />
+            </EnhancedCard>
+          </section>
+        )}
+        {homeCards.proxy && (
+          <section className="home-node">
+            <CurrentProxyCard />
+          </section>
+        )}
+      </Box>
+      {homeCards.profile && (
+        <section className="home-subscription">
+          <HomeProfileCard
+            current={current}
+            onProfileUpdated={mutateProfiles}
+          />
+        </section>
+      )}
+      {hasDiagnostics && (
+        <section className="home-diagnostics">
+          <Button
+            className="diagnostics-toggle"
+            fullWidth
+            aria-expanded={diagnosticsOpen}
+            aria-controls="home-diagnostics-panel"
+            onClick={() => setDiagnosticsOpen(!diagnosticsOpen)}
+            endIcon={
+              <ExpandMoreRounded
+                sx={{
+                  transform: diagnosticsOpen ? 'rotate(180deg)' : 'none',
+                  transition: 'transform 180ms',
+                }}
+              />
+            }
+          >
+            {t('home.components.tests.title')} ·{' '}
+            {t('home.components.ipInfo.title')} ·{' '}
+            {t('home.components.systemInfo.title')}
+          </Button>
+          {diagnosticsOpen && (
+            <Grid
+              id="home-diagnostics-panel"
+              container
+              spacing={2}
+              columns={12}
+              className="workspace-home-grid"
+            >
+              {homeCards.test && (
+                <Grid size={{ xs: 12, md: 6 }}>
+                  <Suspense fallback={<Skeleton height={160} />}>
+                    <LazyTestCard />
+                  </Suspense>
+                </Grid>
+              )}
+              {homeCards.ip && (
+                <Grid size={{ xs: 12, md: 6 }}>
+                  <Suspense fallback={<Skeleton height={160} />}>
+                    <LazyIpInfoCard />
+                  </Suspense>
+                </Grid>
+              )}
+              {homeCards.clashinfo && (
+                <Grid size={{ xs: 12, md: 6 }}>
+                  <Suspense fallback={<Skeleton height={160} />}>
+                    <LazyClashInfoCard />
+                  </Suspense>
+                </Grid>
+              )}
+              {homeCards.systeminfo && (
+                <Grid size={{ xs: 12, md: 6 }}>
+                  <Suspense fallback={<Skeleton height={160} />}>
+                    <LazySystemInfoCard />
+                  </Suspense>
+                </Grid>
+              )}
+            </Grid>
+          )}
+        </section>
+      )}
 
       {/* 首页设置弹窗 */}
       {settingsOpen && (
@@ -345,36 +395,6 @@ const HomePage = () => {
         />
       )}
     </BasePage>
-  )
-}
-
-// 增强版网络设置卡片组件
-const NetworkSettingsCard = () => {
-  const { t } = useTranslation()
-  return (
-    <EnhancedCard
-      title={t('home.page.cards.networkSettings')}
-      icon={<DnsOutlined />}
-      iconColor="primary"
-      action={null}
-    >
-      <ProxyTunCard />
-    </EnhancedCard>
-  )
-}
-
-// 增强版 Clash 模式卡片组件
-const ClashModeEnhancedCard = () => {
-  const { t } = useTranslation()
-  return (
-    <EnhancedCard
-      title={t('home.page.cards.proxyMode')}
-      icon={<RouterOutlined />}
-      iconColor="info"
-      action={null}
-    >
-      <ClashModeCard />
-    </EnhancedCard>
   )
 }
 

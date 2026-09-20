@@ -9,7 +9,7 @@ export const materialComponents: Components<Theme> = {
     defaultProps: { disableElevation: true },
     styleOverrides: {
       root: {
-        borderRadius: 20,
+        borderRadius: 9,
         minHeight: 36,
         paddingInline: 16,
         textTransform: 'none',
@@ -50,7 +50,7 @@ export const materialComponents: Components<Theme> = {
   },
   MuiOutlinedInput: {
     styleOverrides: {
-      root: { borderRadius: 10, backgroundColor: 'var(--md-surface)' },
+      root: { borderRadius: 9, backgroundColor: 'var(--md-surface)' },
       notchedOutline: { borderColor: 'var(--md-outline)' },
     },
   },

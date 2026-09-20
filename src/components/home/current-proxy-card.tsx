@@ -16,6 +16,7 @@ import {
   Box,
   Button,
   Chip,
+  CircularProgress,
   ClickAwayListener,
   FormControl,
   IconButton,
@@ -37,9 +38,11 @@ import { useNavigate } from 'react-router'
 
 import { EnhancedCard } from '@/components/home/enhanced-card'
 import type { ProxySortType } from '@/components/proxy/use-filter-sort'
+import { useDesktopText } from '@/hooks/use-desktop-text'
 import { useGroupDelays } from '@/hooks/use-group-delays'
 import { useProfiles } from '@/hooks/use-profiles'
 import { useProxySelection } from '@/hooks/use-proxy-selection'
+import { useProxySelectionStatus } from '@/hooks/use-proxy-selection-status'
 import { useVerge } from '@/hooks/use-verge'
 import {
   useAppRefreshers,
@@ -59,6 +62,8 @@ import {
 } from '@/types/proxy-view'
 import { debugLog } from '@/utils/debug'
 import { compareByDelay, DEFAULT_DELAY_TIMEOUT } from '@/utils/delay'
+
+import { RouteInspector } from './route-inspector'
 
 const STORAGE_KEY_GROUP = 'clash-verge-selected-proxy-group'
 const STORAGE_KEY_SORT_TYPE = 'clash-verge-proxy-sort-type'
@@ -217,7 +222,6 @@ const sortProxyOptions = (
 interface PersistentProxySelectProps {
   label: string
   groupName: string
-  fixed?: string
   value: string
   selectedName: string
   selectedDelay: number
@@ -233,7 +237,6 @@ interface PersistentProxySelectProps {
 const PersistentProxySelect = ({
   label,
   groupName,
-  fixed,
   value,
   selectedName,
   selectedDelay,
@@ -248,7 +251,6 @@ const PersistentProxySelect = ({
   const anchorRef = useRef<HTMLDivElement>(null)
   const listboxId = 'current-proxy-node-listbox'
   const labelId = 'proxy-select-label'
-  const fixedProxyInUsed = selectedName === fixed
 
   useEffect(() => {
     if (!open) return
@@ -310,18 +312,6 @@ const PersistentProxySelect = ({
                   label={delayManager.formatDelay(selectedDelay)}
                   color={convertDelayColor(selectedDelay)}
                 />
-                {fixedProxyInUsed && (
-                  <span
-                    style={{
-                      position: 'absolute',
-                      fontSize: '12px',
-                      top: '-3px',
-                      right: '25px',
-                    }}
-                  >
-                    📌
-                  </span>
-                )}
               </Box>
             )}
             SelectDisplayProps={{
@@ -355,7 +345,6 @@ const PersistentProxySelect = ({
             >
               {options.map((option) => {
                 const selected = option.value === value
-                const isFixed = option.name === fixed
                 const delay = option.disabled
                   ? -1
                   : delayManager.getDelayFix(option.member, groupName)
@@ -378,21 +367,6 @@ const PersistentProxySelect = ({
                       pr: 1,
                     }}
                   >
-                    {isFixed && (
-                      <span
-                        style={{
-                          position: 'absolute',
-                          fontSize: '12px',
-                          top: '-5px',
-                          right: '5px',
-                          ...(!fixedProxyInUsed && {
-                            filter: 'grayscale(1)',
-                          }),
-                        }}
-                      >
-                        📌
-                      </span>
-                    )}
                     <Typography noWrap sx={{ flex: 1, mr: 1 }}>
                       {option.name}
                     </Typography>
@@ -425,6 +399,8 @@ const PersistentProxySelect = ({
 }
 
 export const CurrentProxyCard = () => {
+  const text = useDesktopText()
+  const pending = useProxySelectionStatus()
   const { t } = useTranslation()
   const navigate = useNavigate()
   const { proxyView } = useProxiesData()
@@ -855,7 +831,7 @@ export const CurrentProxyCard = () => {
 
   return (
     <EnhancedCard
-      title={t('home.components.currentProxy.title')}
+      title={text('关注的代理组', 'Watched group')}
       icon={
         <Tooltip
           title={
@@ -871,7 +847,7 @@ export const CurrentProxyCard = () => {
       }
       iconColor={currentProxy ? 'primary' : undefined}
       action={
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.25 }}>
           <Tooltip
             title={t('home.components.currentProxy.actions.refreshDelay')}
           >
@@ -903,14 +879,39 @@ export const CurrentProxyCard = () => {
             variant="text"
             size="small"
             onClick={goToProxies}
-            sx={{ borderRadius: 1.5 }}
+            sx={{ borderRadius: 1.5, minWidth: 24, px: 0.5 }}
             endIcon={<ChevronRight fontSize="small" />}
           >
-            {t('layout.components.navigation.tabs.proxies')}
+            {text('管理', 'Manage')}
           </Button>
         </Box>
       }
     >
+      <Typography
+        variant="body2"
+        color="text.secondary"
+        sx={{ fontSize: 12, mb: 1.5 }}
+      >
+        {text(
+          '规则模式下，不同网站可能使用不同出口。',
+          'In rule mode, websites may use different routes.',
+        )}
+      </Typography>
+      {pending && (
+        <Box
+          role="status"
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1,
+            mb: 1.5,
+            fontSize: 12,
+          }}
+        >
+          <CircularProgress size={14} />
+          {text('正在切换至', 'Switching to')} {pending.proxyName}
+        </Box>
+      )}
       {isCoreDataPending ? (
         <Box sx={{ py: 4, height: 24 }} />
       ) : currentProxy || (!isDirectMode && selectedGroup) ? (
@@ -1022,7 +1023,6 @@ export const CurrentProxyCard = () => {
           <PersistentProxySelect
             label={t('home.components.currentProxy.labels.proxy')}
             groupName={selectedGroupName}
-            fixed={selectedGroup?.fixed}
             value={
               currentOption
                 ? optionValue(currentOption.memberIndex, currentOption.member)
@@ -1050,6 +1050,7 @@ export const CurrentProxyCard = () => {
           </Typography>
         </Box>
       )}
+      <RouteInspector />
     </EnhancedCard>
   )
 }

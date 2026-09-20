@@ -2,6 +2,7 @@ import { CheckCircleOutlineRounded } from '@mui/icons-material'
 import {
   alpha,
   Box,
+  CircularProgress,
   ListItem,
   ListItemButton,
   ListItemIcon,
@@ -14,7 +15,9 @@ import { useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { BaseLoading } from '@/components/base'
+import { useDesktopText } from '@/hooks/use-desktop-text'
 import { useProxyDelayState } from '@/hooks/use-proxy-delay-state'
+import { useProxySelectionStatus } from '@/hooks/use-proxy-selection-status'
 import { desktopMotion } from '@/lib/motion'
 import delayManager from '@/services/delay'
 import {
@@ -56,6 +59,10 @@ const TypeBox = styled('span')(({ theme }) => ({
 export const ProxyItem = (props: Props) => {
   const { t } = useTranslation()
   const { group, member, selected, showType = true, sx, onClick } = props
+  const text = useDesktopText()
+  const pending = useProxySelectionStatus()
+  const switching =
+    pending?.groupName === group.name && pending.proxyName === member.ref.name
   const details = memberDetails(member)
   const unresolved = member.kind === 'unresolved'
   const name = member.ref.name
@@ -94,6 +101,8 @@ export const ProxyItem = (props: Props) => {
     <ListItem sx={sx}>
       <ListItemButton
         className="proxy-row"
+        aria-busy={switching}
+        aria-pressed={selected}
         dense
         disabled={unresolved}
         selected={!unresolved && selected}
@@ -119,6 +128,13 @@ export const ProxyItem = (props: Props) => {
           },
         ]}
       >
+        {switching && (
+          <CircularProgress
+            size={14}
+            aria-label={text('切换中', 'Switching')}
+            sx={{ mr: 1.5 }}
+          />
+        )}
         <Box
           aria-hidden="true"
           sx={{

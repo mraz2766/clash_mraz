@@ -1,14 +1,10 @@
-import {
-  DirectionsRounded,
-  LanguageRounded,
-  MultipleStopRounded,
-} from '@mui/icons-material'
-import { Box, ButtonBase, Stack, Typography } from '@mui/material'
+import { Box, Typography } from '@mui/material'
 import { useLockFn } from 'ahooks'
-import { type ReactNode, useState } from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { BaseConfig } from 'tauri-plugin-mihomo-api'
 
+import { ModeControl } from '@/components/shared/mode-control'
 import { useClashMode, useRuntimeConfig } from '@/hooks/use-clash'
 import {
   useAppRefreshers,
@@ -47,12 +43,6 @@ const MODE_META: Record<
     label: 'home.components.clashMode.labels.direct',
     description: 'home.components.clashMode.descriptions.direct',
   },
-}
-
-const MODE_ICONS: Record<ClashMode, ReactNode> = {
-  rule: <MultipleStopRounded fontSize="small" />,
-  global: <LanguageRounded fontSize="small" />,
-  direct: <DirectionsRounded fontSize="small" />,
 }
 
 export const ClashModeCard = () => {
@@ -105,36 +95,6 @@ export const ClashModeCard = () => {
     setOptimisticMode(null)
   })
 
-  const buttonStyles = (mode: ClashMode) => ({
-    cursor: 'pointer',
-    px: 2,
-    py: 1,
-    minHeight: 36,
-    flex: 1,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 1,
-    bgcolor:
-      mode === currentMode ? 'var(--md-primary-container)' : 'transparent',
-    color:
-      mode === currentMode
-        ? 'var(--md-on-primary-container)'
-        : 'text.secondary',
-    borderRadius: 1.5,
-    transition:
-      'background-color var(--md-motion), color var(--md-motion), transform var(--md-motion-fast)',
-    position: 'relative',
-    overflow: 'visible',
-    '&:hover': {
-      bgcolor:
-        mode === currentMode
-          ? 'var(--md-primary-container)'
-          : 'var(--md-hover)',
-    },
-    '&:active': { transform: 'scale(0.985)' },
-  })
-
   const descriptionStyles = {
     width: '100%',
     textAlign: 'start',
@@ -149,40 +109,14 @@ export const ClashModeCard = () => {
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
-      <Stack
-        direction="row"
-        spacing={1}
-        sx={{
-          display: 'flex',
-          justifyContent: 'center',
-          py: 1,
-          position: 'relative',
-          zIndex: 2,
-        }}
-      >
-        {CLASH_MODES.map((mode) => (
-          <ButtonBase
-            key={mode}
-            className="home-choice"
-            aria-pressed={mode === currentMode}
-            onClick={() => onChangeMode(mode)}
-            sx={buttonStyles(mode)}
-          >
-            {MODE_ICONS[mode]}
-            <Typography
-              variant="body2"
-              sx={{
-                textTransform: 'capitalize',
-                fontWeight: 500,
-              }}
-            >
-              {t(MODE_META[mode].label)}
-            </Typography>
-          </ButtonBase>
-        ))}
-      </Stack>
+      <ModeControl
+        value={currentMode}
+        onChange={onChangeMode}
+        disabled={optimisticMode !== null}
+      />
 
       <Box
+        className="mode-description"
         sx={{
           width: '100%',
           my: 1,

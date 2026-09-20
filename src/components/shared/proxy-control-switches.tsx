@@ -21,6 +21,7 @@ import { showNotice } from '@/services/notice-service'
 import { requestService } from '@/services/service-request'
 
 interface ProxySwitchProps {
+  category?: 'network'
   label?: string
   onError?: (err: Error) => void
   noRightPadding?: boolean

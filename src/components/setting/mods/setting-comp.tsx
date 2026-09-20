@@ -8,11 +8,18 @@ import {
   ListSubheader,
 } from '@mui/material'
 import CircularProgress from '@mui/material/CircularProgress'
-import React, { ReactNode, useState } from 'react'
+import React, { ReactNode, useState, use } from 'react'
 
 import isAsyncFunction from '@/utils/is-async-function'
 
+import {
+  SettingsFilterContext,
+  matchesSetting,
+  type SettingsCategory,
+} from '../settings-filter'
+
 interface ItemProps {
+  category?: SettingsCategory
   label: ReactNode
   extra?: ReactNode
   children?: ReactNode
@@ -31,7 +38,9 @@ export const SettingItem: React.FC<ItemProps> = ({
 
   const primary = (
     <Box sx={{ display: 'flex', alignItems: 'center', fontSize: '14px' }}>
-      <span>{label}</span>
+      <span>
+        {typeof label === 'string' ? label.replaceAll('Verge', 'Clash') : label}
+      </span>
       {extra ? extra : null}
     </Box>
   )
@@ -70,35 +79,79 @@ export const SettingItem: React.FC<ItemProps> = ({
 export const SettingList: React.FC<{
   title: string
   children: ReactNode
-}> = ({ title, children }) => (
-  <List
-    sx={{
-      py: 0,
-      '& > .MuiListItem-root + .MuiListItem-root': {
-        borderTop: '1px solid var(--md-outline)',
-      },
-      '& .MuiListItem-root': { minHeight: 52 },
-      '& .MuiListItemButton-root': { minHeight: 52 },
-    }}
-  >
-    <ListSubheader
-      sx={[
-        {
-          background: 'var(--md-surface-container)',
-          fontSize: '16px',
-          fontWeight: 500,
-        },
-        ({ palette }) => {
-          return {
-            color: palette.text.primary,
-          }
-        },
-      ]}
-      disableSticky
-    >
-      {title}
-    </ListSubheader>
+  category?: SettingsCategory
+}> = ({ title, children, category = 'general' }) => {
+  const filter = use(SettingsFilterContext)
+  // These four setting sections expose labeled direct children; preserve their keys and mounted dialogs.
+  // eslint-disable-next-line @eslint-react/no-children-to-array
+  const items = React.Children.toArray(children)
+  const matches = (child: ReactNode) => {
+    if (
+      !React.isValidElement<{ label?: ReactNode; category?: SettingsCategory }>(
+        child,
+      ) ||
+      child.props.label === undefined
+    )
+      return false
+    return (
+      !filter ||
+      matchesSetting(
+        String(child.props.label),
+        child.props.category ?? category,
+        filter.category,
+        filter.query,
+      )
+    )
+  }
+  if (!items.some(matches)) {
+    // Keep dialog hosts alive while a search or category hides their rows.
+    return (
+      <SettingsFilterContext value={null}>
+        {items.filter(
+          (child) =>
+            React.isValidElement<{ label?: ReactNode }>(child) &&
+            child.props.label === undefined,
+        )}
+      </SettingsFilterContext>
+    )
+  }
+  return (
+    <SettingsFilterContext value={null}>
+      <List
+        sx={{
+          py: 0,
+          '& > .MuiListItem-root + .MuiListItem-root': {
+            borderTop: '1px solid var(--md-outline-soft)',
+          },
+          '& .MuiListItem-root': { minHeight: 52 },
+          '& .MuiListItemButton-root': { minHeight: 52 },
+        }}
+      >
+        <ListSubheader
+          sx={[
+            {
+              background: 'transparent',
+              fontSize: '13px',
+              fontWeight: 650,
+            },
+            ({ palette }) => {
+              return {
+                color: palette.text.primary,
+              }
+            },
+          ]}
+          disableSticky
+        >
+          {title.replaceAll('Verge', 'Clash')}
+        </ListSubheader>
 
-    {children}
-  </List>
-)
+        {items.filter(
+          (child) =>
+            !React.isValidElement<{ label?: ReactNode }>(child) ||
+            child.props.label === undefined ||
+            matches(child),
+        )}
+      </List>
+    </SettingsFilterContext>
+  )
+}

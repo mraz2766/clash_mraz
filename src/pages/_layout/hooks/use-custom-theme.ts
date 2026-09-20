@@ -239,6 +239,7 @@ export const useCustomTheme = () => {
     })
 
     const rootEle = document.documentElement
+    rootEle.setAttribute('data-theme', mode)
     if (rootEle) {
       Object.entries(motionTokens).forEach(([key, value]) =>
         rootEle.style.setProperty(key, value),

@@ -2,8 +2,9 @@ import { ExpandMoreRounded, InboxRounded } from '@mui/icons-material'
 import {
   alpha,
   Box,
+  ButtonBase,
+  IconButton,
   ListItemText,
-  ListItemButton,
   Typography,
   styled,
   Chip,
@@ -80,8 +81,9 @@ export const ProxyRender = memo(function ProxyRender(props: RenderProps) {
   if (type === 0) {
     return (
       <div style={{ padding: '4px 8px' }}>
-        <ListItemButton
-          dense
+        <Box
+          role="group"
+          aria-label={group.name}
           sx={{
             boxShadow:
               stickyed && headState?.open
@@ -92,12 +94,6 @@ export const ProxyRender = memo(function ProxyRender(props: RenderProps) {
             background: itembackgroundcolor,
             height: '100%',
             borderRadius: '8px',
-          }}
-          onClick={() => {
-            if (headState?.open) {
-              onGroupToggle?.(group)
-            }
-            onHeadState?.(group.name, { open: !headState?.open })
           }}
         >
           <Box sx={{ width: '100%' }}>
@@ -125,45 +121,61 @@ export const ProxyRender = memo(function ProxyRender(props: RenderProps) {
                   width="32px"
                 />
               )}
-              <ListItemText
-                sx={{ flex: '0 1 auto', minWidth: 0 }}
-                primary={<StyledPrimary>{group.name}</StyledPrimary>}
-                secondary={
-                  <Box
-                    sx={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      pt: '2px',
-                      overflow: 'hidden',
-                      whiteSpace: 'nowrap',
-                    }}
-                  >
+              <ButtonBase
+                onClick={() => {
+                  if (headState?.open) onGroupToggle?.(group)
+                  onHeadState(group.name, { open: !headState?.open })
+                }}
+                aria-expanded={Boolean(headState?.open)}
+                sx={{
+                  textAlign: 'left',
+                  flex: 1,
+                  minWidth: 0,
+                  justifyContent: 'flex-start',
+                  px: 1,
+                  py: 0.5,
+                }}
+              >
+                <ListItemText
+                  sx={{ flex: '0 1 auto', minWidth: 0 }}
+                  primary={<StyledPrimary>{group.name}</StyledPrimary>}
+                  secondary={
                     <Box
-                      component="span"
                       sx={{
-                        marginTop: '2px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        pt: '2px',
                         overflow: 'hidden',
-                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
                       }}
                     >
-                      <StyledTypeBox>{group.type}</StyledTypeBox>
-                      <StyledSubtitle sx={{ color: 'text.secondary' }}>
-                        {group.now}
-                      </StyledSubtitle>
+                      <Box
+                        component="span"
+                        sx={{
+                          marginTop: '2px',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                        }}
+                      >
+                        <StyledTypeBox>{group.type}</StyledTypeBox>
+                        <StyledSubtitle sx={{ color: 'text.secondary' }}>
+                          {group.now}
+                        </StyledSubtitle>
+                      </Box>
                     </Box>
-                  </Box>
-                }
-                slotProps={{
-                  secondary: {
-                    component: 'div',
-                    sx: {
-                      display: 'flex',
-                      alignItems: 'center',
-                      color: '#ccc',
+                  }
+                  slotProps={{
+                    secondary: {
+                      component: 'div',
+                      sx: {
+                        display: 'flex',
+                        alignItems: 'center',
+                        color: 'var(--md-text-secondary)',
+                      },
                     },
-                  },
-                }}
-              />
+                  }}
+                />
+              </ButtonBase>
               <Box
                 sx={{
                   display: 'flex',
@@ -202,16 +214,26 @@ export const ProxyRender = memo(function ProxyRender(props: RenderProps) {
                     />
                   </div>
                 </Tooltip>
-                <ExpandMoreRounded
-                  sx={{
-                    transform: headState?.open ? 'rotate(180deg)' : 'none',
-                    transition: 'transform var(--md-motion)',
+                <IconButton
+                  size="small"
+                  aria-label={group.name}
+                  aria-expanded={Boolean(headState?.open)}
+                  onClick={() => {
+                    if (headState?.open) onGroupToggle?.(group)
+                    onHeadState(group.name, { open: !headState?.open })
                   }}
-                />
+                >
+                  <ExpandMoreRounded
+                    sx={{
+                      transform: headState?.open ? 'rotate(180deg)' : 'none',
+                      transition: 'transform var(--md-motion)',
+                    }}
+                  />
+                </IconButton>
               </Box>
             </Box>
           </Box>
-        </ListItemButton>
+        </Box>
       </div>
     )
   }

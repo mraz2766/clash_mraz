@@ -1,4 +1,5 @@
 import { useSortable } from '@dnd-kit/react/sortable'
+import { CheckRounded } from '@mui/icons-material'
 import {
   CheckBoxOutlineBlankRounded,
   CheckBoxRounded,
@@ -31,6 +32,7 @@ import { BaseDialog } from '@/components/base'
 import { EditorViewer } from '@/components/profile/editor-viewer'
 import { GroupsEditorViewer } from '@/components/profile/groups-editor-viewer'
 import { RulesEditorViewer } from '@/components/profile/rules-editor-viewer'
+import { useDesktopText } from '@/hooks/use-desktop-text'
 import { useEditorDocument } from '@/hooks/use-editor-document'
 import {
   getNextUpdateTime,
@@ -100,6 +102,13 @@ const ProfileItemBase = (props: ProfileItemProps) => {
     handle: handleRef,
   })
 
+  const text = useDesktopText()
+  const [updatedSuccessfully, setUpdatedSuccessfully] = useState(false)
+  useEffect(() => {
+    if (!updatedSuccessfully) return
+    const timer = setTimeout(() => setUpdatedSuccessfully(false), 2200)
+    return () => clearTimeout(timer)
+  }, [updatedSuccessfully])
   const { t } = useTranslation()
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
   const [position, setPosition] = useState({ left: 0, top: 0 })
@@ -384,6 +393,7 @@ const ProfileItemBase = (props: ProfileItemProps) => {
   const onUpdate = useLockFn(async (type: 0 | 1 | 2): Promise<void> => {
     setAnchorEl(null)
     setLoading(true)
+    setUpdatedSuccessfully(false)
 
     const option: Partial<IProfileOption> = {}
     if (type === 0) {
@@ -402,9 +412,11 @@ const ProfileItemBase = (props: ProfileItemProps) => {
     try {
       const payload = Object.keys(option).length > 0 ? option : undefined
       await updateProfile(itemData.uid, payload)
+      setUpdatedSuccessfully(true)
 
       void mutateProfiles()
-    } catch {
+    } catch (error) {
+      showNotice.error(error)
     } finally {
       setLoading(false)
     }
@@ -735,10 +747,27 @@ const ProfileItemBase = (props: ProfileItemProps) => {
                 onUpdate(1)
               }}
             >
-              <RefreshRounded color="inherit" />
+              {updatedSuccessfully ? (
+                <CheckRounded color="success" />
+              ) : (
+                <RefreshRounded color="inherit" />
+              )}
             </IconButton>
           )}
         </Box>
+        {selected && (
+          <Typography
+            variant="caption"
+            sx={{ display: 'block', fontWeight: 600, mb: 0.75 }}
+          >
+            {text('正在使用', 'Active subscription')}
+          </Typography>
+        )}
+        {updatedSuccessfully && (
+          <Typography role="status" variant="caption" color="success.main">
+            {text('更新成功', 'Updated successfully')}
+          </Typography>
+        )}
         <Box sx={boxStyle}>
           {
             <>
@@ -803,10 +832,17 @@ const ProfileItemBase = (props: ProfileItemProps) => {
         </Box>
         {hasExtra ? (
           <Box sx={{ ...boxStyle, fontSize: 14 }}>
-            <span title={t('shared.labels.usedTotal')}>
-              {parseTraffic(upload + download)} / {parseTraffic(total)}
+            <span
+              title={`${t('shared.labels.usedTotal')}: ${parseTraffic(upload + download).join(' ')} / ${parseTraffic(total).join(' ')}`}
+            >
+              {text('剩余 ', 'Remaining ')}
+              {parseTraffic(Math.max(0, total - upload - download)).join(' ')} /{' '}
+              {parseTraffic(total).join(' ')}
             </span>
-            <span title={t('shared.labels.expireTime')}>{expire}</span>
+            <span title={t('shared.labels.expireTime')}>
+              {text('到期 ', 'Expires ')}
+              {expire}
+            </span>
           </Box>
         ) : (
           <Box sx={{ ...boxStyle, fontSize: 12, justifyContent: 'flex-end' }}>

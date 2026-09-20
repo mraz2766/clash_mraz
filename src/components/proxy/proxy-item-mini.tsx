@@ -1,9 +1,18 @@
-import { CheckCircleOutlineRounded } from '@mui/icons-material'
-import { alpha, Box, ListItemButton, styled, Typography } from '@mui/material'
+import { CheckCircleOutlineRounded, PushPinOutlined } from '@mui/icons-material'
+import {
+  alpha,
+  Box,
+  CircularProgress,
+  ListItemButton,
+  styled,
+  Typography,
+} from '@mui/material'
 import { useTranslation } from 'react-i18next'
 
 import { BaseLoading } from '@/components/base'
+import { useDesktopText } from '@/hooks/use-desktop-text'
 import { useProxyDelayState } from '@/hooks/use-proxy-delay-state'
+import { useProxySelectionStatus } from '@/hooks/use-proxy-selection-status'
 import delayManager from '@/services/delay'
 import {
   memberDetails,
@@ -24,6 +33,10 @@ interface Props {
 // 多列布局
 export const ProxyItemMini = (props: Props) => {
   const { group, member, selected, showType = true, onClick } = props
+  const pending = useProxySelectionStatus()
+  const text = useDesktopText()
+  const switching =
+    pending?.groupName === group.name && pending.proxyName === member.ref.name
   const details = memberDetails(member)
   const unresolved = member.kind === 'unresolved'
   const name = member.ref.name
@@ -40,6 +53,8 @@ export const ProxyItemMini = (props: Props) => {
 
   return (
     <ListItemButton
+      aria-busy={switching}
+      aria-pressed={selected}
       dense
       disabled={unresolved}
       selected={!unresolved && selected}
@@ -61,13 +76,6 @@ export const ProxyItemMini = (props: Props) => {
             '&:hover .the-check': { display: !showDelay ? 'block' : 'none' },
             '&:hover .the-delay': { display: showDelay ? 'block' : 'none' },
             '&:hover .the-icon': { display: 'none' },
-            '& .the-pin, & .the-unpin': {
-              position: 'absolute',
-              fontSize: '12px',
-              top: '-5px',
-              right: '-5px',
-            },
-            '& .the-unpin': { filter: 'grayscale(1)' },
             '&.Mui-selected': {
               bgcolor: 'var(--md-primary-container)',
               color: 'var(--md-on-primary-container)',
@@ -77,6 +85,23 @@ export const ProxyItemMini = (props: Props) => {
         },
       ]}
     >
+      {switching ? (
+        <CircularProgress
+          size={14}
+          aria-label={text('切换中', 'Switching')}
+          sx={{ mr: 1 }}
+        />
+      ) : selected ? (
+        <CheckCircleOutlineRounded
+          sx={{ fontSize: 16, mr: 1, flexShrink: 0 }}
+        />
+      ) : null}
+      {!unresolved && group.fixed === name && (
+        <PushPinOutlined
+          titleAccess={t('proxies.page.labels.delayCheckReset')}
+          sx={{ fontSize: 14, mr: 0.5, color: 'text.secondary' }}
+        />
+      )}
       <Box title={`${name}\n${now ?? ''}`} sx={{ overflow: 'hidden' }}>
         <Typography
           variant="body2"
@@ -192,31 +217,7 @@ export const ProxyItemMini = (props: Props) => {
             {delayManager.formatDelay(delayValue, timeout)}
           </Widget>
         )}
-        {!unresolved &&
-          type !== 'Direct' &&
-          delayValue !== -2 &&
-          delayValue < 0 &&
-          selected && (
-            // 展示已选择的 icon
-            <CheckCircleOutlineRounded
-              className="the-icon"
-              sx={{ fontSize: 16, mr: 0.5, display: 'block' }}
-            />
-          )}
       </Box>
-      {!unresolved && group.fixed && group.fixed === name && (
-        // 展示 fixed 状态
-        <span
-          className={name === group.now ? 'the-pin' : 'the-unpin'}
-          title={
-            group.type === 'URLTest'
-              ? t('proxies.page.labels.delayCheckReset')
-              : ''
-          }
-        >
-          📌
-        </span>
-      )}
     </ListItemButton>
   )
 }

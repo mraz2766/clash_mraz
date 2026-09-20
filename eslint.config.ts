@@ -46,6 +46,7 @@ export default defineConfig([
             'tests/*.ts',
             'src/polyfills/*.js',
             'tests/*.mjs',
+            'tests/ui/*.mjs',
           ],
         },
       },
@@ -143,7 +144,7 @@ export default defineConfig([
     },
   },
   {
-    files: ['scripts/*.mjs'],
+    files: ['scripts/*.mjs', 'tests/ui/run.mjs'],
 
     languageOptions: {
       globals: {

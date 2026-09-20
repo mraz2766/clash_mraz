@@ -6,14 +6,7 @@ import {
   LinkRounded,
   MemoryRounded,
 } from '@mui/icons-material'
-import {
-  Grid,
-  PaletteColor,
-  Paper,
-  Typography,
-  alpha,
-  useTheme,
-} from '@mui/material'
+import { Box, PaletteColor, Paper, Typography, useTheme } from '@mui/material'
 import { ReactNode, memo, useMemo, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -69,68 +62,46 @@ const CompactStatCard = memo(
     }, [theme.palette, color])
 
     return (
-      <Paper
-        elevation={0}
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          borderRadius: 2,
-          bgcolor: alpha(colorValue, 0.05),
-          border: `1px solid ${alpha(colorValue, 0.15)}`,
-          padding: '8px',
-          transition: 'all 0.2s ease-in-out',
-          cursor: onClick ? 'pointer' : 'default',
-          '&:hover': onClick
-            ? {
-                bgcolor: alpha(colorValue, 0.1),
-                border: `1px solid ${alpha(colorValue, 0.3)}`,
-                boxShadow: `0 4px 8px rgba(0,0,0,0.05)`,
-              }
-            : {},
-        }}
+      <Box
+        className="traffic-metric"
         onClick={onClick}
+        sx={{ cursor: onClick ? 'pointer' : undefined }}
       >
-        {/* 图标容器 */}
-        <Grid
+        <Typography
           component="div"
+          variant="caption"
+          color="text.secondary"
+          noWrap
+          sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}
+        >
+          <Box
+            component="span"
+            sx={{
+              color: colorValue,
+              display: 'flex',
+              '& svg': { fontSize: 13 },
+            }}
+          >
+            {icon}
+          </Box>
+          {title}
+        </Typography>
+        <Typography
+          component="div"
+          className="metric-value"
           sx={{
-            mr: 1,
-            ml: '2px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: 32,
-            height: 32,
-            borderRadius: '50%',
-            bgcolor: alpha(colorValue, 0.1),
-            color: colorValue,
+            fontVariantNumeric: 'tabular-nums',
+            whiteSpace: 'nowrap',
+            letterSpacing: '-.5px',
+            fontWeight: 600,
           }}
         >
-          {icon}
-        </Grid>
-
-        {/* 文本内容 */}
-        <Grid component="div" sx={{ flexGrow: 1, minWidth: 0 }}>
-          <Typography variant="caption" color="text.secondary" noWrap>
-            {title}
+          {value ?? '—'}{' '}
+          <Typography component="span" variant="caption" color="text.secondary">
+            {unit}
           </Typography>
-          <Grid
-            component="div"
-            sx={{ display: 'flex', alignItems: 'baseline' }}
-          >
-            <Typography
-              variant="body1"
-              noWrap
-              sx={{ mr: 0.5, fontWeight: 'bold' }}
-            >
-              {value}
-            </Typography>
-            <Typography variant="caption" color="text.secondary">
-              {unit}
-            </Typography>
-          </Grid>
-        </Grid>
-      </Paper>
+        </Typography>
+      </Box>
     )
   },
 )
@@ -138,9 +109,12 @@ const CompactStatCard = memo(
 // 添加显示名称
 CompactStatCard.displayName = 'CompactStatCard'
 
-export const EnhancedTrafficStats = () => {
+export const EnhancedTrafficStats = ({
+  view = 'full',
+}: {
+  view?: 'full' | 'summary' | 'detail'
+}) => {
   const { t } = useTranslation()
-  const theme = useTheme()
   const { verge } = useVerge()
   const trafficRef = useRef<EnhancedCanvasTrafficGraphRef>(null)
   const pageVisible = useVisibility()
@@ -190,15 +164,16 @@ export const EnhancedTrafficStats = () => {
 
   // 渲染流量图表 - 使用useMemo缓存渲染结果
   const trafficGraphComponent = useMemo(() => {
-    if (!trafficGraph || !pageVisible) return null
+    if (!trafficGraph || !pageVisible || view === 'summary') return null
 
     return (
       <Paper
         elevation={0}
         sx={{
-          height: 130,
+          height: 158,
           cursor: 'pointer',
-          border: `1px solid ${alpha(theme.palette.divider, 0.2)}`,
+          border: 'none',
+          backgroundColor: 'transparent',
           borderRadius: 2,
           overflow: 'hidden',
         }}
@@ -209,7 +184,7 @@ export const EnhancedTrafficStats = () => {
         </div>
       </Paper>
     )
-  }, [trafficGraph, pageVisible, theme.palette.divider])
+  }, [trafficGraph, pageVisible, view])
 
   // 使用useMemo计算统计卡片配置
   const statCards = useMemo(() => {
@@ -257,7 +232,7 @@ export const EnhancedTrafficStats = () => {
         title: t('home.components.traffic.metrics.memoryUsage'),
         value: parsedData.inuse,
         unit: parsedData.inuseUnit,
-        color: 'error' as const,
+        color: 'secondary' as const,
       })
     }
 
@@ -270,20 +245,21 @@ export const EnhancedTrafficStats = () => {
         console.error('[EnhancedTrafficStats] 组件错误:', error, errorInfo)
       }}
     >
-      <Grid container spacing={1} columns={{ xs: 8, sm: 8, md: 12 }}>
-        {trafficGraph && (
-          <Grid size={12}>
-            {/* 流量图表区域 */}
-            {trafficGraphComponent}
-          </Grid>
-        )}
-        {/* 统计卡片区域 */}
-        {statCards.map((card) => (
-          <Grid key={card.title} size={4}>
-            <CompactStatCard {...card} />
-          </Grid>
-        ))}
-      </Grid>
+      {view !== 'detail' && (
+        <Box className="traffic-headline">
+          {statCards.slice(0, 3).map((card) => (
+            <CompactStatCard key={card.title} {...card} />
+          ))}
+        </Box>
+      )}
+      {view !== 'summary' && trafficGraph && trafficGraphComponent}
+      {(view !== 'summary' || !trafficGraph) && (
+        <Box className="traffic-footnote">
+          {statCards.slice(3).map((card) => (
+            <CompactStatCard key={card.title} {...card} />
+          ))}
+        </Box>
+      )}
     </TrafficErrorBoundary>
   )
 }

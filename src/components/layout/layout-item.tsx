@@ -65,6 +65,7 @@ export const LayoutItem = (props: Props) => {
     >
       <ListItemButton
         className="md-nav-item"
+        data-destination={to}
         ref={sortable?.handleRef}
         selected={!!match}
         aria-current={match ? 'page' : undefined}

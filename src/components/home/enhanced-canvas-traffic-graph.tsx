@@ -12,6 +12,7 @@ import {
 } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import { useTrafficColors } from '@/hooks/use-traffic-colors'
 import { useTrafficGraphDataEnhanced } from '@/hooks/use-traffic-monitor'
 import { useVerge } from '@/hooks/use-verge'
 import { debugLog } from '@/utils/debug'
@@ -118,6 +119,7 @@ export const EnhancedCanvasTrafficGraph = memo(
     ref,
   }: EnhancedCanvasTrafficGraphProps) {
     const theme = useTheme()
+    const trafficColors = useTrafficColors()
     const { t } = useTranslation()
     const verge = useVerge()
     const pause_render_traffic_stats_on_blur =
@@ -168,13 +170,13 @@ export const EnhancedCanvasTrafficGraph = memo(
 
     const colors = useMemo(
       () => ({
-        up: theme.palette.secondary.main,
-        down: theme.palette.primary.main,
+        up: trafficColors.up,
+        down: trafficColors.down,
         grid: theme.palette.divider,
         text: theme.palette.text.secondary,
         background: theme.palette.background.paper,
       }),
-      [theme],
+      [theme, trafficColors],
     )
 
     const updateDisplayData = useCallback((newData: ITrafficDataPoint[]) => {
@@ -831,6 +833,7 @@ export const EnhancedCanvasTrafficGraph = memo(
         bottomValue,
       )
 
+      ctx.setLineDash([5, 4])
       drawTrafficLine(
         ctx,
         displayData,
@@ -842,6 +845,7 @@ export const EnhancedCanvasTrafficGraph = memo(
         topValue,
         bottomValue,
       )
+      ctx.setLineDash([])
 
       clearCanvas(hoverCanvasRef.current)
     }, [
@@ -1145,23 +1149,26 @@ export const EnhancedCanvasTrafficGraph = memo(
             )}
           </Box>
 
-          <Box
-            sx={{
-              position: 'absolute',
-              bottom: 6,
-              left: 8,
-              fontSize: '9px',
-              color: 'text.disabled',
-              opacity: 0.6,
-              lineHeight: 1.2,
-            }}
-          >
-            {t('home.components.traffic.diagnostics', {
-              points: displayData.length,
-              compressed: samplerStats.compressedBufferSize,
-              fps: currentFPS,
-            })}
-          </Box>
+          {import.meta.env.DEV && (
+            <Box
+              data-development-only
+              sx={{
+                position: 'absolute',
+                bottom: 6,
+                left: 8,
+                fontSize: '9px',
+                color: 'text.disabled',
+                opacity: 0.6,
+                lineHeight: 1.2,
+              }}
+            >
+              {t('home.components.traffic.diagnostics', {
+                points: displayData.length,
+                compressed: samplerStats.compressedBufferSize,
+                fps: currentFPS,
+              })}
+            </Box>
+          )}
 
           {tooltipData.visible && (
             <Box

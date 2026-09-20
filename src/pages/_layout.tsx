@@ -1,5 +1,15 @@
 import { DragDropProvider, KeyboardSensor, PointerSensor } from '@dnd-kit/react'
-import { Box, List, Menu, MenuItem, Paper, ThemeProvider } from '@mui/material'
+import { ViewSidebarRounded } from '@mui/icons-material'
+import {
+  Box,
+  IconButton,
+  List,
+  Menu,
+  MenuItem,
+  Paper,
+  ThemeProvider,
+  Tooltip,
+} from '@mui/material'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -23,6 +33,7 @@ import { useVerge } from '@/hooks/use-verge'
 import { useWindowDecorations } from '@/hooks/use-window'
 import { useThemeMode } from '@/services/states'
 import getSystem from '@/utils/get-system'
+import { version as appVersion } from '@root/package.json'
 
 import {
   useCustomTheme,
@@ -124,6 +135,43 @@ const Layout = () => {
     void patchVerge({ collapse_navbar: !navCollapsed })
   }, [navCollapsed, patchVerge])
 
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (
+        !(OS === 'macos'
+          ? event.metaKey && !event.ctrlKey
+          : event.ctrlKey && !event.metaKey) ||
+        event.altKey ||
+        event.shiftKey
+      )
+        return
+      if (document.querySelector('[role="dialog"][aria-modal="true"]')) return
+      const target = event.target
+      if (
+        target instanceof HTMLElement &&
+        target.closest(
+          'input, textarea, [contenteditable="true"], [role="dialog"], .monaco-editor',
+        )
+      )
+        return
+      if (event.key === ',') {
+        event.preventDefault()
+        navigate('/settings')
+      } else if (event.key.toLowerCase() === 'b') {
+        event.preventDefault()
+        handleToggleNavCollapsed()
+      } else if (/^[1-8]$/.test(event.key)) {
+        const destination = menuOrder[Number(event.key) - 1]
+        if (destination) {
+          event.preventDefault()
+          navigate(destination)
+        }
+      }
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [handleToggleNavCollapsed, menuOrder, navigate])
+
   const customTitlebar = useMemo(
     () =>
       decorated === false ? (
@@ -223,7 +271,7 @@ const Layout = () => {
       <Paper
         square
         elevation={0}
-        className={`${OS} layout${navCollapsed ? ' layout--nav-collapsed' : ''}`}
+        className={`${OS} desktop-workspace layout${navCollapsed ? ' layout--nav-collapsed' : ''}`}
         style={{
           borderTopLeftRadius: '0px',
           borderTopRightRadius: '0px',
@@ -257,6 +305,26 @@ const Layout = () => {
 
         <div className="layout-content">
           <div className="layout-content__left">
+            <div
+              className="workspace-window-toolbar"
+              data-tauri-drag-region="true"
+            >
+              <Tooltip
+                title={`${t(navCollapsed ? 'layout.components.navigation.menu.expandNavBar' : 'layout.components.navigation.menu.collapseNavBar')} (${OS === 'macos' ? '⌘' : 'Ctrl+'}B)`}
+              >
+                <IconButton
+                  size="small"
+                  onClick={handleToggleNavCollapsed}
+                  aria-label={t(
+                    navCollapsed
+                      ? 'layout.components.navigation.menu.expandNavBar'
+                      : 'layout.components.navigation.menu.collapseNavBar',
+                  )}
+                >
+                  <ViewSidebarRounded fontSize="small" />
+                </IconButton>
+              </Tooltip>
+            </div>
             <div className="the-logo" data-tauri-drag-region="false">
               <div
                 data-tauri-drag-region="true"
@@ -277,6 +345,14 @@ const Layout = () => {
                 <span className="brand-name">Clash</span>
               </div>
               <UpdateButton className="the-newbtn" />
+              <span className="workspace-edition">
+                {OS === 'windows'
+                  ? 'for Windows'
+                  : OS === 'macos'
+                    ? 'for Mac'
+                    : 'Desktop'}{' '}
+                · {appVersion}
+              </span>
             </div>
 
             {menuUnlocked && (

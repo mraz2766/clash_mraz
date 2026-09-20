@@ -67,6 +67,29 @@ ${StrLoc}
 !define ESTIMATEDSIZE "{{estimated_size}}"
 !define STARTMENUFOLDER "{{start_menu_folder}}"
 
+; A versioned icon avoids stale Explorer icons after an in-place upgrade.
+; Update only links targeting this installation; keep arguments and user choices.
+!macro RefreshBrandShortcut shortcut
+  !insertmacro IsShortcutTarget "${shortcut}" "$INSTDIR\${MAINBINARYNAME}.exe"
+  Pop $0
+  ${If} $0 = 1
+    !insertmacro ComHlpr_CreateInProcInstance ${CLSID_ShellLink} ${IID_IShellLink} r0 ""
+    ${If} $0 P<> 0
+      ${IUnknown::QueryInterface} $0 '("${IID_IPersistFile}",.r1)'
+      ${If} $1 P<> 0
+        ${IPersistFile::Load} $1 '("${shortcut}", ${STGM_READWRITE})i.r2'
+        ${If} $2 >= 0
+          ${IShellLink::SetIconLocation} $0 '(w "$INSTDIR\clash-brand-${VERSION}.ico", i 0)'
+          ${IPersistFile::Save} $1 '("${shortcut}",1)'
+          System::Call 'shell32::SHChangeNotify(i 0x2000, i 0x5, w "${shortcut}", p 0)'
+        ${EndIf}
+        ${IUnknown::Release} $1 ""
+      ${EndIf}
+      ${IUnknown::Release} $0 ""
+    ${EndIf}
+  ${EndIf}
+!macroend
+
 Var PassiveMode
 Var UpdateMode
 Var NoShortcutMode
@@ -933,6 +956,7 @@ Section Install
 
   ; Copy main executable
   File "${MAINBINARYSRCPATH}"
+  File "/oname=clash-brand-${VERSION}.ico" "${INSTALLERICON}"
 
   ; Copy resources
   {{#each resources_dirs}}
@@ -1018,6 +1042,16 @@ Section Install
   ${OrIf} ${Silent}
     Call CreateOrUpdateDesktopShortcut
   ${EndIf}
+
+  ; Refresh existing links even when the user opts out of creating new ones.
+  !insertmacro RefreshBrandShortcut "$DESKTOP\${PRODUCTNAME}.lnk"
+  !insertmacro RefreshBrandShortcut "$SMPROGRAMS\${PRODUCTNAME}.lnk"
+  !insertmacro RefreshBrandShortcut "$SMPROGRAMS\$AppStartMenuFolder\${PRODUCTNAME}.lnk"
+  SetShellVarContext current
+  !insertmacro RefreshBrandShortcut "$DESKTOP\${PRODUCTNAME}.lnk"
+  !insertmacro RefreshBrandShortcut "$SMPROGRAMS\${PRODUCTNAME}.lnk"
+  !insertmacro RefreshBrandShortcut "$SMPROGRAMS\$AppStartMenuFolder\${PRODUCTNAME}.lnk"
+  !insertmacro SetContext
 
   !ifmacrodef NSIS_HOOK_POSTINSTALL
     !insertmacro NSIS_HOOK_POSTINSTALL
@@ -1108,6 +1142,7 @@ Section Uninstall
   ; Delete the app directory and its content from disk
   ; Copy main executable
   Delete "$INSTDIR\${MAINBINARYNAME}.exe"
+  Delete "$INSTDIR\clash-brand-*.ico"
 
   ; Delete resources
   {{#each resources}}
@@ -1355,6 +1390,7 @@ Function CreateOrUpdateDesktopShortcut
   Pop $0
   ${If} $0 = 1
     !insertmacro SetShortcutTarget "$DESKTOP\${PRODUCTNAME}.lnk" "$INSTDIR\${MAINBINARYNAME}.exe"
+    !insertmacro RefreshBrandShortcut "$DESKTOP\${PRODUCTNAME}.lnk"
     Return
   ${EndIf}
 
@@ -1368,5 +1404,6 @@ Function CreateOrUpdateDesktopShortcut
   ${EndIf}
 
   CreateShortcut "$DESKTOP\${PRODUCTNAME}.lnk" "$INSTDIR\${MAINBINARYNAME}.exe"
+  !insertmacro RefreshBrandShortcut "$DESKTOP\${PRODUCTNAME}.lnk"
   !insertmacro SetLnkAppUserModelId "$DESKTOP\${PRODUCTNAME}.lnk"
 FunctionEnd
