@@ -1,6 +1,7 @@
 import { spawn } from 'node:child_process'
 import {
   access,
+  open,
   readdir,
   stat,
   mkdir,
@@ -30,7 +31,7 @@ function run(command, args, env, capture = false) {
       output += chunk
     })
     child.once('error', reject)
-    child.once('exit', (code, signal) => {
+    child.once('close', (code, signal) => {
       if (code === 0) resolve(output)
       else
         reject(
@@ -41,8 +42,15 @@ function run(command, args, env, capture = false) {
 }
 
 export function buildOptions(args, platform, env) {
-  const forwarded = args.filter((arg) => arg !== '--no-open')
+  const forwarded = args.filter(
+    (arg) => !['--no-open', '--install'].includes(arg),
+  )
   const localWindows = platform === 'win32' && !env.CI && !args.includes('--ci')
+  const install = args.includes('--install')
+  if (install && (!localWindows || args.includes('--no-open')))
+    throw new Error(
+      '--install requires a local Windows build and cannot be combined with --no-open.',
+    )
   const shouldOpen = localWindows && !args.includes('--no-open')
   const split = forwarded.indexOf('--')
   const tauriArgs = split === -1 ? forwarded : forwarded.slice(0, split)
@@ -63,6 +71,7 @@ export function buildOptions(args, platform, env) {
   return {
     localWindows,
     shouldOpen,
+    install,
     args: ['build', ...tauriArgs, ...cargoArgs],
   }
 }
@@ -111,7 +120,7 @@ export async function publishInstaller(source, directory) {
   }
 }
 
-export async function main(args = process.argv.slice(2)) {
+async function build(args) {
   const env = {
     ...process.env,
     NODE_OPTIONS: process.env.NODE_OPTIONS || '--max-old-space-size=4096',
@@ -150,6 +159,9 @@ export async function main(args = process.argv.slice(2)) {
     try {
       await access(sidecar)
       await access(
+        path.join(root, 'src-tauri/sidecar', `verge-mihomo-alpha-${host}.exe`),
+      )
+      await access(
         path.join(root, 'src-tauri/resources/clash-verge-service.exe'),
       )
     } catch {
@@ -185,20 +197,56 @@ export async function main(args = process.argv.slice(2)) {
     const installer = await publishInstaller(fresh, path.join(root, 'releases'))
     console.log(`Installer: ${installer}`)
     if (options.shouldOpen) {
-      // Pass the path as data, not interpolated PowerShell source. No silent install.
+      // Pass paths as data. Installation is opt-in; /NS preserves shortcut choices.
+      // WaitForExit waits only for NSIS; Start-Process -Wait also waits for the restarted app.
+      const launch = options.install
+        ? '$p = Start-Process -FilePath $env:CLASH_BUILD_INSTALLER -ArgumentList @("/P", "/R", "/NS") -PassThru -ErrorAction Stop; $p.WaitForExit(); if ($p.ExitCode -eq 3010) { Write-Output "Installation requires a restart." } else { exit $p.ExitCode }'
+        : 'Start-Process -FilePath $env:CLASH_BUILD_INSTALLER -ErrorAction Stop'
       await run(
         'powershell.exe',
-        [
-          '-NoProfile',
-          '-NonInteractive',
-          '-Command',
-          'Start-Process -FilePath $env:CLASH_BUILD_INSTALLER -ErrorAction Stop',
-        ],
+        ['-NoProfile', '-NonInteractive', '-Command', launch],
         { ...env, CLASH_BUILD_INSTALLER: installer },
       )
-      console.log('Installer opened. Complete installation in its window.')
+      console.log(
+        options.install
+          ? 'Installer completed. Clash was requested to restart.'
+          : 'Installer opened. Complete installation in its window.',
+      )
     }
   }
+}
+
+// One build/publish/install transaction per checkout, including all failure paths.
+export async function withBuildLock(directory, action) {
+  await mkdir(directory, { recursive: true })
+  const lockPath = path.join(directory, '.build.lock')
+  let lock
+  try {
+    lock = await open(lockPath, 'wx')
+  } catch (error) {
+    if (error.code === 'EEXIST')
+      throw new Error(
+        `Another build or installation holds ${lockPath}. Wait for it to finish. If the previous process crashed, verify it has stopped before removing this lock.`,
+        { cause: error },
+      )
+    throw error
+  }
+  try {
+    await lock.writeFile(
+      JSON.stringify({ pid: process.pid, startedAt: new Date().toISOString() }),
+    )
+    return await action()
+  } finally {
+    await lock.close()
+    await rm(lockPath, { force: true })
+  }
+}
+
+export async function main(args = process.argv.slice(2)) {
+  const { localWindows } = buildOptions(args, process.platform, process.env)
+  return localWindows
+    ? withBuildLock(path.join(root, 'releases'), () => build(args))
+    : build(args)
 }
 
 if (

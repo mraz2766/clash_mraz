@@ -11,7 +11,12 @@ import { tmpdir } from 'node:os'
 import path from 'node:path'
 import test from 'node:test'
 
-import { buildOptions, freshInstaller, publishInstaller } from './build.mjs'
+import {
+  buildOptions,
+  freshInstaller,
+  publishInstaller,
+  withBuildLock,
+} from './build.mjs'
 
 test('every bundled ICO frame uses RGBA PNG encoding accepted by Tauri', async () => {
   const directory = new URL('../src-tauri/icons/', import.meta.url)
@@ -109,4 +114,31 @@ test('only one fresh non-empty installer can be launched; stale and ambiguous ou
     'test fixture; not executable',
   )
   await assert.rejects(freshInstaller(directory, startedAt), /found 2/)
+})
+
+test('installation is explicit and incompatible flags fail early', () => {
+  assert.equal(buildOptions(['--install'], 'win32', {}).install, true)
+  assert.throws(() => buildOptions(['--install', '--no-open'], 'win32', {}))
+  assert.throws(() => buildOptions(['--install'], 'linux', {}))
+  assert.throws(() => buildOptions(['--install'], 'win32', { CI: 'true' }))
+})
+
+test('build lock prevents overlap and is released after failure', async () => {
+  const directory = await mkdtemp(path.join(tmpdir(), 'clash-lock-'))
+  try {
+    await assert.rejects(
+      withBuildLock(directory, async () => {
+        await assert.rejects(
+          withBuildLock(directory, () => assert.fail('overlapping build')),
+          /Another build/,
+        )
+        throw new Error('build failed')
+      }),
+      /build failed/,
+    )
+    assert.equal(await withBuildLock(directory, async () => 'ok'), 'ok')
+    assert.deepEqual(await readdir(directory), [])
+  } finally {
+    await rm(directory, { recursive: true, force: true })
+  }
 })

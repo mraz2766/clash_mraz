@@ -46,6 +46,44 @@ const navigate = async (route = '/', theme = 'light') => {
 }
 try {
   await navigate()
+  const selectors = page.locator('.home-proxy-selectors')
+  assert.ok((await selectors.boundingBox()).width <= 561)
+  await selectors.getByRole('combobox').last().click()
+  const menu = page.getByRole('listbox')
+  await menu.waitFor()
+  const bounds = await menu.boundingBox()
+  assert.ok(bounds.width <= 322 && bounds.height <= 282)
+  await page.screenshot({ path: path.join(output, 'compact-node-menu.png') })
+  await page.keyboard.press('Escape')
+  await menu.waitFor({ state: 'hidden' })
+  await page.getByRole('button', { name: '外观设置', exact: true }).click()
+  assert.equal(
+    await page
+      .getByRole('tab', { name: '外观', exact: true })
+      .getAttribute('aria-selected'),
+    'true',
+  )
+  await page.getByRole('tab', { name: '通用', exact: true }).click()
+  await page.getByText('首页显示内容', { exact: true }).click()
+  const contentDialog = page.getByRole('dialog')
+  await contentDialog.waitFor()
+  assert.ok((await contentDialog.boundingBox()).width <= 401)
+  await contentDialog.getByRole('checkbox').first().uncheck()
+  await contentDialog.getByRole('button', { name: '取消', exact: true }).click()
+  await page.getByText('首页显示内容', { exact: true }).click()
+  assert.equal(
+    await contentDialog.getByRole('checkbox').first().isChecked(),
+    true,
+  )
+  await contentDialog.getByRole('checkbox').first().uncheck()
+  await page.screenshot({ path: path.join(output, 'home-content-dialog.png') })
+  await contentDialog.getByRole('button', { name: '保存', exact: true }).click()
+  await contentDialog.waitFor({ state: 'hidden' })
+  assert.equal(
+    await page.evaluate(() => window.__uiFixture.verge.home_cards.network),
+    false,
+  )
+  await navigate()
   assert.equal(await page.locator('#home-diagnostics-panel').count(), 0)
   assert.equal(
     await page.evaluate(() => window.__uiCalls.includes('get_system_info')),
@@ -68,6 +106,7 @@ try {
   assert.match(page.url(), /settings/)
   await search.fill('')
   await page.getByRole('tab', { name: '外观', exact: true }).click()
+  await page.getByRole('switch', { name: '显示流量图', exact: true }).waitFor()
   // Persist the color preference, then verify it survives a complete reload.
   await page.getByRole('combobox').click()
   await page.getByRole('option', { name: '单色', exact: true }).click()
@@ -79,6 +118,7 @@ try {
   )
   await page.reload()
   await page.getByRole('tab', { name: '外观', exact: true }).click()
+  await page.getByRole('switch', { name: '显示流量图', exact: true }).waitFor()
   assert.match(await page.getByRole('combobox').innerText(), /单色/)
   await page.getByRole('switch', { name: '显示流量图', exact: true }).uncheck()
   await page.locator('.base-page > header').click()
@@ -230,6 +270,7 @@ try {
   }
   await navigate('/settings')
   await page.getByRole('tab', { name: '外观', exact: true }).click()
+  await page.getByRole('switch', { name: '显示流量图', exact: true }).waitFor()
   await page.screenshot({
     animations: 'disabled',
     path: path.join(root, 'docs/preview_settings.jpg'),

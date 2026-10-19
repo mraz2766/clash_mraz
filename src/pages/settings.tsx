@@ -9,6 +9,7 @@ import {
 } from '@mui/material'
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useSearchParams } from 'react-router'
 
 import { BasePage } from '@/components/base'
 import SettingClash from '@/components/setting/setting-clash'
@@ -25,7 +26,15 @@ import { showNotice } from '@/services/notice-service'
 const SettingPage = () => {
   const { t } = useTranslation()
   const text = useDesktopText()
-  const [category, setCategory] = useState<SettingsCategory>('general')
+  const [searchParams, setSearchParams] = useSearchParams()
+  const requestedCategory = searchParams.get('category')
+  const category: SettingsCategory =
+    requestedCategory &&
+    ['general', 'appearance', 'network', 'backup', 'advanced'].includes(
+      requestedCategory,
+    )
+      ? (requestedCategory as SettingsCategory)
+      : 'general'
   const [query, setQuery] = useState('')
   const filter = useMemo(() => ({ category, query }), [category, query])
   const tabs = [
@@ -64,7 +73,13 @@ const SettingPage = () => {
         <Tabs
           value={category}
           onChange={(_, next) => {
-            setCategory(next)
+            setSearchParams(
+              (previous) => {
+                previous.set('category', next)
+                return previous
+              },
+              { replace: true },
+            )
             setQuery('')
           }}
           variant="scrollable"

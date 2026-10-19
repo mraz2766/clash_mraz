@@ -20,7 +20,7 @@ powershell -ExecutionPolicy Bypass -File scripts\build-windows.ps1 -InstallTools
 - 检查 Node.js（20 及以上）、Rust 与带 C++ 工作负载的 Visual Studio 构建工具；`-InstallTools` 时用 winget 安装缺少的项目，否则列出下载链接后退出。
 - 按 `rust-toolchain.toml` 安装固定版本的 Rust 工具链。
 - 没有 pnpm 时，用 corepack 在 `%LOCALAPPDATA%\clash-build\bin` 生成当前用户可用的 pnpm，无需管理员权限；Node.js 不带 corepack 时改用 `npm install --global` 安装 `package.json` 中固定的 pnpm 版本。
-- 运行 `pnpm install --frozen-lockfile` 与 `pnpm build:fast --no-open`（`-Release` 时为 `pnpm build`），找到本次生成的安装包后打开安装向导；`-NoLaunch` 只输出路径。
+- 运行 `pnpm install --frozen-lockfile` 与 `pnpm build:fast`（`-Release` 时为 `pnpm build`），找到本次生成的安装包后打开安装向导；`-NoLaunch` 只输出路径。
 
 脚本以 UTF-8 BOM 保存，以便 Windows PowerShell 5.1 正确显示中文提示。
 
@@ -51,12 +51,12 @@ pnpm build:fast
 ```text
 clash_mraz/
   releases/
-    Clash_2.6.0_x64-setup.exe
+    Clash_2.6.1_x64-setup.exe
 ```
 
 文件名随版本与架构变化，以构建输出为准。Cargo 的中间产物仍在 `target/` 中，这是编译缓存；无需手动进入它寻找安装包。`releases/` 不提交到 Git。
 
-只有本次构建成功，且找到唯一、非空的新安装包，才会复制并打开。复制使用临时文件后重命名，失败不会打开旧安装包。打开后由你操作安装向导，不执行静默安装。
+只有本次构建成功，且找到唯一、非空的新安装包，才会复制并打开。复制使用临时文件后重命名，失败不会打开旧安装包。默认打开后由你操作安装向导。显式传入 `--install` 时使用带进度的覆盖安装，完成后启动 Clash；保留现有快捷方式选择。
 
 ```sh
 pnpm build:fast --no-open
@@ -72,9 +72,9 @@ pnpm build:fast --no-open
 
 如果上一次安装向导仍在运行并锁定同名 EXE，新构建会在 `releases/` 中使用带时间戳的文件名，不强行关闭正在使用的安装程序。安装完成后，可自行清理不再需要的旧 EXE。
 
-## 2.6.0 图标升级
+## 2.6.1 图标升级
 
-安装目录包含带版本号的 `clash-brand-2.6.0.ico`。升级后，仅刷新目标为本次安装 EXE 的既有桌面与开始菜单快捷方式，保留快捷方式的参数。未选择创建快捷方式时不会额外创建；不删除系统图标缓存或重启 Explorer。
+安装目录包含带版本号的 `clash-brand-2.6.1.ico`。升级后，仅刷新目标为本次安装 EXE 的既有桌面与开始菜单快捷方式，保留快捷方式的参数。未选择创建快捷方式时不会额外创建；不删除系统图标缓存或重启 Explorer。
 
 ## 隔离页面验证
 
@@ -90,11 +90,17 @@ pnpm build:fast --no-open
 - 隔离 UI 运行器全部通过（8 页 × 2 主题 × 2 尺寸，含 200% DPI 与减少动态效果），并重新生成四张文档截图；本次在 macOS 上以 Windows 平台渲染完成，未在 Windows 实机上重新验收。
 - 生产构建入口包约 603 KB（此前约 1.05 MB）。
 
-## 2.6.0 验证记录（2026-09-20）
+## 2.6.1 验证记录（2026-09-20）
 
 - TypeScript、ESLint、17 项前端测试、5 项构建/ICO 测试通过，包含过期 NotRunning 快照的代理开关回归。
 - 隔离 UI 验证涵盖设置搜索、配色持久化、关闭图表、模式切换、诊断按需加载、网站出口空状态、节点切换成功/失败，以及快捷键避让；记录 8 页 × 2 主题 × 2 尺寸截图，另检查 200% DPI 与减少动态效果。
-- `pnpm build:fast` 完成 Windows x64 NSIS 打包。安装包位于 `releases/Clash_2.6.0_x64-setup.exe`。
-- `tests/windows-shortcut-icon.ps1` 在项目 `target/` 内执行安装器实际图标刷新宏；确认图标更新、参数与目标保留、无关链接不变、缺失链接不创建。本机升级后读取到应用版本 2.6.0，桌面和开始菜单快捷方式均指向 `clash-brand-2.6.0.ico`。
+- `pnpm build:fast` 完成 Windows x64 NSIS 打包。安装包位于 `releases/Clash_2.6.1_x64-setup.exe`。
+- `tests/windows-shortcut-icon.ps1` 在项目 `target/` 内执行安装器实际图标刷新宏；确认图标更新、参数与目标保留、无关链接不变、缺失链接不创建。本机升级后读取到应用版本 2.6.1，桌面和开始菜单快捷方式均指向 `clash-brand-2.6.1.ico`。
 - 完整 Tauri 测试程序可以编译，但本机运行时出现 `0xc0000139 / STATUS_ENTRYPOINT_NOT_FOUND`，9 月 12 日留下的旧测试程序也复现相同加载错误。`tests/startup-gate.ps1` 直接引用原启动等待源码，以锁定版本 Tokio 独立执行：等待初始化、已完成立即返回、超时上限三项全部通过；这不代表完整 Tauri 测试套件通过。
 - 未验证 Windows 10/11 全版本矩阵、开机冷启动、多显示器 DPI 切换与完整安装/卸载组合。原生窗口截图工具在本机返回不支持接口错误；页面截图来自浏览器隔离预览，不能代替原生窗口操作验收。
+
+## 一键覆盖本机应用
+
+运行 `powershell -ExecutionPolicy Bypass -File scripts\build-windows.ps1 -Install`，或 `pnpm build:fast --install`。默认仍然只打开安装向导；`-NoLaunch` / `--no-open` 仅打包，两者不能与自动安装同时使用。
+
+构建、发布安装包和安装过程共用互斥锁，阻止重复运行。安装器使用本次构建返回的确切路径，不按文件时间猜测。若进程异常退出留下 releases/.build.lock，确认没有构建或安装进程后再删除该锁。GitHub 云端自动构建保持关闭。

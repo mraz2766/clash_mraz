@@ -1,10 +1,11 @@
 import { ContentCopyRounded } from '@mui/icons-material'
 import { Button, Input, MenuItem, Select } from '@mui/material'
 import { open } from '@tauri-apps/plugin-dialog'
-import { useCallback, useRef } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { DialogRef, Switch, TooltipIcon } from '@/components/base'
+import { HomeContentDialog } from '@/components/setting/mods/home-content-dialog'
 import { useDesktopText } from '@/hooks/use-desktop-text'
 import { useTrafficPreferences } from '@/hooks/use-traffic-preferences'
 import { useVerge } from '@/hooks/use-verge'
@@ -64,6 +65,7 @@ const SettingVergeBasic = ({ onError }: Props) => {
     startup_script,
     start_page,
   } = verge ?? {}
+  const [homeContentOpen, setHomeContentOpen] = useState(false)
   const configRef = useRef<DialogRef>(null)
   const hotkeyRef = useRef<DialogRef>(null)
   const miscRef = useRef<DialogRef>(null)
@@ -82,6 +84,18 @@ const SettingVergeBasic = ({ onError }: Props) => {
 
   return (
     <SettingList title={t('settings.components.verge.basic.title')}>
+      {homeContentOpen && (
+        <HomeContentDialog onClose={() => setHomeContentOpen(false)} />
+      )}
+      <SettingItem
+        category="general"
+        label={text('首页显示内容', 'Home content')}
+        secondary={text(
+          '选择首页显示的模块与诊断信息',
+          'Choose dashboard modules and diagnostics',
+        )}
+        onClick={() => setHomeContentOpen(true)}
+      />
       <ThemeViewer ref={themeRef} />
       <ConfigViewer ref={configRef} />
       <HotkeyViewer ref={hotkeyRef} />

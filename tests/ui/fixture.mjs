@@ -251,7 +251,7 @@ mockIPC(
       clearInterval(timers.get(args.id))
       return null
     }
-    if (command === 'plugin:app|version') return '2.6.0'
+    if (command === 'plugin:app|version') return '2.6.1'
     if (command === 'plugin:app|name') return 'Clash'
     if (command === 'plugin:updater|check') return null
     if (command === 'read_profile_file') return '# 演示配置\n'

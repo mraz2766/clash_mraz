@@ -69,7 +69,24 @@ const STORAGE_KEY_SORT_TYPE = 'clash-verge-proxy-sort-type'
 
 const AUTO_CHECK_DEFAULT_INTERVAL_MINUTES = 5
 const AUTO_CHECK_INITIAL_DELAY_MS = 100
-const PROXY_MENU_MAX_HEIGHT = 500
+const PROXY_MENU_MAX_HEIGHT = 280
+const compactMenuSx = {
+  width: 320,
+  maxWidth: 'calc(100vw - 32px)',
+  maxHeight: 'min(280px, calc(100vh - 80px))',
+  overflow: 'auto',
+  borderRadius: '10px',
+  border: '1px solid var(--md-outline-soft)',
+  boxShadow: '0 6px 24px #00000018',
+  '& .MuiMenuItem-root': {
+    minHeight: 32,
+    py: 0.5,
+    px: 1.25,
+    borderRadius: '6px',
+    fontSize: 13,
+  },
+  '& .MuiMenuList-root, & .MuiList-root': { p: 0.5 },
+} as const
 
 interface ProxyOption {
   memberIndex: number
@@ -277,7 +294,7 @@ const PersistentProxySelect = ({
         onClose()
       }}
     >
-      <Box>
+      <Box sx={{ minWidth: 0 }}>
         {/* Windows-style field: a static label above the box, no notched outline. */}
         <Typography
           component="label"
@@ -296,7 +313,11 @@ const PersistentProxySelect = ({
             onOpen={onOpen}
             disabled={disabled}
             // The current node's delay is already shown in the card header.
-            renderValue={() => <Typography noWrap>{selectedName}</Typography>}
+            renderValue={() => (
+              <Typography sx={{ fontSize: 13 }} noWrap>
+                {selectedName}
+              </Typography>
+            )}
             SelectDisplayProps={{
               'aria-controls': open ? listboxId : undefined,
               'aria-expanded': open ? 'true' : 'false',
@@ -311,13 +332,17 @@ const PersistentProxySelect = ({
           anchorEl={anchorRef.current}
           placement="bottom-start"
           sx={{
-            width: anchorRef.current?.clientWidth,
+            width: 320,
+            maxWidth: 'calc(100vw - 32px)',
             zIndex: (theme) => theme.zIndex.modal,
           }}
         >
           <Paper
             elevation={8}
-            sx={{ maxHeight: PROXY_MENU_MAX_HEIGHT, overflow: 'auto' }}
+            sx={{
+              ...compactMenuSx,
+              maxHeight: `min(${PROXY_MENU_MAX_HEIGHT}px, calc(100vh - 80px))`,
+            }}
           >
             <MenuList
               id={listboxId}
@@ -350,7 +375,7 @@ const PersistentProxySelect = ({
                       pr: 1,
                     }}
                   >
-                    <Typography noWrap sx={{ flex: 1, mr: 1 }}>
+                    <Typography noWrap sx={{ flex: 1, mr: 1, fontSize: 13 }}>
                       {option.name}
                     </Typography>
                     {!option.disabled && (
@@ -364,7 +389,8 @@ const PersistentProxySelect = ({
                           bgcolor: 'transparent',
                           fontWeight: 500,
                           fontVariantNumeric: 'tabular-nums',
-                          minWidth: '60px',
+                          minWidth: '44px',
+                          fontSize: 12,
                           height: '22px',
                           flexShrink: 0,
                         }}
@@ -976,55 +1002,72 @@ export const CurrentProxyCard = () => {
               />
             )}
           </Box>
-          <FormControl
-            fullWidth
-            variant="outlined"
-            size="small"
-            sx={{ mb: 1.5 }}
+          <Box
+            className="home-proxy-selectors"
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+              gap: 1.5,
+              maxWidth: 560,
+              '& .MuiOutlinedInput-root': { height: 34, fontSize: 13 },
+              '& .MuiSelect-select': { py: 0.75 },
+              '& label': { fontSize: 12, fontWeight: 500 },
+            }}
           >
-            <Typography
-              component="label"
-              id="proxy-group-select-label"
-              variant="caption"
-              color="text.secondary"
-              sx={{ display: 'block', mb: 0.5, fontWeight: 600 }}
+            <FormControl
+              fullWidth
+              variant="outlined"
+              size="small"
+              sx={{ minWidth: 0 }}
             >
-              {t('home.components.currentProxy.labels.group')}
-            </Typography>
-            <Select
-              labelId="proxy-group-select-label"
-              value={selectedGroupName}
-              onChange={handleGroupChange}
-              open={openSelect === 'group'}
-              onOpen={() => setOpenSelect('group')}
-              disabled={isGlobalMode || isDirectMode}
-              MenuProps={{ onClose: handleGroupMenuClose }}
-            >
-              {selectableGroups.map((group) => (
-                <MenuItem key={group.name} value={group.name}>
-                  {group.name}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+              <Typography
+                component="label"
+                id="proxy-group-select-label"
+                variant="caption"
+                color="text.secondary"
+                sx={{ display: 'block', mb: 0.5, fontWeight: 600 }}
+              >
+                {t('home.components.currentProxy.labels.group')}
+              </Typography>
+              <Select
+                labelId="proxy-group-select-label"
+                value={selectedGroupName}
+                onChange={handleGroupChange}
+                open={openSelect === 'group'}
+                onOpen={() => setOpenSelect('group')}
+                disabled={isGlobalMode || isDirectMode}
+                autoWidth
+                MenuProps={{
+                  onClose: handleGroupMenuClose,
+                  slotProps: { paper: { sx: compactMenuSx } },
+                }}
+              >
+                {selectableGroups.map((group) => (
+                  <MenuItem key={group.name} value={group.name}>
+                    {group.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
 
-          <PersistentProxySelect
-            label={t('home.components.currentProxy.labels.proxy')}
-            groupName={selectedGroupName}
-            value={
-              currentOption
-                ? optionValue(currentOption.memberIndex, currentOption.member)
-                : ''
-            }
-            selectedName={selectedProxyName}
-            options={isDirectMode ? [] : proxyOptions}
-            open={openSelect === 'proxy'}
-            disabled={isDirectMode}
-            keepOpenRef={delayButtonRef}
-            onOpen={() => setOpenSelect('proxy')}
-            onClose={() => setOpenSelect(null)}
-            onChange={handleProxyChange}
-          />
+            <PersistentProxySelect
+              label={t('home.components.currentProxy.labels.proxy')}
+              groupName={selectedGroupName}
+              value={
+                currentOption
+                  ? optionValue(currentOption.memberIndex, currentOption.member)
+                  : ''
+              }
+              selectedName={selectedProxyName}
+              options={isDirectMode ? [] : proxyOptions}
+              open={openSelect === 'proxy'}
+              disabled={isDirectMode}
+              keepOpenRef={delayButtonRef}
+              onOpen={() => setOpenSelect('proxy')}
+              onClose={() => setOpenSelect(null)}
+              onChange={handleProxyChange}
+            />
+          </Box>
         </Box>
       ) : (
         <Box sx={{ textAlign: 'center', py: 4 }}>

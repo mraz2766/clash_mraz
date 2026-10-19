@@ -13,6 +13,9 @@
 .PARAMETER NoLaunch
   只生成安装包，不打开安装向导。
 
+.PARAMETER Install
+  构建成功后覆盖安装并重启 Clash；保留配置与已有快捷方式。与 -NoLaunch 互斥。
+
 .PARAMETER Release
   使用正式配置构建（pnpm build），耗时更长；默认使用快速配置（pnpm build:fast）。
 
@@ -23,10 +26,12 @@
 param(
   [switch]$InstallTools,
   [switch]$NoLaunch,
-  [switch]$Release
+  [switch]$Release,
+  [switch]$Install
 )
 
 $ErrorActionPreference = 'Stop'
+if ($Install -and $NoLaunch) { throw '-Install 与 -NoLaunch 不能同时使用。' }
 $root = Split-Path -Parent $PSScriptRoot
 Set-Location $root
 
@@ -54,7 +59,7 @@ function Update-SessionPath {
   $machine = [Environment]::GetEnvironmentVariable('Path', 'Machine')
   $user = [Environment]::GetEnvironmentVariable('Path', 'User')
   $cargo = Join-Path $env:USERPROFILE '.cargo\bin'
-  $env:Path = (@($cargo, $user, $machine) | Where-Object { $_ }) -join ';'
+  $env:Path = (@($cargo, $env:Path, $user, $machine) | Where-Object { $_ }) -join ';'
 }
 
 function Test-Command([string]$Name) {
@@ -109,7 +114,7 @@ if ($missing.Count -gt 0 -and $InstallTools) {
       '--accept-source-agreements', '--accept-package-agreements'
     )
     if ($tool.Override) { $wingetArgs += @('--override', $tool.Override) }
-    & winget @wingetArgs
+    Invoke-Checked 'winget' $wingetArgs
   }
   Update-SessionPath
   $missing = @($tools | Where-Object { -not (& $_.Test) })
@@ -136,8 +141,13 @@ Write-Host "  Node.js $(& node --version)  ·  $(& cargo --version)  ·  C++ 构
 # Newer rustup no longer installs the pinned toolchain implicitly.
 $channel = (Select-String -Path (Join-Path $root 'rust-toolchain.toml') -Pattern 'channel\s*=\s*"([^"]+)"').Matches[0].Groups[1].Value
 if ($channel -and (Test-Command 'rustup')) {
-  Write-Step "准备 Rust $channel 工具链"
-  Invoke-Checked 'rustup' @('toolchain', 'install', $channel, '--profile', 'minimal', '--component', 'rustfmt,clippy')
+  $installed = @(& rustup toolchain list)
+  if ($LASTEXITCODE -ne 0) { Stop-Build '无法读取 Rust 工具链。' }
+  if (-not ($installed | Where-Object { $_ -match ('^' + [regex]::Escape($channel) + '(-|\s|$)') })) {
+    Write-Step "准备 Rust $channel 工具链"
+    Invoke-Checked 'rustup' @('toolchain', 'install', $channel, '--profile', 'minimal', '--component', 'rustfmt,clippy')
+  }
+
 }
 
 Write-Step '准备 pnpm'
@@ -165,25 +175,9 @@ Invoke-Checked 'pnpm' @('install', '--frozen-lockfile')
 
 $buildScript = if ($Release) { 'build' } else { 'build:fast' }
 Write-Step "构建安装包（pnpm $buildScript，首次需要较长时间并联网下载内核资源）"
-$startedAt = Get-Date
-Invoke-Checked 'pnpm' @($buildScript, '--no-open')
-
-$installer = Get-ChildItem (Join-Path $root 'releases') -Filter '*-setup.exe' -ErrorAction SilentlyContinue |
-  Where-Object { $_.LastWriteTime -ge $startedAt.AddMinutes(-1) } |
-  Sort-Object LastWriteTime -Descending |
-  Select-Object -First 1
-
-if (-not $installer) {
-  Stop-Build '构建结束但未在 releases\ 中找到新的安装包。'
-}
-
-Write-Host ''
-Write-Host '安装包已生成：' -ForegroundColor Green
-Write-Host "  $($installer.FullName)"
-
-if ($NoLaunch) {
-  Write-Host '  双击该文件即可安装。'
-} else {
-  Write-Step '打开安装向导'
-  Start-Process -FilePath $installer.FullName
-}
+$buildArgs = @($buildScript)
+if ($NoLaunch) { $buildArgs += '--no-open' }
+if ($Install) { $buildArgs += '--install' }
+# build.mjs identifies the exact fresh artifact, publishes it atomically, then opens
+# or installs that same file. Never guess the newest EXE from releases/ again.
+Invoke-Checked 'pnpm' $buildArgs

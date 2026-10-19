@@ -21,6 +21,10 @@
 
 基于 [Clash Verge Rev](https://github.com/clash-verge-rev/clash-verge-rev) 二次开发，内核为 [Mihomo](https://github.com/MetaCubeX/mihomo)。保留原有的代理能力，重新整理了界面与安装体验。
 
+## 本次更新 · 2.6.1
+
+首页选择器更紧凑，节点菜单限高滚动。右上角齿轮打开外观设置；首页模块在 **设置 → 通用 → 首页显示内容** 中调整。运行 `powershell -ExecutionPolicy Bypass -File scripts\build-windows.ps1 -Install` 可在本地构建并覆盖安装，EXE 位于 `releases/`。GitHub 自动构建保持关闭。
+
 ## 特点
 
 - **贴近 Windows 11**：系统默认强调色，4px 控件与 8px 卡片圆角，统一的开关与分段控件，浅色和深色同样自然。
