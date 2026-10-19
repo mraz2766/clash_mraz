@@ -1,13 +1,11 @@
 import {
   ExpandMoreRounded,
   HistoryEduOutlined,
-  SettingsOutlined,
   SpeedOutlined,
 } from '@mui/icons-material'
 import { Box, Button, Grid, IconButton, Skeleton, Tooltip } from '@mui/material'
 import { Suspense, lazy, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useNavigate } from 'react-router'
 
 import { BasePage } from '@/components/base'
 import { ClashModeCard } from '@/components/home/clash-mode-card'
@@ -20,7 +18,6 @@ import {
 } from '@/components/home/home-card-settings'
 import { HomeProfileCard } from '@/components/home/home-profile-card'
 import { ProxyTunCard } from '@/components/home/proxy-tun-card'
-import { useDesktopText } from '@/hooks/use-desktop-text'
 import { useProfiles } from '@/hooks/use-profiles'
 import { useVerge } from '@/hooks/use-verge'
 import { entry_lightweight_mode } from '@/services/cmds'
@@ -52,9 +49,6 @@ const HomePage = () => {
   const { verge } = useVerge()
   const { current, mutateProfiles } = useProfiles()
 
-  const navigate = useNavigate()
-  const text = useDesktopText()
-
   // 卡片显示状态
   const homeCards =
     (verge?.home_cards as HomeCardsSettings | undefined) ?? DEFAULT_HOME_CARDS
@@ -78,16 +72,6 @@ const HomePage = () => {
               color="inherit"
             >
               <HistoryEduOutlined />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title={text('外观设置', 'Appearance settings')} arrow>
-            <IconButton
-              aria-label={text('外观设置', 'Appearance settings')}
-              onClick={() => navigate('/settings?category=appearance')}
-              size="small"
-              color="inherit"
-            >
-              <SettingsOutlined />
             </IconButton>
           </Tooltip>
         </Box>

@@ -90,10 +90,6 @@ const SettingVergeBasic = ({ onError }: Props) => {
       <SettingItem
         category="general"
         label={text('首页显示内容', 'Home content')}
-        secondary={text(
-          '选择首页显示的模块与诊断信息',
-          'Choose dashboard modules and diagnostics',
-        )}
         onClick={() => setHomeContentOpen(true)}
       />
       <ThemeViewer ref={themeRef} />

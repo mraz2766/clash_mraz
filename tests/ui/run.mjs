@@ -56,14 +56,8 @@ try {
   await page.screenshot({ path: path.join(output, 'compact-node-menu.png') })
   await page.keyboard.press('Escape')
   await menu.waitFor({ state: 'hidden' })
-  await page.getByRole('button', { name: '外观设置', exact: true }).click()
-  assert.equal(
-    await page
-      .getByRole('tab', { name: '外观', exact: true })
-      .getAttribute('aria-selected'),
-    'true',
-  )
-  await page.getByRole('tab', { name: '通用', exact: true }).click()
+  await page.keyboard.press('Control+,')
+  await page.getByRole('tab', { name: '通用', exact: true }).waitFor()
   await page.getByText('首页显示内容', { exact: true }).click()
   const contentDialog = page.getByRole('dialog')
   await contentDialog.waitFor()

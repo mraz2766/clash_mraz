@@ -23,7 +23,7 @@
 
 ## 本次更新 · 2.6.1
 
-首页选择器更紧凑，节点菜单限高滚动。右上角齿轮打开外观设置；首页模块在 **设置 → 通用 → 首页显示内容** 中调整。运行 `powershell -ExecutionPolicy Bypass -File scripts\build-windows.ps1 -Install` 可在本地构建并覆盖安装，EXE 位于 `releases/`。GitHub 自动构建保持关闭。
+首页选择器更紧凑，节点菜单限高滚动。外观在设置页调整；首页模块在 **设置 → 通用 → 首页显示内容** 中调整。运行 `powershell -ExecutionPolicy Bypass -File scripts\build-windows.ps1 -Install` 可在本地构建并覆盖安装，EXE 位于 `releases/`。GitHub 自动构建保持关闭。
 
 ## 特点
 

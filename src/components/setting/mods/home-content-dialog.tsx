@@ -7,7 +7,6 @@ import {
   DialogContent,
   DialogTitle,
   FormControlLabel,
-  Typography,
 } from '@mui/material'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -70,16 +69,6 @@ export const HomeContentDialog = ({ onClose }: { onClose: () => void }) => {
         {text('首页显示内容', 'Home content')}
       </DialogTitle>
       <DialogContent sx={{ px: 2.5, pb: 1 }}>
-        <Typography
-          variant="body2"
-          color="text.secondary"
-          sx={{ fontSize: 12, mb: 1.5 }}
-        >
-          {text(
-            '勾选要显示的模块，保存后生效。',
-            'Choose modules to show, then save.',
-          )}
-        </Typography>
         <Box
           sx={{
             display: 'grid',
