@@ -8,8 +8,8 @@
 
 <p align="center">
   <a href="https://github.com/mraz2766/clash_mraz/releases">下载</a> ·
+  <a href="#在-windows-上使用">安装与免安装</a> ·
   <a href="docs/usage.md">使用说明</a> ·
-  <a href="docs/windows-build.md">构建</a> ·
   <a href="docs/ui-design.md">设计规范</a>
 </p>
 
@@ -39,33 +39,69 @@
 
 </details>
 
-## 开始使用
+## 在 Windows 上使用
 
-1. 从 [Releases](https://github.com/mraz2766/clash_mraz/releases) 下载安装包，没有对应版本时可以自行构建。
-2. 运行安装程序，按向导完成安装。
-3. 在「订阅」中导入订阅或本地配置，再到「代理」选择节点。
-4. 按需开启系统代理或 TUN，在「连接」「规则」「日志」查看运行状态。
+支持 Windows 10 / 11（64 位）。三种方式任选其一，本项目不提供代理订阅。
 
-支持 Windows 10 / 11。本项目不提供代理订阅。
+### 方式一：下载安装（推荐）
 
-## 本地构建
+1. 打开 [Releases](https://github.com/mraz2766/clash_mraz/releases)，下载 `Clash_<版本>_x64-setup.exe`。
+2. 双击运行，按向导完成安装。升级时直接覆盖安装，订阅与设置会保留。
+3. 在「订阅」导入订阅或本地配置，到「代理」选择节点，再按需开启系统代理或 TUN。
 
-需要 Node.js、pnpm、Rust MSVC 工具链和 Visual Studio C++ 桌面构建环境，版本以 `package.json` 与 `rust-toolchain.toml` 为准。
+### 方式二：自己构建安装包
 
-```sh
+**准备环境**（只需一次）
+
+| 工具 | 说明 |
+| --- | --- |
+| [Node.js](https://nodejs.org/) 与 pnpm | 安装 Node.js 后运行 `corepack enable pnpm` |
+| [Rust](https://rustup.rs/) | 选择 MSVC 工具链，版本以 `rust-toolchain.toml` 为准 |
+| [Visual Studio Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/) | 勾选「使用 C++ 的桌面开发」和 Windows SDK |
+| [Git](https://git-scm.com/) | 用于获取源码 |
+
+**构建**
+
+```powershell
+git clone https://github.com/mraz2766/clash_mraz.git
+cd clash_mraz
 pnpm install
-pnpm dev
+pnpm build:fast --no-open
 ```
 
-| 命令 | 作用 |
-| --- | --- |
-| `pnpm build:fast` | 快速构建安装包并打开安装向导 |
-| `pnpm build` | 以正式配置构建安装包 |
-| `pnpm typecheck` · `pnpm lint` · `pnpm test` | 类型检查、代码检查、单元测试 |
+完成后安装包位于 `releases\Clash_<版本>_x64-setup.exe`，双击安装即可。去掉 `--no-open` 会在构建结束后直接打开安装向导；`pnpm build` 为正式配置，耗时更长。首次构建需要联网下载内核资源。
 
-安装包输出到 `releases/`，例如 `Clash_2.6.0_x64-setup.exe`。加上 `--no-open` 只生成、不打开向导。完整步骤见 [Windows 构建说明](docs/windows-build.md)。
+### 方式三：免安装（便携模式）
 
-`pnpm web:dev` 只启动前端，普通浏览器里没有 Tauri 原生能力，也不会运行代理内核。
+不想安装时，可以用方式二的构建结果组成一个便携文件夹。应用检测到程序旁的 `.config\PORTABLE` 文件后，会把配置和订阅都保存在这个文件夹里，不写入用户目录。
+
+在项目根目录完成 `pnpm build:fast --no-open` 后，于 PowerShell 中运行：
+
+```powershell
+$src = "target\fast-release"
+$out = "$env:USERPROFILE\Clash"
+New-Item -ItemType Directory -Force "$out\.config" | Out-Null
+Copy-Item "$src\clash-verge.exe", "$src\verge-mihomo*.exe" $out
+Copy-Item "$src\resources" $out -Recurse -Force
+New-Item -ItemType File -Force "$out\.config\PORTABLE" | Out-Null
+```
+
+之后双击 `%USERPROFILE%\Clash\clash-verge.exe` 即可使用，整个文件夹可以移动到任意位置或 U 盘。
+
+- 需要系统自带的 WebView2 运行时：Windows 11 已内置；Windows 10 如无法启动，请安装 [WebView2](https://developer.microsoft.com/microsoft-edge/webview2/)。
+- 便携模式不会自动更新，也不会创建开始菜单和桌面快捷方式。
+- TUN 模式需要安装系统服务，首次开启时按提示授权即可；仅用系统代理时无需额外操作。
+
+### 开发与检查
+
+```powershell
+pnpm dev          # 启动桌面开发版
+pnpm typecheck    # 类型检查
+pnpm lint         # 代码检查
+pnpm test         # 单元测试
+```
+
+`pnpm web:dev` 只启动前端，浏览器里没有 Tauri 原生能力，不会运行代理内核。更多细节见 [Windows 构建说明](docs/windows-build.md)。
 
 ## 须知
 
@@ -73,7 +109,7 @@ pnpm dev
 - **更新**：应用内自动更新仍指向上游。请从本仓库手动安装新版本，避免定制界面被覆盖。
 - **兼容**：为沿用已有配置和服务，内部的可执行文件名、服务标识、数据目录与 URL 协议保留原项目名称。
 - **共存**：与上游版本共用内部标识，不能同时运行。
-- **macOS**：在独立的 `clash-mac` 分支维护。
+- **macOS**：在独立的 `clash-mac` 分支维护，本页步骤仅适用于 Windows。
 
 ## 文档
 
