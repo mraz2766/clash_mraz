@@ -15,11 +15,14 @@ body {
 }
 
 :root {
-  --radius-xs: 6px;
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
-  --radius-xl: 22px;
+  // Windows 11 geometry: controls 4px, cards, menus and dialogs 8px.
+  --radius-control: 4px;
+  --radius-card: 8px;
+  --radius-xs: 2px;
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 8px;
+  --radius-xl: 8px;
   --md-motion: 180ms cubic-bezier(0.2, 0, 0, 1);
   --primary-main: #1a73e8;
   --text-primary: #202124;

@@ -82,7 +82,6 @@ const IPInfoCardContainer = forwardRef<HTMLElement, React.PropsWithChildren>(
       <EnhancedCard
         title={t('home.components.ipInfo.title')}
         icon={<LocationOnOutlined />}
-        iconColor="info"
         ref={ref}
         action={
           <IconButton size="small" onClick={() => mutate()}>

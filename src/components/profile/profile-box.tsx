@@ -8,18 +8,19 @@ export const ProfileBox = styled(Box)(({ 'aria-selected': selected }) => ({
   padding: '16px',
   boxSizing: 'border-box',
   width: '100%',
-  backgroundColor: selected
-    ? 'var(--md-primary-container)'
-    : 'var(--md-surface)',
-  border: '1px solid var(--md-outline)',
+  backgroundColor: 'var(--md-surface)',
+  border: '1px solid',
+  borderColor: selected ? 'var(--md-primary)' : 'var(--md-outline)',
+  // Doubles the accent border without shifting layout.
+  boxShadow: selected ? 'inset 0 0 0 1px var(--md-primary)' : 'none',
   borderRadius: 'var(--radius-lg)',
   color: 'var(--md-text-secondary)',
-  transition: 'background-color var(--md-motion)',
-  '&:hover': { borderColor: 'var(--md-primary)' },
+  transition: 'border-color var(--md-motion), box-shadow var(--md-motion)',
+  '&:hover': {
+    borderColor: selected ? 'var(--md-primary)' : 'var(--md-text-muted)',
+  },
   '& h2': {
-    color: selected
-      ? 'var(--md-on-primary-container)'
-      : 'var(--md-text-primary)',
-    fontWeight: 500,
+    color: 'var(--md-text-primary)',
+    fontWeight: 600,
   },
 }))

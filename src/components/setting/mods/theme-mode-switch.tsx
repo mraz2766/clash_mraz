@@ -1,4 +1,4 @@
-import { Button, ButtonGroup } from '@mui/material'
+import { ToggleButton, ToggleButtonGroup } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 
 type ThemeValue = IVergeConfig['theme_mode']
@@ -8,6 +8,7 @@ interface Props {
   onChange?: (value: ThemeValue) => void
 }
 
+// Same segmented control as the proxy mode selector on the home page.
 export const ThemeModeSwitch = (props: Props) => {
   const { value, onChange } = props
   const { t } = useTranslation()
@@ -15,17 +16,21 @@ export const ThemeModeSwitch = (props: Props) => {
   const modes = ['light', 'dark', 'system'] as const
 
   return (
-    <ButtonGroup size="small" sx={{ my: '4px' }}>
+    <ToggleButtonGroup
+      className="workspace-segmented"
+      exclusive
+      size="small"
+      value={value ?? null}
+      sx={{ my: '4px' }}
+      onChange={(_, next: ThemeValue | null) => {
+        if (next) onChange?.(next)
+      }}
+    >
       {modes.map((mode) => (
-        <Button
-          key={mode}
-          variant={mode === value ? 'contained' : 'outlined'}
-          onClick={() => onChange?.(mode)}
-          sx={{ textTransform: 'capitalize' }}
-        >
+        <ToggleButton value={mode} key={mode}>
           {t(`settings.sections.appearance.${mode}`)}
-        </Button>
+        </ToggleButton>
       ))}
-    </ButtonGroup>
+    </ToggleButtonGroup>
   )
 }

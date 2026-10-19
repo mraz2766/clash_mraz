@@ -377,7 +377,6 @@ export const HomeProfileCard = ({
     <EnhancedCard
       title={cardTitle}
       icon={<CloudUploadOutlined />}
-      iconColor="info"
       action={cardAction}
     >
       {current ? (

@@ -20,7 +20,6 @@ import {
   ClickAwayListener,
   FormControl,
   IconButton,
-  InputLabel,
   type MenuProps,
   MenuItem,
   MenuList,
@@ -224,7 +223,6 @@ interface PersistentProxySelectProps {
   groupName: string
   value: string
   selectedName: string
-  selectedDelay: number
   options: ProxyOption[]
   open: boolean
   disabled: boolean
@@ -239,7 +237,6 @@ const PersistentProxySelect = ({
   groupName,
   value,
   selectedName,
-  selectedDelay,
   options,
   open,
   disabled,
@@ -281,39 +278,25 @@ const PersistentProxySelect = ({
       }}
     >
       <Box>
+        {/* Windows-style field: a static label above the box, no notched outline. */}
+        <Typography
+          component="label"
+          id={labelId}
+          variant="caption"
+          color="text.secondary"
+          sx={{ display: 'block', mb: 0.5, fontWeight: 600 }}
+        >
+          {label}
+        </Typography>
         <FormControl ref={anchorRef} fullWidth variant="outlined" size="small">
-          <InputLabel id={labelId}>{label}</InputLabel>
           <Select
             labelId={labelId}
             value={value}
             open={false}
             onOpen={onOpen}
-            label={label}
             disabled={disabled}
-            renderValue={() => (
-              <Box
-                sx={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                }}
-              >
-                <Typography noWrap>{selectedName}</Typography>
-                <Chip
-                  size="small"
-                  variant="outlined"
-                  sx={{
-                    border: 0,
-                    bgcolor: 'transparent',
-                    height: 24,
-                    fontWeight: 500,
-                    fontVariantNumeric: 'tabular-nums',
-                  }}
-                  label={delayManager.formatDelay(selectedDelay)}
-                  color={convertDelayColor(selectedDelay)}
-                />
-              </Box>
-            )}
+            // The current node's delay is already shown in the card header.
+            renderValue={() => <Typography noWrap>{selectedName}</Typography>}
             SelectDisplayProps={{
               'aria-controls': open ? listboxId : undefined,
               'aria-expanded': open ? 'true' : 'false',
@@ -999,16 +982,21 @@ export const CurrentProxyCard = () => {
             size="small"
             sx={{ mb: 1.5 }}
           >
-            <InputLabel id="proxy-group-select-label">
+            <Typography
+              component="label"
+              id="proxy-group-select-label"
+              variant="caption"
+              color="text.secondary"
+              sx={{ display: 'block', mb: 0.5, fontWeight: 600 }}
+            >
               {t('home.components.currentProxy.labels.group')}
-            </InputLabel>
+            </Typography>
             <Select
               labelId="proxy-group-select-label"
               value={selectedGroupName}
               onChange={handleGroupChange}
               open={openSelect === 'group'}
               onOpen={() => setOpenSelect('group')}
-              label={t('home.components.currentProxy.labels.group')}
               disabled={isGlobalMode || isDirectMode}
               MenuProps={{ onClose: handleGroupMenuClose }}
             >
@@ -1029,7 +1017,6 @@ export const CurrentProxyCard = () => {
                 : ''
             }
             selectedName={selectedProxyName}
-            selectedDelay={currentDelay}
             options={isDirectMode ? [] : proxyOptions}
             open={openSelect === 'proxy'}
             disabled={isDirectMode}

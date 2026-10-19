@@ -11,6 +11,7 @@ import { useLocation } from 'react-router'
 
 import { LightweightTrafficErrorBoundary } from '@/components/shared/traffic-error-boundary'
 import { useMemoryData } from '@/hooks/use-memory-data'
+import { useTrafficColors } from '@/hooks/use-traffic-colors'
 import { useTrafficData } from '@/hooks/use-traffic-data'
 import { useVerge } from '@/hooks/use-verge'
 import { useVisibility } from '@/hooks/use-visibility'
@@ -31,6 +32,7 @@ export const LayoutTraffic = () => {
   const displayMemory = verge?.enable_memory_usage ?? true
 
   const trafficRef = useRef<TrafficRef>(null)
+  const trafficColors = useTrafficColors()
   const pageVisible = useVisibility()
   const active = pageVisible && !hiddenOnHome
 
@@ -72,7 +74,7 @@ export const LayoutTraffic = () => {
   }
   const unitStyle: Pick<TypographyProps, 'component' | 'color' | 'sx'> = {
     component: 'span',
-    color: 'grey.500',
+    color: 'text.secondary',
     sx: {
       flex: '0 1 27px',
       userSelect: 'none',
@@ -104,10 +106,16 @@ export const LayoutTraffic = () => {
             }}
           >
             <ArrowUpwardRounded
-              {...iconStyle}
-              color={(traffic?.up || 0) > 0 ? 'secondary' : 'disabled'}
+              sx={{
+                ...iconStyle.sx,
+                color:
+                  (traffic?.up || 0) > 0 ? trafficColors.up : 'text.disabled',
+              }}
             />
-            <Typography {...valStyle} color="secondary">
+            <Typography
+              {...valStyle}
+              sx={{ ...valStyle.sx, fontVariantNumeric: 'tabular-nums' }}
+            >
               {up}
             </Typography>
             <Typography {...unitStyle}>{upUnit}/s</Typography>
@@ -121,10 +129,18 @@ export const LayoutTraffic = () => {
             }}
           >
             <ArrowDownwardRounded
-              {...iconStyle}
-              color={(traffic?.down || 0) > 0 ? 'primary' : 'disabled'}
+              sx={{
+                ...iconStyle.sx,
+                color:
+                  (traffic?.down || 0) > 0
+                    ? trafficColors.down
+                    : 'text.disabled',
+              }}
             />
-            <Typography {...valStyle} color="primary">
+            <Typography
+              {...valStyle}
+              sx={{ ...valStyle.sx, fontVariantNumeric: 'tabular-nums' }}
+            >
               {down}
             </Typography>
             <Typography {...unitStyle}>{downUnit}/s</Typography>
@@ -141,8 +157,15 @@ export const LayoutTraffic = () => {
               color={'disabled'}
               onClick={async () => {}}
             >
-              <MemoryRounded {...iconStyle} />
-              <Typography {...valStyle}>{inuse}</Typography>
+              <MemoryRounded
+                sx={{ ...iconStyle.sx, color: 'text.secondary' }}
+              />
+              <Typography
+                {...valStyle}
+                sx={{ ...valStyle.sx, fontVariantNumeric: 'tabular-nums' }}
+              >
+                {inuse}
+              </Typography>
               <Typography {...unitStyle}>{inuseUnit}</Typography>
             </Box>
           )}

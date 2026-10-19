@@ -1,6 +1,8 @@
 import { styled } from '@mui/material/styles'
 import { default as MuiSwitch, SwitchProps } from '@mui/material/Switch'
 
+// Windows 11 toggle: outlined track with a small dark thumb when off, accent
+// track with a light thumb when on; the thumb grows slightly on hover.
 export const Switch = styled((props: SwitchProps) => (
   <MuiSwitch
     focusVisibleClassName="Mui-focusVisible"
@@ -8,55 +10,55 @@ export const Switch = styled((props: SwitchProps) => (
     {...props}
   />
 ))(({ theme }) => ({
-  width: 44,
-  height: 28,
+  width: 40,
+  height: 20,
   padding: 0,
   marginRight: 1,
+  overflow: 'visible',
   '& .MuiSwitch-switchBase': {
     padding: 0,
-    margin: 3,
+    margin: 4,
+    color: 'var(--md-text-secondary)',
     transitionDuration: '180ms',
+    '&:hover': { backgroundColor: 'transparent' },
+    '&:hover .MuiSwitch-thumb': { transform: 'scale(1.17)' },
     '&.Mui-checked': {
-      transform: 'translateX(16px)',
+      transform: 'translateX(20px)',
       color: 'var(--md-on-primary)',
-      '& .MuiSwitch-thumb': { transform: 'scale(1)' },
       '& + .MuiSwitch-track': {
         backgroundColor: theme.palette.primary.main,
+        borderColor: theme.palette.primary.main,
         opacity: 1,
-        border: 0,
       },
       '&.Mui-disabled + .MuiSwitch-track': {
-        opacity: 0.5,
+        opacity: 0.4,
       },
     },
-    '&.Mui-focusVisible .MuiSwitch-thumb': {
-      outline: '2px solid var(--md-primary)',
-      outlineOffset: 3,
+    '&.Mui-focusVisible + .MuiSwitch-track': {
+      outline: '2px solid var(--md-text-primary)',
+      outlineOffset: 2,
     },
-    '&.Mui-disabled .MuiSwitch-thumb': {
-      color:
-        theme.palette.mode === 'light'
-          ? theme.palette.grey[100]
-          : theme.palette.grey[600],
+    '&.Mui-disabled': {
+      color: 'var(--md-text-muted)',
     },
     '&.Mui-disabled + .MuiSwitch-track': {
-      opacity: theme.palette.mode === 'light' ? 0.7 : 0.3,
+      opacity: 0.4,
     },
   },
   '& .MuiSwitch-thumb': {
     boxSizing: 'border-box',
-    transform: 'scale(0.7)',
+    boxShadow: 'none',
+    width: 12,
+    height: 12,
     transition: 'transform var(--md-motion)',
-    width: 22,
-    height: 22,
   },
   '& .MuiSwitch-track': {
-    borderRadius: 14,
-    border: '2px solid var(--md-text-muted)',
+    borderRadius: 10,
+    border: '1px solid var(--md-text-secondary)',
     boxSizing: 'border-box',
-    backgroundColor: 'var(--md-outline)',
+    backgroundColor: 'transparent',
     opacity: 1,
-    transition: theme.transitions.create(['background-color'], {
+    transition: theme.transitions.create(['background-color', 'border-color'], {
       duration: 180,
     }),
   },

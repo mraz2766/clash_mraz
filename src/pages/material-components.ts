@@ -9,8 +9,8 @@ export const materialComponents: Components<Theme> = {
     defaultProps: { disableElevation: true },
     styleOverrides: {
       root: {
-        borderRadius: 9,
-        minHeight: 36,
+        borderRadius: 'var(--radius-control)',
+        minHeight: 32,
         paddingInline: 16,
         textTransform: 'none',
         fontWeight: 500,
@@ -31,7 +31,7 @@ export const materialComponents: Components<Theme> = {
   MuiIconButton: {
     styleOverrides: {
       root: {
-        borderRadius: 8,
+        borderRadius: 'var(--radius-control)',
         transition:
           'background-color var(--md-motion-fast), transform var(--md-motion-fast)',
         '&:active:not(.Mui-disabled)': { transform: 'scale(0.97)' },
@@ -41,22 +41,33 @@ export const materialComponents: Components<Theme> = {
   MuiPaper: {
     styleOverrides: {
       root: { backgroundImage: 'none' },
-      outlined: { borderColor: 'var(--md-outline-soft)', borderRadius: 12 },
+      outlined: {
+        borderColor: 'var(--md-outline-soft)',
+        borderRadius: 'var(--radius-card)',
+      },
     },
   },
   MuiCard: {
     defaultProps: { variant: 'outlined' },
-    styleOverrides: { root: { borderRadius: 16 } },
+    styleOverrides: { root: { borderRadius: 'var(--radius-card)' } },
   },
   MuiOutlinedInput: {
     styleOverrides: {
-      root: { borderRadius: 9, backgroundColor: 'var(--md-surface)' },
+      root: {
+        borderRadius: 'var(--radius-control)',
+        backgroundColor: 'var(--md-surface)',
+      },
       notchedOutline: { borderColor: 'var(--md-outline)' },
     },
   },
   MuiChip: {
     styleOverrides: {
-      root: { height: 26, borderRadius: 6, fontSize: 12, fontWeight: 500 },
+      root: {
+        height: 24,
+        borderRadius: 'var(--radius-control)',
+        fontSize: 12,
+        fontWeight: 500,
+      },
       colorDefault: {
         backgroundColor: 'var(--md-surface-container)',
         color: 'var(--md-text-secondary)',
@@ -67,7 +78,7 @@ export const materialComponents: Components<Theme> = {
     defaultProps: { slots: { transition: DesktopTransition } },
     styleOverrides: {
       paper: {
-        borderRadius: 22,
+        borderRadius: 'var(--radius-card)',
         backgroundColor: 'var(--md-surface)',
         boxShadow: '0 8px 32px rgba(0,0,0,0.16)',
       },
@@ -75,7 +86,7 @@ export const materialComponents: Components<Theme> = {
   },
   MuiDialogTitle: {
     styleOverrides: {
-      root: { fontSize: 20, fontWeight: 500, padding: '24px 24px 16px' },
+      root: { fontSize: 20, fontWeight: 600, padding: '24px 24px 16px' },
     },
   },
   MuiDialogActions: {
@@ -88,7 +99,7 @@ export const materialComponents: Components<Theme> = {
     },
     styleOverrides: {
       paper: {
-        borderRadius: 12,
+        borderRadius: 'var(--radius-card)',
         border: '1px solid var(--md-outline)',
         boxShadow: '0 4px 16px rgba(0,0,0,0.12)',
       },
@@ -102,7 +113,9 @@ export const materialComponents: Components<Theme> = {
     },
   },
   MuiSnackbarContent: {
-    styleOverrides: { root: { borderRadius: 10, fontSize: 14 } },
+    styleOverrides: {
+      root: { borderRadius: 'var(--radius-card)', fontSize: 14 },
+    },
   },
   MuiTableCell: {
     styleOverrides: {
@@ -126,8 +139,21 @@ export const materialComponents: Components<Theme> = {
       root: {
         transition: 'background-color 180ms cubic-bezier(0.2,0,0,1)',
         '&:hover': { backgroundColor: 'var(--md-hover)' },
+        '&:active': { backgroundColor: 'var(--md-pressed)' },
         '&.Mui-selected, &.Mui-selected:hover': {
           backgroundColor: 'var(--md-primary-container)',
+        },
+        // Windows 11 selection pill; the nav draws its own on the moving indicator.
+        '&.Mui-selected:not(.md-nav-item)::before': {
+          content: '""',
+          position: 'absolute',
+          left: 0,
+          top: '50%',
+          width: 3,
+          height: 16,
+          marginTop: -8,
+          borderRadius: 2,
+          backgroundColor: 'var(--md-primary)',
         },
       },
     },

@@ -1,10 +1,10 @@
 import { ContentCopyRounded } from '@mui/icons-material'
-import { Button, Input, MenuItem, Select, Switch } from '@mui/material'
+import { Button, Input, MenuItem, Select } from '@mui/material'
 import { open } from '@tauri-apps/plugin-dialog'
 import { useCallback, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import { DialogRef, TooltipIcon } from '@/components/base'
+import { DialogRef, Switch, TooltipIcon } from '@/components/base'
 import { useDesktopText } from '@/hooks/use-desktop-text'
 import { useTrafficPreferences } from '@/hooks/use-traffic-preferences'
 import { useVerge } from '@/hooks/use-verge'

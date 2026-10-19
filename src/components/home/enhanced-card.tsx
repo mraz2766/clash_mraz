@@ -20,7 +20,7 @@ export const EnhancedCard = forwardRef<HTMLElement, EnhancedCardProps>(
       icon,
       action,
       children,
-      iconColor = 'primary',
+      iconColor,
       minHeight,
       noContentPadding = false,
     },
@@ -44,9 +44,9 @@ export const EnhancedCard = forwardRef<HTMLElement, EnhancedCardProps>(
           height: '100%',
           display: 'flex',
           flexDirection: 'column',
-          borderRadius: 'var(--radius-lg)',
+          borderRadius: 'var(--radius-card)',
           backgroundColor: 'var(--md-surface)',
-          border: 'none',
+          border: '1px solid var(--md-outline-soft)',
           boxShadow: 'none',
         }}
         ref={ref}
@@ -83,7 +83,9 @@ export const EnhancedCard = forwardRef<HTMLElement, EnhancedCardProps>(
                 flexShrink: 0,
                 backgroundColor: 'transparent',
                 '& .MuiSvgIcon-root': { fontSize: 20 },
-                color: theme.palette[iconColor].main,
+                color: iconColor
+                  ? theme.palette[iconColor].main
+                  : theme.palette.text.secondary,
               }}
             >
               {icon}
@@ -94,7 +96,7 @@ export const EnhancedCard = forwardRef<HTMLElement, EnhancedCardProps>(
                   variant="h6"
                   sx={{
                     ...titleTruncateStyle,
-                    fontWeight: 'medium',
+                    fontWeight: 600,
                     fontSize: 14,
                   }}
                   title={title}

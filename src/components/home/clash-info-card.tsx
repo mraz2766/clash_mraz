@@ -100,7 +100,6 @@ export const ClashInfoCard = () => {
     <EnhancedCard
       title={t('home.components.clashInfo.title')}
       icon={<DeveloperBoardOutlined />}
-      iconColor="warning"
       action={null}
     >
       {cardContent}

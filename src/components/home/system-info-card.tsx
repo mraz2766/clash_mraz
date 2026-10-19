@@ -191,7 +191,6 @@ export const SystemInfoCard = () => {
     <EnhancedCard
       title={t('home.components.systemInfo.title')}
       icon={<InfoOutlined />}
-      iconColor="error"
       action={
         <IconButton
           size="small"

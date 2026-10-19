@@ -272,7 +272,7 @@
 .layout.layout--nav-collapsed {
   --layout-nav-collapsed-width: 72px;
   --layout-nav-item-size: 44px;
-  --layout-nav-item-radius: 22px;
+  --layout-nav-item-radius: var(--radius-control);
   --layout-nav-logo-size: 56px;
 
   .layout-content {

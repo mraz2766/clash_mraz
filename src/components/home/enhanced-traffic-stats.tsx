@@ -6,13 +6,14 @@ import {
   LinkRounded,
   MemoryRounded,
 } from '@mui/icons-material'
-import { Box, PaletteColor, Paper, Typography, useTheme } from '@mui/material'
+import { Box, Paper, Typography } from '@mui/material'
 import { ReactNode, memo, useMemo, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { TrafficErrorBoundary } from '@/components/shared/traffic-error-boundary'
 import { useConnectionSummaryData } from '@/hooks/use-connection-data'
 import { useMemoryData } from '@/hooks/use-memory-data'
+import { useTrafficColors } from '@/hooks/use-traffic-colors'
 import { useTrafficData } from '@/hooks/use-traffic-data'
 import { useVerge } from '@/hooks/use-verge'
 import { useVisibility } from '@/hooks/use-visibility'
@@ -28,7 +29,8 @@ interface StatCardProps {
   title: string
   value: string | number
   unit: string
-  color: 'primary' | 'secondary' | 'error' | 'warning' | 'info' | 'success'
+  /** Icon colour; neutral when omitted. Speeds use the shared traffic colours. */
+  tint?: string
   onClick?: () => void
 }
 
@@ -45,22 +47,7 @@ declare global {
 
 // 统计卡片组件 - 使用memo优化
 const CompactStatCard = memo(
-  ({ icon, title, value, unit, color, onClick }: StatCardProps) => {
-    const theme = useTheme()
-
-    // 获取调色板颜色 - 使用useMemo避免重复计算
-    const colorValue = useMemo(() => {
-      const palette = theme.palette
-      if (
-        color in palette &&
-        palette[color as keyof typeof palette] &&
-        'main' in (palette[color as keyof typeof palette] as PaletteColor)
-      ) {
-        return (palette[color as keyof typeof palette] as PaletteColor).main
-      }
-      return palette.primary.main
-    }, [theme.palette, color])
-
+  ({ icon, title, value, unit, tint, onClick }: StatCardProps) => {
     return (
       <Box
         className="traffic-metric"
@@ -77,7 +64,7 @@ const CompactStatCard = memo(
           <Box
             component="span"
             sx={{
-              color: colorValue,
+              color: tint ?? 'text.secondary',
               display: 'flex',
               '& svg': { fontSize: 13 },
             }}
@@ -92,7 +79,6 @@ const CompactStatCard = memo(
           sx={{
             fontVariantNumeric: 'tabular-nums',
             whiteSpace: 'nowrap',
-            letterSpacing: '-.5px',
             fontWeight: 600,
           }}
         >
@@ -190,6 +176,7 @@ export const EnhancedTrafficStats = ({
   }, [trafficGraph, pageVisible, view])
 
   // 使用useMemo计算统计卡片配置
+  const trafficColors = useTrafficColors()
   const statCards = useMemo(() => {
     const cards: StatCardProps[] = [
       {
@@ -197,35 +184,34 @@ export const EnhancedTrafficStats = ({
         title: t('home.components.traffic.metrics.uploadSpeed'),
         value: parsedData.up,
         unit: `${parsedData.upUnit}/s`,
-        color: 'secondary' as const,
+        tint: trafficColors.up,
       },
       {
         icon: <ArrowDownwardRounded fontSize="small" />,
         title: t('home.components.traffic.metrics.downloadSpeed'),
         value: parsedData.down,
         unit: `${parsedData.downUnit}/s`,
-        color: 'primary' as const,
+        tint: trafficColors.down,
       },
       {
         icon: <LinkRounded fontSize="small" />,
         title: t('home.components.traffic.metrics.activeConnections'),
         value: parsedData.connectionsCount,
         unit: '',
-        color: 'success' as const,
       },
       {
         icon: <CloudUploadRounded fontSize="small" />,
         title: t('shared.labels.uploaded'),
         value: parsedData.uploadTotal,
         unit: parsedData.uploadTotalUnit,
-        color: 'secondary' as const,
+        tint: trafficColors.up,
       },
       {
         icon: <CloudDownloadRounded fontSize="small" />,
         title: t('shared.labels.downloaded'),
         value: parsedData.downloadTotal,
         unit: parsedData.downloadTotalUnit,
-        color: 'primary' as const,
+        tint: trafficColors.down,
       },
     ]
 
@@ -235,12 +221,11 @@ export const EnhancedTrafficStats = ({
         title: t('home.components.traffic.metrics.memoryUsage'),
         value: parsedData.inuse,
         unit: parsedData.inuseUnit,
-        color: 'secondary' as const,
       })
     }
 
     return cards
-  }, [t, parsedData, displayMemory])
+  }, [t, parsedData, displayMemory, trafficColors])
 
   return (
     <TrafficErrorBoundary

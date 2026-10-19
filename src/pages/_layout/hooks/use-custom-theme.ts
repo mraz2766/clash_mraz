@@ -225,11 +225,11 @@ export const useCustomTheme = () => {
         },
       },
       typography: {
-        h4: { fontSize: 24, fontWeight: 500 },
-        h5: { fontSize: 24, fontWeight: 500 },
-        h6: { fontSize: 16, fontWeight: 500 },
-        subtitle1: { fontSize: 16, fontWeight: 500 },
-        subtitle2: { fontSize: 13, fontWeight: 500 },
+        h4: { fontSize: 20, fontWeight: 600 },
+        h5: { fontSize: 20, fontWeight: 600 },
+        h6: { fontSize: 14, fontWeight: 600 },
+        subtitle1: { fontSize: 14, fontWeight: 600 },
+        subtitle2: { fontSize: 13, fontWeight: 600 },
         body1: { fontSize: 14, fontWeight: 400 },
         body2: { fontSize: 14, fontWeight: 400 },
         caption: { fontSize: 12, fontWeight: 400 },
@@ -250,7 +250,7 @@ export const useCustomTheme = () => {
         'md-surface-container': dt.surface_container,
         'md-primary': muiTheme.palette.primary.main,
         'md-primary-container': setting.primary_color
-          ? alpha(muiTheme.palette.primary.main, mode === 'light' ? 0.14 : 0.28)
+          ? alpha(muiTheme.palette.primary.main, mode === 'light' ? 0.1 : 0.18)
           : dt.primary_container,
         'md-on-primary-container': setting.primary_color
           ? muiTheme.palette.text.primary
@@ -263,6 +263,7 @@ export const useCustomTheme = () => {
         'md-outline-soft': dt.outline_soft,
         'md-surface-subtle': dt.surface_subtle,
         'md-hover': dt.hover,
+        'md-pressed': dt.pressed,
         'md-success': muiTheme.palette.success.main,
         'md-warning': muiTheme.palette.warning.main,
         'md-error': muiTheme.palette.error.main,

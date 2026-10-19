@@ -1033,7 +1033,6 @@ export const EnhancedCanvasTrafficGraph = memo(
           width: '100%',
           height: '100%',
           position: 'relative',
-          bgcolor: 'action.hover',
           borderRadius: 1,
           cursor: 'pointer',
           overflow: 'hidden',
@@ -1090,63 +1089,63 @@ export const EnhancedCanvasTrafficGraph = memo(
               pointerEvents: 'all',
               px: 1,
               py: 0.5,
-              borderRadius: 0.5,
-              bgcolor: 'rgba(0,0,0,0.05)',
+              borderRadius: 1,
+              bgcolor: 'var(--md-surface-container)',
               '&:hover': {
-                bgcolor: 'rgba(0,0,0,0.1)',
+                bgcolor: 'var(--md-primary-container)',
               },
             }}
           >
             {getTimeRangeText()}
           </Box>
 
+          {/* One legend row on an opaque chip so it never sits on top of a line. */}
           <Box
             sx={{
               position: 'absolute',
               top: 6,
               right: 8,
               display: 'flex',
-              flexDirection: 'column',
-              gap: 0.5,
+              alignItems: 'center',
+              gap: 1.25,
+              px: 1,
+              py: 0.5,
+              borderRadius: 1,
+              bgcolor: 'background.paper',
+              fontSize: '11px',
+              color: 'text.secondary',
+              '& .legend-dot': {
+                display: 'inline-block',
+                width: 8,
+                height: 8,
+                borderRadius: '50%',
+                mr: 0.5,
+              },
             }}
           >
-            <Box
-              sx={{
-                fontSize: '11px',
-                fontWeight: 'bold',
-                color: colors.up,
-                textAlign: 'right',
-              }}
-            >
+            <Box component="span">
+              <Box
+                component="span"
+                className="legend-dot"
+                sx={{ bgcolor: colors.up }}
+              />
               {t('home.components.traffic.legends.upload')}
             </Box>
-            <Box
-              sx={{
-                fontSize: '11px',
-                fontWeight: 'bold',
-                color: colors.down,
-                textAlign: 'right',
-              }}
-            >
+            <Box component="span">
+              <Box
+                component="span"
+                className="legend-dot"
+                sx={{ bgcolor: colors.down }}
+              />
               {t('home.components.traffic.legends.download')}
             </Box>
-          </Box>
-
-          <Box
-            sx={{
-              position: 'absolute',
-              bottom: 6,
-              right: 8,
-              fontSize: '10px',
-              color: 'text.disabled',
-              opacity: 0.7,
-            }}
-          >
-            {t(
-              chartStyle === 'bezier'
-                ? 'home.components.traffic.chartStyles.smooth'
-                : 'home.components.traffic.chartStyles.linear',
-            )}
+            <Box component="span" sx={{ color: 'text.disabled' }}>
+              {t(
+                chartStyle === 'bezier'
+                  ? 'home.components.traffic.chartStyles.smooth'
+                  : 'home.components.traffic.chartStyles.linear',
+              )}
+            </Box>
           </Box>
 
           {import.meta.env.DEV && (
