@@ -5,6 +5,8 @@ import useSWR, {
   mutate as swrMutate,
 } from 'swr'
 
+import { isWindowVisible } from '@/hooks/use-visibility'
+
 type QueryKey = string | readonly unknown[]
 type QueryDataUpdater<T> =
   | T
@@ -51,6 +53,8 @@ export const swrConfig: SWRConfiguration = {
   errorRetryCount: 3,
   errorRetryInterval: 5000,
   revalidateOnFocus: false,
+  // Interval polling skips ticks while the window is hidden to the tray.
+  isVisible: isWindowVisible,
 }
 
 export const getCacheData = <T>(queryKey: QueryKey): T | undefined => {

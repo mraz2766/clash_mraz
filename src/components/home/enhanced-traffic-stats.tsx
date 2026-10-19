@@ -122,6 +122,9 @@ export const EnhancedTrafficStats = ({
   // 是否显示流量图表
   const trafficGraph = verge?.traffic_graph ?? true
   const displayMemory = verge?.enable_memory_usage ?? true
+  // Home mounts a summary and a detail view; each subscribes only to what it shows.
+  const showHeadline = view !== 'detail'
+  const showFootnote = view !== 'summary' || !trafficGraph
 
   const {
     response: { data: traffic },
@@ -129,11 +132,11 @@ export const EnhancedTrafficStats = ({
 
   const {
     response: { data: memory },
-  } = useMemoryData({ enabled: displayMemory && pageVisible })
+  } = useMemoryData({ enabled: displayMemory && pageVisible && showFootnote })
 
   const {
     response: { data: connectionSummary },
-  } = useConnectionSummaryData({ enabled: pageVisible })
+  } = useConnectionSummaryData({ enabled: pageVisible && showHeadline })
 
   // Canvas组件现在直接从全局Hook获取数据，无需手动添加数据点
 
@@ -245,7 +248,7 @@ export const EnhancedTrafficStats = ({
         console.error('[EnhancedTrafficStats] 组件错误:', error, errorInfo)
       }}
     >
-      {view !== 'detail' && (
+      {showHeadline && (
         <Box className="traffic-headline">
           {statCards.slice(0, 3).map((card) => (
             <CompactStatCard key={card.title} {...card} />
@@ -253,7 +256,7 @@ export const EnhancedTrafficStats = ({
         </Box>
       )}
       {view !== 'summary' && trafficGraph && trafficGraphComponent}
-      {(view !== 'summary' || !trafficGraph) && (
+      {showFootnote && (
         <Box className="traffic-footnote">
           {statCards.slice(3).map((card) => (
             <CompactStatCard key={card.title} {...card} />

@@ -17,15 +17,17 @@ import RulesSvg from '@/assets/image/itemicon/rules.svg?react'
 import SettingsSvg from '@/assets/image/itemicon/settings.svg?react'
 import UnlockSvg from '@/assets/image/itemicon/unlock.svg?react'
 
+import {
+  ConnectionsPage,
+  LogsPage,
+  ProfilePage,
+  ProxyPage,
+  RulesPage,
+  SettingPage,
+  UnlockPage,
+} from './_lazy-pages'
 import { navigationItems } from './_navigation-meta'
-import ConnectionsPage from './connections'
 import HomePage from './home'
-import LogsPage from './logs'
-import ProfilePage from './profiles'
-import ProxyPage from './proxies'
-import RulesPage from './rules'
-import SettingPage from './settings'
-import UnlockPage from './unlock'
 
 type NavigationItem = {
   label: (typeof navigationItems)[keyof typeof navigationItems]['label']

@@ -1,21 +1,16 @@
 import React, { useCallback, useEffect, useMemo, useRef } from 'react'
-import {
-  getBaseConfig,
-  getRuleProviders,
-  getRules,
-} from 'tauri-plugin-mihomo-api'
+import { getBaseConfig } from 'tauri-plugin-mihomo-api'
 
 import { useClashInfo, useRuntimeConfig } from '@/hooks/use-clash'
 import { runStateQueryKey } from '@/hooks/use-system-state'
 import { useVerge } from '@/hooks/use-verge'
-import {
-  getAppUptime,
-  getProxyView,
-  getRuntimeState,
-  getSystemProxy,
-} from '@/services/cmds'
+import { getProxyView, getRuntimeState, getSystemProxy } from '@/services/cmds'
 import { subscribeVergeEvents } from '@/services/events'
-import { revalidateQueries, useQuery } from '@/services/query-client'
+import {
+  revalidateQueries,
+  revalidateQuery,
+  useQuery,
+} from '@/services/query-client'
 import { resolveDisplayedMixedPort } from '@/utils/mixed-port'
 
 import {
@@ -23,9 +18,9 @@ import {
   CoreDataStatusContext,
   ProxiesContext,
   RefreshersContext,
-  RulesContext,
+  ruleProvidersQueryKey,
+  rulesQueryKey,
   SystemContext,
-  UptimeContext,
 } from './app-data-context'
 
 const TQ_MIHOMO = {
@@ -82,19 +77,6 @@ export const AppDataProvider = ({
     ...TQ_MIHOMO,
   })
 
-  const { data: ruleProviders, refetch: _refetchRuleProviders } = useQuery({
-    queryKey: ['getRuleProviders'],
-    queryFn: getRuleProviders,
-    ...TQ_MIHOMO,
-    revalidateOnMount: false,
-  })
-
-  const { data: rulesData, refetch: _refetchRules } = useQuery({
-    queryKey: ['getRules'],
-    queryFn: getRules,
-    ...TQ_MIHOMO,
-  })
-
   const { data: sysproxy, refetch: _refetchSysproxy } = useQuery({
     queryKey: ['getSystemProxy'],
     queryFn: getSystemProxy,
@@ -109,19 +91,15 @@ export const AppDataProvider = ({
   })
   const runningMode = runState?.mode
 
-  const { data: uptimeData } = useQuery({
-    queryKey: ['appUptime'],
-    queryFn: getAppUptime,
-    ...TQ_DEFAULTS,
-    refetchInterval: 3000,
-    retry: 1,
-  })
-
   const refreshProxy = useStableFn(_refetchProxyView)
   const refreshClashConfig = useStableFn(_refetchClashConfig)
-  const refreshRules = useStableFn(_refetchRules)
   const refreshSysproxy = useStableFn(_refetchSysproxy)
-  const refreshRuleProviders = useStableFn(_refetchRuleProviders)
+  // Rules are fetched by their consumers; with none mounted this is a no-op.
+  const refreshRules = useCallback(() => revalidateQuery(rulesQueryKey), [])
+  const refreshRuleProviders = useCallback(
+    () => revalidateQuery(ruleProvidersQueryKey),
+    [],
+  )
 
   useEffect(() => {
     let lastProfileId: string | null = null
@@ -184,14 +162,6 @@ export const AppDataProvider = ({
     [proxyView, isProxyViewPending, proxyViewError],
   )
 
-  const rulesValue = useMemo(
-    () => ({
-      rules: rulesData?.rules ?? [],
-      ruleProviders: ruleProviders?.providers || {},
-    }),
-    [rulesData, ruleProviders],
-  )
-
   const clashConfigValue = useMemo(
     () => ({
       clashConfig,
@@ -244,8 +214,6 @@ export const AppDataProvider = ({
     }
   }, [sysproxy, runningMode, isRunningModePending, verge, displayedMixedPort])
 
-  const uptimeValue = useMemo(() => ({ uptime: uptimeData || 0 }), [uptimeData])
-
   const coreDataStatusValue = useMemo(
     () => ({
       isCoreDataPending: isProxyViewPending || isClashConfigPending,
@@ -274,19 +242,15 @@ export const AppDataProvider = ({
 
   return (
     <ProxiesContext value={proxiesValue}>
-      <RulesContext value={rulesValue}>
-        <ClashConfigContext value={clashConfigValue}>
-          <SystemContext value={systemValue}>
-            <UptimeContext value={uptimeValue}>
-              <CoreDataStatusContext value={coreDataStatusValue}>
-                <RefreshersContext value={refreshersValue}>
-                  {children}
-                </RefreshersContext>
-              </CoreDataStatusContext>
-            </UptimeContext>
-          </SystemContext>
-        </ClashConfigContext>
-      </RulesContext>
+      <ClashConfigContext value={clashConfigValue}>
+        <SystemContext value={systemValue}>
+          <CoreDataStatusContext value={coreDataStatusValue}>
+            <RefreshersContext value={refreshersValue}>
+              {children}
+            </RefreshersContext>
+          </CoreDataStatusContext>
+        </SystemContext>
+      </ClashConfigContext>
     </ProxiesContext>
   )
 }

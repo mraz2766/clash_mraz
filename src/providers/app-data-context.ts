@@ -1,17 +1,19 @@
 import { Context, createContext, use } from 'react'
-import { BaseConfig, Rule, RuleProvider } from 'tauri-plugin-mihomo-api'
+import {
+  BaseConfig,
+  getRuleProviders,
+  getRules,
+  RuleProvider,
+} from 'tauri-plugin-mihomo-api'
 
+import { getAppUptime } from '@/services/cmds'
+import { useQuery } from '@/services/query-client'
 import type { ProxyViewV1 } from '@/types/proxy-view'
 
 export interface ProxiesContextType {
   proxyView: ProxyViewV1 | undefined
   isProxyViewPending: boolean
   isProxyViewError: boolean
-}
-
-export interface RulesContextType {
-  rules: Rule[]
-  ruleProviders: Record<string, RuleProvider | undefined>
 }
 
 export interface ClashConfigContextType {
@@ -24,10 +26,6 @@ export interface SystemContextType {
   runningMode?: string
   isRunningModePending: boolean
   systemProxyAddress: string
-}
-
-export interface UptimeContextType {
-  uptime: number
 }
 
 export interface CoreDataStatusContextType {
@@ -44,12 +42,10 @@ export interface RefreshersContextType {
 }
 
 export const ProxiesContext = createContext<ProxiesContextType | null>(null)
-export const RulesContext = createContext<RulesContextType | null>(null)
 export const ClashConfigContext = createContext<ClashConfigContextType | null>(
   null,
 )
 export const SystemContext = createContext<SystemContextType | null>(null)
-export const UptimeContext = createContext<UptimeContextType | null>(null)
 export const CoreDataStatusContext =
   createContext<CoreDataStatusContextType | null>(null)
 export const RefreshersContext = createContext<RefreshersContextType | null>(
@@ -65,12 +61,37 @@ const useCtx = <T>(ctx: Context<T | null>, hookName: string): T => {
 export const useProxiesData = (): ProxiesContextType =>
   useCtx(ProxiesContext, 'useProxiesData')
 
+export const rulesQueryKey = ['getRules'] as const
+export const ruleProvidersQueryKey = ['getRuleProviders'] as const
+
+const TQ_RULES = {
+  refetchOnWindowFocus: false,
+  refetchOnReconnect: false,
+  staleTime: 1500,
+  retry: 3,
+  retryDelay: (attempt: number) => Math.min(200 * 2 ** attempt, 3000),
+} as const
+
+const EMPTY_RULES: never[] = []
+const EMPTY_RULE_PROVIDERS: Record<string, RuleProvider> = {}
+
+// Rules can be large, so they load only while a consumer is mounted.
 export const useRulesData = () => {
-  const { rules, ruleProviders } = useCtx(RulesContext, 'useRulesData')
+  const { data: rulesData } = useQuery({
+    queryKey: rulesQueryKey,
+    queryFn: getRules,
+    ...TQ_RULES,
+  })
+  const { data: ruleProviders } = useQuery({
+    queryKey: ruleProvidersQueryKey,
+    queryFn: getRuleProviders,
+    ...TQ_RULES,
+    revalidateOnMount: false,
+  })
 
   return {
-    rules,
-    ruleProviders: ruleProviders as Record<string, RuleProvider>,
+    rules: rulesData?.rules ?? EMPTY_RULES,
+    ruleProviders: ruleProviders?.providers ?? EMPTY_RULE_PROVIDERS,
   }
 }
 
@@ -80,8 +101,19 @@ export const useClashConfigData = (): ClashConfigContextType =>
 export const useSystemData = (): SystemContextType =>
   useCtx(SystemContext, 'useSystemData')
 
-export const useUptimeData = (): UptimeContextType =>
-  useCtx(UptimeContext, 'useUptimeData')
+// Polled only while the diagnostics card that shows it is mounted.
+export const useUptimeData = () => {
+  const { data } = useQuery({
+    queryKey: ['appUptime'],
+    queryFn: getAppUptime,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    staleTime: 5000,
+    refetchInterval: 3000,
+    retry: 1,
+  })
+  return { uptime: data || 0 }
+}
 
 export const useAppRefreshers = (): RefreshersContextType =>
   useCtx(RefreshersContext, 'useAppRefreshers')

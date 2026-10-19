@@ -1,13 +1,15 @@
 // Shared desktop workspace, adapted from the clash-mac branch.
+// Surfaces are solid: nothing scrolls behind the sidebar or page header, so a
+// backdrop blur would only cost compositing work without any visible effect.
 :root {
-  --workspace-sidebar: rgba(255, 255, 255, .96);
+  --workspace-sidebar: #ffffff;
   --workspace-glass-edge: rgba(255, 255, 255, .65);
-  --workspace-toolbar: rgba(247, 247, 247, .96);
+  --workspace-toolbar: #f7f7f7;
 }
 :root[data-theme='dark'] {
-  --workspace-sidebar: rgba(42, 42, 42, .96);
+  --workspace-sidebar: #2a2a2a;
   --workspace-glass-edge: rgba(215, 215, 215, .1);
-  --workspace-toolbar: rgba(36, 36, 36, .96);
+  --workspace-toolbar: #242424;
 }
 .desktop-workspace.layout {
   background: var(--md-bg);
@@ -27,8 +29,6 @@
     }
     padding-top: 0;
     background: linear-gradient(155deg, var(--workspace-glass-edge), transparent 65%), var(--workspace-sidebar);
-    backdrop-filter: blur(30px) saturate(140%);
-    -webkit-backdrop-filter: blur(30px) saturate(140%);
     border-right: 1px solid var(--md-outline-soft);
     .the-logo {
       flex: 0 0 110px;
@@ -49,14 +49,13 @@
     .MuiListItemIcon-root { color: var(--md-primary); }
     .md-nav-item[aria-current='page'] { color: var(--md-on-primary-container); .MuiListItemIcon-root { color: inherit; } }
     .the-traffic { padding-top: 14px; padding-bottom: 10px; border-top: 1px solid var(--md-outline-soft); }
+    .the-traffic:empty { display: none; }
   }
   .layout-content__right .the-content { top: 0; }
   .base-page > header {
     flex-basis: 82px;
     padding-top: 14px;
     background: var(--workspace-toolbar);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
     > .MuiTypography-root { font-size: 23px; font-weight: 650; letter-spacing: -.5px; }
   }
   .home-choice {
@@ -78,14 +77,6 @@
 }
 .MuiDialog-paper, .MuiMenu-paper {
   background-image: linear-gradient(135deg, var(--workspace-glass-edge), transparent) !important;
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-}
-@media (prefers-reduced-transparency: reduce) {
-  :root { --workspace-sidebar: #ffffff; --workspace-toolbar: #f7f7f7; }
-  :root[data-theme='dark'] { --workspace-sidebar: #2a2a2a; --workspace-toolbar: #242424; }
-  .desktop-workspace.layout .layout-content__left, .desktop-workspace.layout .base-page > header,
-  .MuiDialog-paper, .MuiMenu-paper { backdrop-filter: none; -webkit-backdrop-filter: none; }
 }
 
 .desktop-workspace.layout {
@@ -193,8 +184,4 @@
   .layout-content__left .the-logo .the-newbtn { top: auto; bottom: 8px; right: 12px; }
   &.layout--nav-collapsed .workspace-window-toolbar { position: relative; top: 0; left: 0; right: 0; height: 36px; flex-shrink: 0; }
   .workspace-window-toolbar { z-index: 1; }
-}
-@supports not (backdrop-filter: blur(1px)) {
-  .desktop-workspace.layout .layout-content__left { background: var(--md-surface); }
-  .desktop-workspace.layout .base-page > header { background: var(--md-bg); }
 }

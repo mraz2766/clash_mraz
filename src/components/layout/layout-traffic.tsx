@@ -23,19 +23,23 @@ export const LayoutTraffic = () => {
   const { verge } = useVerge()
 
   const location = useLocation()
+  // Home already shows live speed and memory in its traffic section.
+  const hiddenOnHome =
+    location.pathname === '/' && (verge?.home_cards?.traffic ?? true)
   const trafficGraph =
     (verge?.traffic_graph ?? true) && location.pathname !== '/'
   const displayMemory = verge?.enable_memory_usage ?? true
 
   const trafficRef = useRef<TrafficRef>(null)
   const pageVisible = useVisibility()
+  const active = pageVisible && !hiddenOnHome
 
   const {
     response: { data: traffic },
-  } = useTrafficData({ enabled: pageVisible })
+  } = useTrafficData({ enabled: active })
   const {
     response: { data: memory },
-  } = useMemoryData({ enabled: displayMemory && pageVisible })
+  } = useMemoryData({ enabled: displayMemory && active })
 
   useEffect(() => {
     if (trafficRef.current) {
@@ -76,6 +80,8 @@ export const LayoutTraffic = () => {
       textAlign: 'right',
     },
   }
+
+  if (hiddenOnHome) return null
 
   return (
     <LightweightTrafficErrorBoundary>

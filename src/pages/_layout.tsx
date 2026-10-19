@@ -12,7 +12,14 @@ import {
 } from '@mui/material'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import {
+  Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import { useTranslation } from 'react-i18next'
 import { Outlet, useNavigate } from 'react-router'
 
@@ -44,6 +51,7 @@ import {
 } from './_layout/hooks'
 import { handleNoticeMessage } from './_layout/utils'
 import { navItems } from './_navigation'
+import { preloadPages } from './_page-loaders'
 
 import 'dayjs/locale/ru'
 import 'dayjs/locale/zh-cn'
@@ -202,6 +210,21 @@ const Layout = () => {
 
   useLayoutEvents(handleNotice)
   usePendingFailures()
+
+  // Warm the lazy page chunks once startup work has settled.
+  useEffect(() => {
+    const preload = () => {
+      preloadPages().catch((error) => {
+        console.error('[Layout] Page preload failed:', error)
+      })
+    }
+    if (typeof window.requestIdleCallback === 'function') {
+      const id = window.requestIdleCallback(preload, { timeout: 3000 })
+      return () => window.cancelIdleCallback(id)
+    }
+    const id = window.setTimeout(preload, 1500)
+    return () => window.clearTimeout(id)
+  }, [])
 
   useEffect(() => {
     if (language) {
@@ -435,7 +458,9 @@ const Layout = () => {
             <div className="the-bar"></div>
             <div className="the-content">
               <BaseErrorBoundary>
-                <Outlet />
+                <Suspense fallback={null}>
+                  <Outlet />
+                </Suspense>
               </BaseErrorBoundary>
             </div>
           </div>
