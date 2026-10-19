@@ -87,9 +87,11 @@ try {
   assert.equal(await page.locator('.home-traffic').count(), 0)
   assert.match(await page.locator('.home-metrics').innerText(), /上传量/)
   // Check mode controls and native-independent keyboard behavior.
-  await page.getByRole('button', { name: '全局', exact: true }).click()
+  // Scoped to the mode group: the "规则" nav item has the same name.
+  const modeGroup = page.getByRole('group', { name: '代理模式卡', exact: true })
+  await modeGroup.getByRole('button', { name: '全局', exact: true }).click()
   await page.waitForFunction(() => window.__uiFixture.config.mode === 'global')
-  await page.getByRole('button', { name: '规则', exact: true }).click()
+  await modeGroup.getByRole('button', { name: '规则', exact: true }).click()
   await page.waitForFunction(() => window.__uiFixture.config.mode === 'rule')
   await page.keyboard.press('Control+b')
   await page.waitForFunction(

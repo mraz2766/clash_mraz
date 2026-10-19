@@ -67,6 +67,14 @@ pnpm build:fast --no-open
 
 验证覆盖浅色/深色、常规/800×600 窗口和页面交互；截图保存到 `target/ui-review/`。Windows 原生窗口、安装升级、真实重启与不同系统版本需另行实机验证，浏览器预览不替代这些测试。
 
+运行器同时会重新生成 `docs/preview_light.jpg`、`preview_dark.jpg`、`preview_settings.jpg` 与 `preview_dialog.jpg`。平台由 User-Agent 与构建时的 `OS_PLATFORM` 共同判断，因此在 macOS 上运行时界面会显示 “for Mac” 并改用 ⌘ 快捷键，导致快捷键断言失败；生成文档截图需以 Windows 平台渲染（开发服务器将 `OS_PLATFORM` 设为 `"win32"`，浏览器上下文使用 Windows User-Agent）。
+
+## 视觉与性能优化验证记录（2026-10-19）
+
+- TypeScript、ESLint、knip、17 项前端测试与 5 项构建测试通过。
+- 隔离 UI 运行器全部通过（8 页 × 2 主题 × 2 尺寸，含 200% DPI 与减少动态效果），并重新生成四张文档截图；本次在 macOS 上以 Windows 平台渲染完成，未在 Windows 实机上重新验收。
+- 生产构建入口包约 603 KB（此前约 1.05 MB）。
+
 ## 2.6.0 验证记录（2026-09-20）
 
 - TypeScript、ESLint、17 项前端测试、5 项构建/ICO 测试通过，包含过期 NotRunning 快照的代理开关回归。
