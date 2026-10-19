@@ -769,7 +769,9 @@ export const ConnectionTable = (props: Props) => {
             overflow: 'auto',
             WebkitOverflowScrolling: 'touch',
             overscrollBehavior: 'contain',
-            borderRadius: 8,
+            borderRadius: 'var(--radius-card)',
+            border: '1px solid var(--md-outline-soft)',
+            backgroundColor: 'var(--md-surface)',
           }}
         >
           <div

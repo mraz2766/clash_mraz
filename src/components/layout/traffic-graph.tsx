@@ -6,8 +6,8 @@ import { useTrafficColors } from '@/hooks/use-traffic-colors'
 
 const maxPoint = 30
 
-const refLineAlpha = 1
-const refLineWidth = 2
+const refLineAlpha = 0.5
+const refLineWidth = 1
 
 const upLineAlpha = 0.6
 const upLineWidth = 4

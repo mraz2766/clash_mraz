@@ -701,12 +701,13 @@ const ProfileItemBase = (props: ProfileItemProps) => {
               }}
             >
               <DragIndicatorRounded
-                sx={[
-                  { cursor: 'move', marginLeft: '-6px' },
-                  ({ palette: { text } }) => {
-                    return { color: text.primary }
-                  },
-                ]}
+                // A quiet grip that only darkens on hover, so titles stay the focus.
+                sx={{
+                  cursor: 'move',
+                  marginLeft: '-6px',
+                  color: 'text.disabled',
+                  '&:hover': { color: 'text.secondary' },
+                }}
               />
             </Box>
 

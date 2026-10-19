@@ -26,7 +26,12 @@ export const ProxyGroupNavigator = ({
         aria-haspopup="menu"
         aria-expanded={Boolean(anchor)}
         onClick={(event) => setAnchor(event.currentTarget)}
-        sx={{ bgcolor: 'var(--md-surface)', boxShadow: '0 3px 14px #00000010' }}
+        sx={{
+          bgcolor: 'var(--md-surface)',
+          border: '1px solid var(--md-outline-soft)',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+          '&:hover': { bgcolor: 'var(--md-surface)' },
+        }}
       >
         {text('跳转代理组', 'Jump to group')}
       </Button>

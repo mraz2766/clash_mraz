@@ -1,6 +1,5 @@
 import { ExpandMoreRounded, InboxRounded } from '@mui/icons-material'
 import {
-  alpha,
   Box,
   ButtonBase,
   IconButton,
@@ -53,7 +52,7 @@ export const ProxyRender = memo(function ProxyRender(props: RenderProps) {
   const { type, group, headState, member, memberCol } = item
   const { verge } = useVerge()
   const enable_group_icon = verge?.enable_group_icon ?? true
-  const itembackgroundcolor = 'var(--md-surface-container)'
+  const itembackgroundcolor = 'var(--md-surface)'
   const iconCachePath = useIconCache({
     icon: group.icon,
     cacheKey: group.name.replaceAll(' ', ''),
@@ -80,7 +79,7 @@ export const ProxyRender = memo(function ProxyRender(props: RenderProps) {
 
   if (type === 0) {
     return (
-      <div style={{ padding: '4px 8px' }}>
+      <div style={{ padding: '4px 0' }}>
         <Box
           role="group"
           aria-label={group.name}
@@ -92,8 +91,9 @@ export const ProxyRender = memo(function ProxyRender(props: RenderProps) {
           }}
           style={{
             background: itembackgroundcolor,
+            border: '1px solid var(--md-outline-soft)',
             height: '100%',
-            borderRadius: '8px',
+            borderRadius: 'var(--radius-card)',
           }}
         >
           <Box sx={{ width: '100%' }}>
@@ -205,12 +205,7 @@ export const ProxyRender = memo(function ProxyRender(props: RenderProps) {
                     <Chip
                       size="small"
                       label={`${group.members.length}`}
-                      sx={{
-                        mr: 1,
-                        backgroundColor: (theme) =>
-                          alpha(theme.palette.primary.main, 0.1),
-                        color: (theme) => theme.palette.primary.main,
-                      }}
+                      sx={{ mr: 1, fontVariantNumeric: 'tabular-nums' }}
                     />
                   </div>
                 </Tooltip>
@@ -241,7 +236,7 @@ export const ProxyRender = memo(function ProxyRender(props: RenderProps) {
   if (type === 1) {
     return (
       <ProxyHead
-        sx={{ pl: 2, pr: 3, mt: 0.5, mb: 1 }}
+        sx={{ pl: 1, pr: 1, mt: 0.5, mb: 1 }}
         url={group.testUrl}
         groupName={group.name}
         headState={headState!}
@@ -259,7 +254,7 @@ export const ProxyRender = memo(function ProxyRender(props: RenderProps) {
         member={member!.member}
         selected={group.now === member?.member.ref.name}
         showType={headState?.showType}
-        sx={{ py: 0, pl: 2 }}
+        sx={{ py: 0, px: 0 }}
         onClick={(nextMember) => onChangeProxy(group, nextMember)}
       />
     )
@@ -293,7 +288,7 @@ export const ProxyRender = memo(function ProxyRender(props: RenderProps) {
           display: 'grid',
           my: 0.5,
           gap: 1,
-          px: 2,
+          px: 0,
           gridTemplateColumns: `repeat(${item.col! || 2}, 1fr)`,
         }}
       >
@@ -306,8 +301,8 @@ export const ProxyRender = memo(function ProxyRender(props: RenderProps) {
 })
 
 const StyledPrimary = styled('span')`
-  font-size: 16px;
-  font-weight: 500;
+  font-size: 14px;
+  font-weight: 600;
   line-height: 1.5;
   overflow: hidden;
   text-overflow: ellipsis;

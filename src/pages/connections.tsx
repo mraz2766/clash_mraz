@@ -7,10 +7,11 @@ import {
 import {
   Box,
   Button,
-  ButtonGroup,
   Fab,
   IconButton,
   MenuItem,
+  ToggleButton,
+  ToggleButtonGroup,
   Tooltip,
   Zoom,
 } from '@mui/material'
@@ -181,12 +182,19 @@ const ConnectionsPage = () => {
       }}
       header={
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <Box sx={{ mx: 1 }}>
-            {t('shared.labels.downloaded')}:{' '}
+          <Box
+            sx={{
+              mx: 1,
+              fontSize: 13,
+              color: 'text.secondary',
+              fontVariantNumeric: 'tabular-nums',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {t('shared.labels.downloaded')}{' '}
             {parseTraffic(traffic?.downTotal || 0)}
-          </Box>
-          <Box sx={{ mx: 1 }}>
-            {t('shared.labels.uploaded')}: {parseTraffic(traffic?.upTotal || 0)}
+            {' · '}
+            {t('shared.labels.uploaded')} {parseTraffic(traffic?.upTotal || 0)}
           </Box>
           <IconButton
             color="inherit"
@@ -205,7 +213,7 @@ const ConnectionsPage = () => {
               <TableChartRounded titleAccess={t('shared.actions.tableView')} />
             )}
           </IconButton>
-          <Button size="small" variant="contained" onClick={onCloseAll}>
+          <Button size="small" variant="outlined" onClick={onCloseAll}>
             <span style={{ whiteSpace: 'nowrap' }}>
               {t('shared.actions.closeAll')}
             </span>
@@ -217,7 +225,6 @@ const ConnectionsPage = () => {
         sx={{
           pt: 1,
           mb: 0.5,
-          mx: '10px',
           minHeight: '36px',
           display: 'flex',
           alignItems: 'center',
@@ -228,24 +235,26 @@ const ConnectionsPage = () => {
           zIndex: 2,
         }}
       >
-        <ButtonGroup sx={{ mr: 1, flexBasis: 'content' }}>
-          <Button
-            size="small"
-            variant={connectionsType === 'active' ? 'contained' : 'outlined'}
-            onClick={() => selectConnectionsType('active')}
-          >
+        {/* Same segmented control as the proxy and theme mode selectors. */}
+        <ToggleButtonGroup
+          className="workspace-segmented"
+          exclusive
+          size="small"
+          value={connectionsType}
+          sx={{ mr: 1, flexShrink: 0 }}
+          onChange={(_, next: 'active' | 'closed' | null) => {
+            if (next) selectConnectionsType(next)
+          }}
+        >
+          <ToggleButton value="active" sx={{ whiteSpace: 'nowrap' }}>
             {t('connections.components.actions.active')}{' '}
             {connections?.activeConnections.length}
-          </Button>
-          <Button
-            size="small"
-            variant={connectionsType === 'closed' ? 'contained' : 'outlined'}
-            onClick={() => selectConnectionsType('closed')}
-          >
+          </ToggleButton>
+          <ToggleButton value="closed" sx={{ whiteSpace: 'nowrap' }}>
             {t('connections.components.actions.closed')}{' '}
             {connections?.closedConnections.length}
-          </Button>
-        </ButtonGroup>
+          </ToggleButton>
+        </ToggleButtonGroup>
         {!isTableLayout && (
           <BaseStyledSelect
             value={curOrderOpt}

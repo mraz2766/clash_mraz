@@ -187,6 +187,12 @@
   .desktop-workspace.layout .MuiCollapse-root { transition-duration: 0ms !important; }
   .workspace-segmented .MuiToggleButton-root { transition: none; }
 }
+// List pages (BasePage `full`) share the header's 24px gutter so toolbars,
+// lists and tables line up with the page title.
+.desktop-workspace.layout .base-container.no-padding > section .base-content {
+  padding: 0 24px 16px;
+  box-sizing: border-box;
+}
 .desktop-workspace.layout .home-metrics { margin-bottom: 16px; padding: 0 4px; }
 .desktop-workspace.layout .home-metrics .traffic-headline { padding-bottom: 0; }
 .desktop-workspace.layout .home-metrics .traffic-headline .metric-value { font-size: 28px; }

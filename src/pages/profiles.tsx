@@ -752,7 +752,7 @@ const ProfilePage = () => {
 
               <IconButton
                 size="small"
-                color="primary"
+                color="inherit"
                 title={t('profiles.page.actions.reactivate')}
                 onClick={() => onEnhance(true)}
               >
@@ -832,7 +832,6 @@ const ProfilePage = () => {
         sx={{
           pt: 1,
           mb: 0.5,
-          mx: '10px',
           height: '36px',
           display: 'flex',
           alignItems: 'center',
@@ -883,15 +882,13 @@ const ProfilePage = () => {
           loading={loading}
           variant="contained"
           size="small"
-          sx={{ borderRadius: '6px' }}
           onClick={onImport}
         >
           {t('profiles.page.actions.import')}
         </Button>
         <Button
-          variant="contained"
+          variant="outlined"
           size="small"
-          sx={{ borderRadius: '6px' }}
           onClick={() => viewerRef.current?.create()}
         >
           {t('shared.actions.new')}
@@ -900,8 +897,6 @@ const ProfilePage = () => {
 
       <Box
         sx={{
-          pl: '10px',
-          pr: '10px',
           height: 'calc(100% - 48px)',
           overflowY: 'auto',
         }}
@@ -918,7 +913,6 @@ const ProfilePage = () => {
               overflow: 'hidden',
               gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
               gap: 1,
-              px: 0.5,
             }}
           >
             {profileItems.map((item, index) => (

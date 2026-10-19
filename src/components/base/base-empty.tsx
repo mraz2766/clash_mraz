@@ -1,5 +1,5 @@
-import { InboxRounded } from '@mui/icons-material'
-import { alpha, Box, Typography } from '@mui/material'
+import { InboxOutlined } from '@mui/icons-material'
+import { Box, Typography } from '@mui/material'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -11,6 +11,7 @@ interface Props {
   extra?: ReactNode
 }
 
+// Quiet, centred empty state: a small outlined glyph and one line of secondary text.
 export const BaseEmpty = ({
   text,
   textKey = 'shared.statuses.empty',
@@ -22,18 +23,20 @@ export const BaseEmpty = ({
 
   return (
     <Box
-      sx={({ palette }) => ({
+      sx={{
         width: '100%',
         height: '100%',
+        minHeight: 240,
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        color: alpha(palette.text.secondary, 0.75),
-      })}
+        gap: 1,
+        color: 'text.secondary',
+      }}
     >
-      <InboxRounded sx={{ fontSize: '4em' }} />
-      <Typography sx={{ fontSize: '1.25em' }}>{resolvedText}</Typography>
+      <InboxOutlined sx={{ fontSize: 40, color: 'text.disabled' }} />
+      <Typography sx={{ fontSize: 13 }}>{resolvedText}</Typography>
       {extra}
     </Box>
   )
