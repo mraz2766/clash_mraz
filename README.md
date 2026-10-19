@@ -1,96 +1,90 @@
-<p align="center"><img src="src/assets/image/mascot.png" width="104" alt="Clash 小白鲸 Logo" /></p>
+<p align="center">
+  <img src="src/assets/image/mascot.png" width="96" alt="Clash" />
+</p>
+
 <h1 align="center">Clash</h1>
-<p align="center">柔和、清晰、专注效率的桌面代理管理工具</p>
-<p align="center"><a href="#界面预览">界面预览</a> · <a href="#开始使用">开始使用</a> · <a href="#本地构建">本地构建</a> · <a href="docs/usage.md">使用说明</a></p>
 
-基于 [Clash Verge Rev](https://github.com/clash-verge-rev/clash-verge-rev) 二次开发，保留 Mihomo 与既有代理管理能力，重点改善桌面界面的排版、交互和 Windows 安装体验。
+<p align="center">一个安静、清晰的 Windows 桌面代理客户端</p>
 
-## Windows 2.6.0
+<p align="center">
+  <a href="https://github.com/mraz2766/clash_mraz/releases">下载</a> ·
+  <a href="docs/usage.md">使用说明</a> ·
+  <a href="docs/windows-build.md">构建</a> ·
+  <a href="docs/ui-design.md">设计规范</a>
+</p>
 
-本版将仓库 `clash-mac` 分支 2.9.7 的页面设计带到 Windows：同一只线稿白鲸、同一套双白与炭黑主题，保留 Windows 原生窗口操作与现有代理能力。界面按 Windows 11 规范统一：开启、选中与主操作使用系统默认蓝色强调色，控件 4px、卡片与弹窗 8px 圆角，开关与分段控件全局一致。
+<br />
 
-| 页面 | 使用体验 |
-| --- | --- |
-| 首页 | 系统代理、TUN 与路由模式置顶；实时速度、关注代理组和流量趋势组成工作台；诊断信息按需展开。 |
-| 代理 | 紧凑节点列表，选中节点带强调色竖条，切换中状态明确；测速直接可用，搜索、排序和测速地址集中在更多菜单。 |
-| 订阅 | 展示使用状态、流量和到期信息；高级覆写与脚本折叠收纳，原有编辑与更新功能保留。 |
-| 设置 | 通用、外观、网络、备份、高级五分类；搜索跨分类查找，Windows UWP 工具等入口继续保留。 |
-| 连接与规则 | 保持清晰表格和虚拟列表，统一工具栏、分隔线、字体与深浅色表面。 |
-| 图标与安装 | 应用、托盘、安装器、桌面与开始菜单使用统一白鲸图标；覆盖升级刷新已有快捷方式图标。 |
-
-网站出口查看只读取已有连接记录；关注的代理组不代表所有网站的出口。流量图可隐藏或切换低饱和彩色/单色，隐藏后仍显示实时速度和累计用量；上传与下载在侧栏、指标和图表中使用同一组配色。
-
-窗口隐藏到托盘时暂停界面定时刷新与实时订阅；首页以外的页面按需加载，规则列表只在规则页或诊断卡片打开时读取。
-
-快捷键：`Ctrl+,` 打开设置，`Ctrl+1–8` 按当前导航顺序切换页面，`Ctrl+B` 折叠侧栏。输入框、编辑器和弹窗内不会抢占这些快捷键。
-
-保留 Windows 已有的首次启动等待与代理就绪检查，不移植 Mac 分支的 DNS、自动测速、内核或系统服务变更。
-
-## 界面预览
-
-| 浅色首页 | 深色首页 |
+| 浅色 | 深色 |
 | --- | --- |
 | ![浅色首页](docs/preview_light.jpg) | ![深色首页](docs/preview_dark.jpg) |
 
-<details>
-<summary>设置与网站出口查看</summary>
+基于 [Clash Verge Rev](https://github.com/clash-verge-rev/clash-verge-rev) 二次开发，内核为 [Mihomo](https://github.com/MetaCubeX/mihomo)。保留原有的代理能力，重新整理了界面与安装体验。
 
-![分类设置](docs/preview_settings.jpg)
+## 特点
+
+- **贴近 Windows 11**：系统默认强调色，4px 控件与 8px 卡片圆角，统一的开关与分段控件，浅色和深色同样自然。
+- **首页即工作台**：系统代理、TUN 与代理模式放在最上方，实时速度、关注的代理组和流量趋势一屏可见，诊断信息按需展开。
+- **状态一目了然**：选中的节点和页面带强调色竖条，切换中、延迟和失败都有明确反馈。
+- **轻量常驻**：窗口隐藏到托盘时暂停界面刷新，页面按需加载，规则等大数据只在用到时读取。
+- **键盘友好**：`Ctrl+,` 打开设置，`Ctrl+1–8` 切换页面，`Ctrl+B` 折叠侧栏；输入框和弹窗内不会被抢占。
+
+<details>
+<summary>更多截图</summary>
+<br />
+
+![设置](docs/preview_settings.jpg)
 
 ![网站出口查看](docs/preview_dialog.jpg)
 
 </details>
 
-以上为本版真实前端组件的隔离预览，使用演示订阅、节点和流量，不包含个人配置。替换截图只需覆盖 `docs/preview_light.jpg`、`preview_dark.jpg`、`preview_settings.jpg`、`preview_dialog.jpg`。预览不包含操作系统标题栏；安装后的窗口保留 Windows 原生按钮。
-
 ## 开始使用
 
-1. 从[本仓库 Releases](https://github.com/mraz2766/clash_mraz/releases) 选择已手动发布的安装包；没有对应包时可自行构建。
-2. Windows 双击安装 EXE，按向导完成安装。
-3. 在“订阅”中导入自己的订阅或本地配置，然后在“代理”中选择节点。
-4. 按需开启系统代理或 TUN；通过“连接”“规则”和“日志”查看运行状态。
+1. 从 [Releases](https://github.com/mraz2766/clash_mraz/releases) 下载安装包，没有对应版本时可以自行构建。
+2. 运行安装程序，按向导完成安装。
+3. 在「订阅」中导入订阅或本地配置，再到「代理」选择节点。
+4. 按需开启系统代理或 TUN，在「连接」「规则」「日志」查看运行状态。
 
-项目不提供代理订阅。Windows 10 / 11 保留原生窗口控制与桌面交互；macOS 版本在独立的 `clash-mac` 分支维护，本次不修改该分支。
+支持 Windows 10 / 11。本项目不提供代理订阅。
 
 ## 本地构建
 
-准备 Node.js、pnpm、Rust MSVC 工具链及 Visual Studio C++ 桌面构建环境。版本约束以 `package.json` 和 `rust-toolchain.toml` 为准，完整步骤见 [Windows 构建说明](docs/windows-build.md)。
+需要 Node.js、pnpm、Rust MSVC 工具链和 Visual Studio C++ 桌面构建环境，版本以 `package.json` 与 `rust-toolchain.toml` 为准。
 
 ```sh
 pnpm install
 pnpm dev
 ```
 
-| 命令 | 用途 |
+| 命令 | 作用 |
 | --- | --- |
-| `pnpm typecheck` | TypeScript 类型检查 |
-| `pnpm lint` | 前端代码检查 |
-| `pnpm test` | 现有单元测试与安装包脚本检查 |
-| `pnpm knip:check` | 未使用代码检查 |
-| `pnpm build:fast` | 快速构建 Windows 安装包并打开安装向导 |
-| `pnpm build` | 正式配置构建安装包并打开安装向导 |
-| `pnpm build:fast --no-open` | 生成安装包但不打开 |
+| `pnpm build:fast` | 快速构建安装包并打开安装向导 |
+| `pnpm build` | 以正式配置构建安装包 |
+| `pnpm typecheck` · `pnpm lint` · `pnpm test` | 类型检查、代码检查、单元测试 |
 
-安装包位置：**`releases/Clash_2.6.0_x64-setup.exe`**。版本号随项目版本变化；旧安装包正在使用时，新包使用时间戳后缀。打开向导不会自动完成安装。
+安装包输出到 `releases/`，例如 `Clash_2.6.0_x64-setup.exe`。加上 `--no-open` 只生成、不打开向导。完整步骤见 [Windows 构建说明](docs/windows-build.md)。
 
-`pnpm web:dev` 只启动前端，普通浏览器缺少 Tauri 原生能力，不会运行代理核心。
+`pnpm web:dev` 只启动前端，普通浏览器里没有 Tauri 原生能力，也不会运行代理内核。
 
-## GitHub 工作流与应用更新
+## 须知
 
-本仓库采用本地构建、手动发布。工作流已移除定时、推送和 PR 自动触发，仅保留手动或复用入口；日常提交不需要云端打包。历史失败邮件对应已经执行过的任务，关闭工作流不会撤回旧邮件。
+- **发布**：本地构建、手动发布。GitHub 工作流只保留手动触发，日常提交不会触发云端打包。
+- **更新**：应用内自动更新仍指向上游。请从本仓库手动安装新版本，避免定制界面被覆盖。
+- **兼容**：为沿用已有配置和服务，内部的可执行文件名、服务标识、数据目录与 URL 协议保留原项目名称。
+- **共存**：与上游版本共用内部标识，不能同时运行。
+- **macOS**：在独立的 `clash-mac` 分支维护。
 
-**GitHub 构建与应用内自动更新是两套机制。** 应用更新端点和签名校验仍沿用上游，自有签名更新流程尚未建立。使用定制版时，建议从本仓库手动安装，避免上游更新覆盖定制界面。
-
-为兼容已有配置，内部可执行文件名、服务标识、数据目录与 URL 协议仍保留原项目标识。它们不是漏改的界面名称。
-
-## 文档与致谢
+## 文档
 
 - [使用说明与常见问题](docs/usage.md)
-- [Windows 构建与安装流程](docs/windows-build.md)
+- [Windows 构建与安装](docs/windows-build.md)
 - [视觉与交互规范](docs/ui-design.md)
-- [Logo 与平台图标资源](docs/branding.md)
-- [参与开发](CONTRIBUTING.md)
+- [Logo 与图标资源](docs/branding.md)
+- [参与开发](CONTRIBUTING.md) · [更新日志](Changelog.md)
 
-感谢 [Clash Verge Rev](https://github.com/clash-verge-rev/clash-verge-rev)、[Clash Verge](https://github.com/zzzgydi/clash-verge) 和 [Mihomo](https://github.com/MetaCubeX/mihomo) 的作者及贡献者。交互参考 [Amicro](https://github.com/Subhan-code/Amicro--Micro-transitions-)，Logo 整理参考 [ip-as-logo-skill](https://github.com/s1dashu/ip-as-logo-skill)，最终白鲸形象以用户提供的参考为基础。
+## 致谢
 
-沿用 [GPL-3.0-only](LICENSE) 许可证，保留上游版权、第三方归属与历史更新记录。
+感谢 [Clash Verge Rev](https://github.com/clash-verge-rev/clash-verge-rev)、[Clash Verge](https://github.com/zzzgydi/clash-verge) 与 [Mihomo](https://github.com/MetaCubeX/mihomo) 的作者和贡献者。交互动效参考 [Amicro](https://github.com/Subhan-code/Amicro--Micro-transitions-)，Logo 整理参考 [ip-as-logo-skill](https://github.com/s1dashu/ip-as-logo-skill)。
+
+以 [GPL-3.0-only](LICENSE) 许可发布，保留上游版权与第三方归属。
