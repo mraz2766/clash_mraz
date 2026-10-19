@@ -8,7 +8,7 @@
 
 <p align="center">
   <a href="https://github.com/mraz2766/clash_mraz/releases">下载</a> ·
-  <a href="#在-windows-上使用">安装与免安装</a> ·
+  <a href="#在-windows-上使用">安装</a> ·
   <a href="docs/usage.md">使用说明</a> ·
   <a href="docs/ui-design.md">设计规范</a>
 </p>
@@ -41,7 +41,7 @@
 
 ## 在 Windows 上使用
 
-支持 Windows 10 / 11（64 位）。三种方式任选其一，本项目不提供代理订阅。
+支持 Windows 10 / 11（64 位）。两种方式任选其一，本项目不提供代理订阅。
 
 ### 方式一：下载安装（推荐）
 
@@ -49,48 +49,26 @@
 2. 双击运行，按向导完成安装。升级时直接覆盖安装，订阅与设置会保留。
 3. 在「订阅」导入订阅或本地配置，到「代理」选择节点，再按需开启系统代理或 TUN。
 
-### 方式二：自己构建安装包
+### 方式二：一键构建并安装
 
-**准备环境**（只需一次）
+1. 获取源码：`git clone https://github.com/mraz2766/clash_mraz.git`，或在仓库页面选择 **Code → Download ZIP** 并解压。
+2. 在源码目录打开 PowerShell，运行：
 
-| 工具 | 说明 |
+   ```powershell
+   powershell -ExecutionPolicy Bypass -File scripts\build-windows.ps1 -InstallTools
+   ```
+
+3. 构建完成后会自动打开安装向导，按提示安装即可。
+
+脚本会依次检查并准备 Node.js、Rust、Visual Studio C++ 构建工具和 pnpm，然后安装依赖、构建安装包。`-InstallTools` 表示缺少的工具通过 winget 自动安装，期间会弹出安装程序和管理员授权；已经装好时可以省略。首次构建需要联网，耗时较长。
+
+| 参数 | 作用 |
 | --- | --- |
-| [Node.js](https://nodejs.org/) 与 pnpm | 安装 Node.js 后运行 `corepack enable pnpm` |
-| [Rust](https://rustup.rs/) | 选择 MSVC 工具链，版本以 `rust-toolchain.toml` 为准 |
-| [Visual Studio Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/) | 勾选「使用 C++ 的桌面开发」和 Windows SDK |
-| [Git](https://git-scm.com/) | 用于获取源码 |
+| `-InstallTools` | 缺少构建工具时自动安装 |
+| `-NoLaunch` | 只生成安装包，不打开安装向导 |
+| `-Release` | 使用正式配置构建，耗时更长 |
 
-**构建**
-
-```powershell
-git clone https://github.com/mraz2766/clash_mraz.git
-cd clash_mraz
-pnpm install
-pnpm build:fast --no-open
-```
-
-完成后安装包位于 `releases\Clash_<版本>_x64-setup.exe`，双击安装即可。去掉 `--no-open` 会在构建结束后直接打开安装向导；`pnpm build` 为正式配置，耗时更长。首次构建需要联网下载内核资源。
-
-### 方式三：免安装（便携模式）
-
-不想安装时，可以用方式二的构建结果组成一个便携文件夹。应用检测到程序旁的 `.config\PORTABLE` 文件后，会把配置和订阅都保存在这个文件夹里，不写入用户目录。
-
-在项目根目录完成 `pnpm build:fast --no-open` 后，于 PowerShell 中运行：
-
-```powershell
-$src = "target\fast-release"
-$out = "$env:USERPROFILE\Clash"
-New-Item -ItemType Directory -Force "$out\.config" | Out-Null
-Copy-Item "$src\clash-verge.exe", "$src\verge-mihomo*.exe" $out
-Copy-Item "$src\resources" $out -Recurse -Force
-New-Item -ItemType File -Force "$out\.config\PORTABLE" | Out-Null
-```
-
-之后双击 `%USERPROFILE%\Clash\clash-verge.exe` 即可使用，整个文件夹可以移动到任意位置或 U 盘。
-
-- 需要系统自带的 WebView2 运行时：Windows 11 已内置；Windows 10 如无法启动，请安装 [WebView2](https://developer.microsoft.com/microsoft-edge/webview2/)。
-- 便携模式不会自动更新，也不会创建开始菜单和桌面快捷方式。
-- TUN 模式需要安装系统服务，首次开启时按提示授权即可；仅用系统代理时无需额外操作。
+安装包保存在 `releases\Clash_<版本>_x64-setup.exe`，可以复制到其他电脑安装。
 
 ### 开发与检查
 

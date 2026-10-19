@@ -9,6 +9,21 @@
 
 Windows ARM64 构建还需要 LLVM/Clang。macOS 与 Linux 应使用对应平台的开发环境。
 
+## 一键脚本
+
+`scripts/build-windows.ps1` 把下文的环境检查、依赖安装与构建串成一步，适合只想得到安装包的场景：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts\build-windows.ps1 -InstallTools
+```
+
+- 检查 Node.js（20 及以上）、Rust 与带 C++ 工作负载的 Visual Studio 构建工具；`-InstallTools` 时用 winget 安装缺少的项目，否则列出下载链接后退出。
+- 按 `rust-toolchain.toml` 安装固定版本的 Rust 工具链。
+- 没有 pnpm 时，用 corepack 在 `%LOCALAPPDATA%\clash-build\bin` 生成当前用户可用的 pnpm，无需管理员权限；Node.js 不带 corepack 时改用 `npm install --global` 安装 `package.json` 中固定的 pnpm 版本。
+- 运行 `pnpm install --frozen-lockfile` 与 `pnpm build:fast --no-open`（`-Release` 时为 `pnpm build`），找到本次生成的安装包后打开安装向导；`-NoLaunch` 只输出路径。
+
+脚本以 UTF-8 BOM 保存，以便 Windows PowerShell 5.1 正确显示中文提示。
+
 ## 命令
 
 ```sh
