@@ -49,7 +49,15 @@ export const materialComponents: Components<Theme> = {
   },
   MuiCard: {
     defaultProps: { variant: 'outlined' },
-    styleOverrides: { root: { borderRadius: 'var(--radius-card)' } },
+    styleOverrides: {
+      root: {
+        borderRadius: 'var(--radius-card)',
+        backgroundColor: 'var(--surface-card-bg)',
+        backgroundImage: 'var(--surface-card-highlight)',
+        borderColor: 'var(--surface-card-border)',
+        boxShadow: 'var(--surface-card-shadow)',
+      },
+    },
   },
   MuiOutlinedInput: {
     styleOverrides: {

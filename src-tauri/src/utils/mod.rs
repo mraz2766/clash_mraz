@@ -20,5 +20,7 @@ pub(crate) mod startup;
 pub mod tmpl;
 #[cfg(target_os = "macos")]
 pub mod tray_speed;
+#[cfg(target_os = "windows")]
+pub mod window_branding;
 pub mod window_manager;
 pub mod yaml_emitter;

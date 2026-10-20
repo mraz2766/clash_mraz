@@ -45,9 +45,10 @@ export const EnhancedCard = forwardRef<HTMLElement, EnhancedCardProps>(
           display: 'flex',
           flexDirection: 'column',
           borderRadius: 'var(--radius-card)',
-          backgroundColor: 'var(--md-surface)',
-          border: '1px solid var(--md-outline-soft)',
-          boxShadow: 'none',
+          backgroundColor: 'var(--surface-card-bg)',
+          backgroundImage: 'var(--surface-card-highlight)',
+          border: '1px solid var(--surface-card-border)',
+          boxShadow: 'var(--surface-card-shadow)',
         }}
         ref={ref}
       >

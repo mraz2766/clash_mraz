@@ -46,6 +46,8 @@ const navigate = async (route = '/', theme = 'light') => {
 }
 try {
   await navigate()
+  assert.equal(await page.locator('img.brand-icon').count(), 0)
+  await page.waitForFunction(() => window.__uiNativeLogo === false)
   const selectors = page.locator('.home-proxy-selectors')
   assert.ok((await selectors.boundingBox()).width <= 561)
   await selectors.getByRole('combobox').last().click()
@@ -101,6 +103,28 @@ try {
   await search.fill('')
   await page.getByRole('tab', { name: '外观', exact: true }).click()
   await page.getByRole('switch', { name: '显示流量图', exact: true }).waitFor()
+  const logoSwitch = page.getByRole('switch', {
+    name: '显示鲸鱼 Logo',
+    exact: true,
+  })
+  assert.equal(await logoSwitch.isChecked(), false)
+  await logoSwitch.check()
+  await page.locator('img.brand-icon').waitFor()
+  await page.waitForFunction(() => window.__uiNativeLogo === true)
+  await page.reload()
+  await logoSwitch.waitFor()
+  assert.equal(await logoSwitch.isChecked(), true)
+  assert.equal(await page.locator('img.brand-icon').count(), 1)
+  await page.waitForFunction(() => window.__uiNativeLogo === true)
+  await logoSwitch.uncheck()
+  assert.equal(await page.locator('img.brand-icon').count(), 0)
+  await page.waitForFunction(() => window.__uiNativeLogo === false)
+  await page.locator('.base-page > header').click()
+  await page.keyboard.press('Control+b')
+  await page.locator('.layout--nav-collapsed').waitFor()
+  assert.equal(await page.locator('.the-logo').count(), 0)
+  await page.keyboard.press('Control+b')
+  await page.locator('.the-logo').waitFor()
   // Persist the color preference, then verify it survives a complete reload.
   await page.getByRole('combobox').click()
   await page.getByRole('option', { name: '单色', exact: true }).click()
@@ -190,6 +214,20 @@ try {
         '/settings',
       ]) {
         await navigate(route, theme)
+        if (route === '/profile' && width === 1280) {
+          const card = page
+            .locator('[aria-selected="true"]')
+            .filter({ hasText: '日常订阅' })
+          await card.waitFor()
+          const bounds = await card.boundingBox()
+          assert.ok(bounds.width < 400 && bounds.height < 135)
+          if (theme === 'light')
+            await page.screenshot({
+              animations: 'disabled',
+              path: path.join(root, 'docs/preview_profiles.jpg'),
+              quality: 90,
+            })
+        }
         if (route === '/connections')
           await page
             .getByText('example.com:443', { exact: true })

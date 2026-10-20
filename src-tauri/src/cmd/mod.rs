@@ -109,6 +109,8 @@ pub mod uwp;
 pub mod validate;
 pub mod verge;
 pub mod webdav;
+pub mod window_appearance;
+pub use window_appearance::*;
 
 // Re-export all command functions for backwards compatibility
 pub use app::*;

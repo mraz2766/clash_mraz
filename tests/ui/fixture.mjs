@@ -116,10 +116,15 @@ const timers = new Map()
 let nextSocket = 1
 window.__uiCalls = []
 window.__uiFixture = { verge, config, groups, profiles }
+window.isTauri = true
 mockWindows('main')
 mockIPC(
   async (command, args = {}) => {
     window.__uiCalls.push(command)
+    if (command === 'set_window_logo_visible') {
+      window.__uiNativeLogo = args.visible
+      return null
+    }
     if (command.startsWith('plugin:window|')) {
       if (
         command.endsWith('is_decorated') ||
@@ -251,7 +256,7 @@ mockIPC(
       clearInterval(timers.get(args.id))
       return null
     }
-    if (command === 'plugin:app|version') return '2.6.1'
+    if (command === 'plugin:app|version') return '2.6.2'
     if (command === 'plugin:app|name') return 'Clash'
     if (command === 'plugin:updater|check') return null
     if (command === 'read_profile_file') return '# 演示配置\n'

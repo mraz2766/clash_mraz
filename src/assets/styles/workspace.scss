@@ -4,12 +4,12 @@
 :root {
   --workspace-sidebar: #ffffff;
   --workspace-glass-edge: rgba(255, 255, 255, .65);
-  --workspace-toolbar: #f7f7f7;
+  --workspace-toolbar: var(--md-bg);
 }
 :root[data-theme='dark'] {
-  --workspace-sidebar: #2a2a2a;
+  --workspace-sidebar: #27272a;
   --workspace-glass-edge: rgba(215, 215, 215, .1);
-  --workspace-toolbar: #242424;
+  --workspace-toolbar: var(--md-bg);
 }
 .desktop-workspace.layout {
   background: var(--md-bg);
@@ -159,7 +159,13 @@
   .settings-toolbar { position: sticky; top: 0; z-index: 5; background: var(--md-bg); padding: 0 0 12px; }
   .settings-toolbar .MuiTabs-root { margin-top: 12px; }
   .settings-toolbar .MuiTab-root { min-width: 76px; min-height: 42px; padding: 8px 14px; text-transform: none; font-size: 13px; }
-  .settings-results > .MuiList-root { background: var(--md-surface); border: 1px solid var(--md-outline-soft); border-radius: var(--radius-card); margin-bottom: 16px; }
+  .settings-results > .MuiList-root {
+    background: var(--surface-card-highlight), var(--surface-card-bg);
+    border: 1px solid var(--surface-card-border);
+    border-radius: var(--radius-card);
+    box-shadow: var(--surface-card-shadow);
+    margin-bottom: 16px;
+  }
   .settings-results .MuiListItemText-root { min-width: 0; margin-right: 16px; }
   .settings-results:has(> .MuiList-root) > .settings-empty { display: none; }
   .settings-empty { text-align: center; padding: 40px 16px; }

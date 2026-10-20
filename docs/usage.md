@@ -28,7 +28,7 @@
 
 ## 外观与无障碍
 
-支持浅色、深色及原有主题设置。Windows 优先使用 Segoe UI Variable / Segoe UI，macOS 回退到系统字体。没有下载或打包 SF Pro。
+支持浅色、深色及原有主题设置。应用内默认隐藏侧栏与 Windows 标题栏鲸鱼，需要时在“设置 → 外观 → 显示鲸鱼 Logo”中统一打开，重启后保留。Windows 优先使用 Segoe UI Variable / Segoe UI，macOS 回退到系统字体。没有下载或打包 SF Pro。
 
 系统开启“减少动态效果”后，界面的位移和缩放会关闭，按钮和列表依然立即响应。窗口拖拽、缩放、最大化与最小化沿用原实现。
 

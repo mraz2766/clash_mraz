@@ -283,7 +283,7 @@ const UnlockPage = () => {
                 variant="outlined"
                 sx={{
                   height: '100%',
-                  borderRadius: 2,
+                  borderRadius: 'var(--radius-card)',
                   borderLeft: `4px solid ${getStatusBorderColor(item.status)}`,
                   backgroundColor: 'var(--md-surface)',
                   position: 'relative',

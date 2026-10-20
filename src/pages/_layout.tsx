@@ -36,6 +36,7 @@ import {
   WindowResizeHandles,
 } from '@/components/layout/window-controller'
 import { useI18n } from '@/hooks/use-i18n'
+import { useLogoPreference } from '@/hooks/use-logo-preference'
 import { useVerge } from '@/hooks/use-verge'
 import { useWindowDecorations } from '@/hooks/use-window'
 import { useThemeMode } from '@/services/states'
@@ -70,6 +71,7 @@ const Layout = () => {
   const { verge, mutateVerge, patchVerge } = useVerge()
   const { language } = verge ?? {}
   const navCollapsed = verge?.collapse_navbar ?? false
+  const { showLogo } = useLogoPreference()
   const { switchLanguage } = useI18n()
   const navigate = useNavigate()
   const themeReady = useMemo(() => Boolean(theme), [theme])
@@ -348,35 +350,46 @@ const Layout = () => {
                 </IconButton>
               </Tooltip>
             </div>
-            <div className="the-logo" data-tauri-drag-region="false">
+            {(!navCollapsed || showLogo) && (
               <div
-                data-tauri-drag-region="true"
-                style={{
-                  height: '36px',
-                  alignItems: 'center',
-                  gap: '10px',
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                }}
+                className="the-logo"
+                data-show-logo={showLogo}
+                data-tauri-drag-region="false"
               >
-                <img
-                  className="brand-icon"
-                  src={mascot}
-                  alt="Clash"
-                  draggable={false}
-                />
-                <span className="brand-name">Clash</span>
+                <div
+                  data-tauri-drag-region="true"
+                  style={{
+                    height: '36px',
+                    alignItems: 'center',
+                    gap: '10px',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                  }}
+                >
+                  {showLogo && (
+                    <img
+                      className="brand-icon"
+                      src={mascot}
+                      alt="Clash"
+                      draggable={false}
+                    />
+                  )}
+                  <span className="brand-name">Clash</span>
+                </div>
+                <UpdateButton className="the-newbtn" />
+                <span
+                  className="workspace-edition"
+                  style={showLogo ? undefined : { marginLeft: 0 }}
+                >
+                  {OS === 'windows'
+                    ? 'for Windows'
+                    : OS === 'macos'
+                      ? 'for Mac'
+                      : 'Desktop'}{' '}
+                  · {appVersion}
+                </span>
               </div>
-              <UpdateButton className="the-newbtn" />
-              <span className="workspace-edition">
-                {OS === 'windows'
-                  ? 'for Windows'
-                  : OS === 'macos'
-                    ? 'for Mac'
-                    : 'Desktop'}{' '}
-                · {appVersion}
-              </span>
-            </div>
+            )}
 
             {menuUnlocked && (
               <Box

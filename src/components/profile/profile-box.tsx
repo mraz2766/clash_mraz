@@ -5,22 +5,26 @@ export const ProfileBox = styled(Box)(({ 'aria-selected': selected }) => ({
   display: 'block',
   cursor: 'pointer',
   textAlign: 'left',
-  padding: '16px',
+  padding: '12px 14px',
   boxSizing: 'border-box',
   width: '100%',
-  backgroundColor: 'var(--md-surface)',
+  background: 'var(--surface-card-bg)',
   border: '1px solid',
-  borderColor: selected ? 'var(--md-primary)' : 'var(--md-outline)',
-  // Doubles the accent border without shifting layout.
-  boxShadow: selected ? 'inset 0 0 0 1px var(--md-primary)' : 'none',
-  borderRadius: 'var(--radius-lg)',
+  borderColor: selected
+    ? 'color-mix(in srgb, var(--md-primary) 30%, var(--surface-card-border))'
+    : 'var(--surface-card-border)',
+  boxShadow: 'var(--surface-card-shadow)',
+  borderRadius: 'var(--radius-card)',
   color: 'var(--md-text-secondary)',
   transition: 'border-color var(--md-motion), box-shadow var(--md-motion)',
   '&:hover': {
-    borderColor: selected ? 'var(--md-primary)' : 'var(--md-text-muted)',
+    boxShadow: 'var(--surface-card-shadow-hover)',
+    borderColor: selected
+      ? 'color-mix(in srgb, var(--md-primary) 45%, var(--surface-card-border))'
+      : 'var(--md-outline)',
   },
   '& h2': {
     color: 'var(--md-text-primary)',
-    fontWeight: 600,
+    fontWeight: 500,
   },
 }))

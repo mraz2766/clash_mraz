@@ -899,6 +899,9 @@ const ProfilePage = () => {
         sx={{
           height: 'calc(100% - 48px)',
           overflowY: 'auto',
+          mx: -0.5,
+          p: 0.5,
+          boxSizing: 'border-box',
         }}
       >
         <DragDropProvider
@@ -910,9 +913,10 @@ const ProfilePage = () => {
             sx={{
               mb: 1.5,
               display: 'grid',
-              overflow: 'hidden',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-              gap: 1,
+              gridTemplateColumns:
+                'repeat(auto-fill, minmax(min(100%, 300px), 1fr))',
+              gap: 1.5,
+              alignItems: 'start',
             }}
           >
             {profileItems.map((item, index) => (

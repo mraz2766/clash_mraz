@@ -316,7 +316,10 @@ const ConnectionsPage = () => {
           )}
           style={{
             flex: 1,
-            borderRadius: '8px',
+            borderRadius: 'var(--radius-card)',
+            border: '1px solid var(--surface-card-border)',
+            backgroundColor: 'var(--surface-card-bg)',
+            boxShadow: 'var(--surface-card-shadow)',
             WebkitOverflowScrolling: 'touch',
             overscrollBehavior: 'contain',
           }}

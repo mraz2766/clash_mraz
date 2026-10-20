@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next'
 import { DialogRef, Switch, TooltipIcon } from '@/components/base'
 import { HomeContentDialog } from '@/components/setting/mods/home-content-dialog'
 import { useDesktopText } from '@/hooks/use-desktop-text'
+import { useLogoPreference } from '@/hooks/use-logo-preference'
 import { useTrafficPreferences } from '@/hooks/use-traffic-preferences'
 import { useVerge } from '@/hooks/use-verge'
 import { navigationItems } from '@/pages/_navigation-meta'
@@ -55,6 +56,7 @@ const SettingVergeBasic = ({ onError }: Props) => {
   const { t } = useTranslation()
   const text = useDesktopText()
   const { colorMode, setColorMode } = useTrafficPreferences()
+  const { showLogo, setShowLogo } = useLogoPreference()
 
   const { verge, patchVerge, mutateVerge } = useVerge()
   const {
@@ -131,6 +133,18 @@ const SettingVergeBasic = ({ onError }: Props) => {
         </GuardState>
       </SettingItem>
 
+      <SettingItem
+        category="appearance"
+        label={text('显示鲸鱼 Logo', 'Show whale logo')}
+      >
+        <Switch
+          checked={showLogo}
+          onChange={(_, checked) => setShowLogo(checked)}
+          slotProps={{
+            input: { 'aria-label': text('显示鲸鱼 Logo', 'Show whale logo') },
+          }}
+        />
+      </SettingItem>
       <SettingItem
         category="appearance"
         label={text('显示流量图', 'Show traffic charts')}

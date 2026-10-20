@@ -593,10 +593,11 @@ const ProfileItemBase = (props: ProfileItemProps) => {
   ]
 
   const boxStyle = {
-    height: 26,
+    minHeight: 23,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
+    gap: 1,
   }
 
   const handleSaveProfileDocument = useLockFn(async () => {
@@ -632,7 +633,10 @@ const ProfileItemBase = (props: ProfileItemProps) => {
   })
 
   return (
-    <Box ref={setElement} sx={{ position: 'relative', borderRadius: '8px' }}>
+    <Box
+      ref={setElement}
+      sx={{ position: 'relative', borderRadius: 'var(--radius-card)' }}
+    >
       <ProfileBox
         aria-selected={selected}
         onClick={(e) => {
@@ -673,7 +677,15 @@ const ProfileItemBase = (props: ProfileItemProps) => {
           </Box>
         )}
         <Box sx={{ position: 'relative' }}>
-          <Box sx={{ display: 'flex', justifyContent: 'start' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 0.5,
+              pr: hasUrl ? 3.5 : 0,
+              mb: 0.75,
+            }}
+          >
             {batchMode && (
               <IconButton
                 size="small"
@@ -705,6 +717,7 @@ const ProfileItemBase = (props: ProfileItemProps) => {
                 sx={{
                   cursor: 'move',
                   marginLeft: '-6px',
+                  fontSize: 18,
                   color: 'text.disabled',
                   '&:hover': { color: 'text.secondary' },
                 }}
@@ -713,8 +726,9 @@ const ProfileItemBase = (props: ProfileItemProps) => {
 
             <Typography
               sx={{
-                width: batchMode ? 'calc(100% - 56px)' : 'calc(100% - 36px)',
-                fontSize: '16px',
+                minWidth: 0,
+                flex: 1,
+                fontSize: '14px',
                 fontWeight: 500,
                 lineHeight: '26px',
               }}
@@ -725,6 +739,22 @@ const ProfileItemBase = (props: ProfileItemProps) => {
             >
               {name}
             </Typography>
+            {selected && (
+              <Typography
+                variant="caption"
+                sx={{
+                  flexShrink: 0,
+                  fontSize: 11,
+                  lineHeight: '20px',
+                  px: 0.75,
+                  borderRadius: '6px',
+                  color: 'var(--md-primary)',
+                  backgroundColor: 'var(--md-primary-container)',
+                }}
+              >
+                {text('正在使用', 'Active subscription')}
+              </Typography>
+            )}
           </Box>
 
           {hasUrl && (
@@ -735,6 +765,7 @@ const ProfileItemBase = (props: ProfileItemProps) => {
                 p: '3px',
                 top: -1,
                 right: -5,
+                '& .MuiSvgIcon-root': { fontSize: 18 },
                 animation: loading ? `1s linear infinite ${round}` : 'none',
               }}
               size="small"
@@ -756,14 +787,6 @@ const ProfileItemBase = (props: ProfileItemProps) => {
             </IconButton>
           )}
         </Box>
-        {selected && (
-          <Typography
-            variant="caption"
-            sx={{ display: 'block', fontWeight: 600, mb: 0.75 }}
-          >
-            {text('正在使用', 'Active subscription')}
-          </Typography>
-        )}
         {updatedSuccessfully && (
           <Typography role="status" variant="caption" color="success.main">
             {text('更新成功', 'Updated successfully')}
@@ -776,7 +799,7 @@ const ProfileItemBase = (props: ProfileItemProps) => {
                 <Typography
                   noWrap
                   title={description}
-                  sx={{ fontSize: '14px' }}
+                  sx={{ fontSize: 12, minWidth: 0 }}
                 >
                   {description}
                 </Typography>
@@ -785,6 +808,7 @@ const ProfileItemBase = (props: ProfileItemProps) => {
                   <Typography
                     noWrap
                     title={`${t('shared.labels.from')} ${from}`}
+                    sx={{ fontSize: 12, minWidth: 0 }}
                   >
                     {from}
                   </Typography>
@@ -796,6 +820,7 @@ const ProfileItemBase = (props: ProfileItemProps) => {
                     display: 'flex',
                     justifyContent: 'flex-end',
                     ml: 'auto',
+                    flexShrink: 0,
                   }}
                 >
                   <Typography
@@ -807,7 +832,7 @@ const ProfileItemBase = (props: ProfileItemProps) => {
                         : `${t('shared.labels.updateTime')}: ${parseExpire(updated)}\n${t('profiles.components.profileItem.tooltips.showNext')}`
                     }
                     sx={{
-                      fontSize: 14,
+                      fontSize: 12,
                       textAlign: 'right',
                       cursor: 'pointer',
                       display: 'inline-block',
@@ -832,7 +857,15 @@ const ProfileItemBase = (props: ProfileItemProps) => {
           }
         </Box>
         {hasExtra ? (
-          <Box sx={{ ...boxStyle, fontSize: 14 }}>
+          <Box
+            sx={{
+              ...boxStyle,
+              fontSize: 12,
+              flexWrap: 'wrap',
+              columnGap: 1,
+              rowGap: 0,
+            }}
+          >
             <span
               title={`${t('shared.labels.usedTotal')}: ${parseTraffic(upload + download).join(' ')} / ${parseTraffic(total).join(' ')}`}
             >
@@ -852,11 +885,13 @@ const ProfileItemBase = (props: ProfileItemProps) => {
             </span>
           </Box>
         )}
-        <LinearProgress
-          variant="determinate"
-          value={progress}
-          style={{ opacity: total > 0 ? 1 : 0 }}
-        />
+        {total > 0 && (
+          <LinearProgress
+            variant="determinate"
+            value={progress}
+            sx={{ mt: 1, height: 3, borderRadius: 2 }}
+          />
+        )}
       </ProfileBox>
 
       <Menu

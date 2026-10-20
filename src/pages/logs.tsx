@@ -194,7 +194,14 @@ const LogPage = () => {
               element.scrollHeight - element.scrollTop - element.clientHeight <=
               20
           }}
-          style={{ flex: 1 }}
+          style={{
+            flex: 1,
+            marginTop: 8,
+            borderRadius: 'var(--radius-card)',
+            border: '1px solid var(--surface-card-border)',
+            backgroundColor: 'var(--surface-card-bg)',
+            boxShadow: 'var(--surface-card-shadow)',
+          }}
         />
       ) : (
         <BaseEmpty />

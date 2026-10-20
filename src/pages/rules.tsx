@@ -88,7 +88,14 @@ const RulesPage = () => {
             count={filteredRules.length}
             estimateSize={40}
             renderItem={(i) => <RuleItem value={filteredRules[i]} />}
-            style={{ flex: 1 }}
+            style={{
+              flex: 1,
+              marginTop: 8,
+              borderRadius: 'var(--radius-card)',
+              border: '1px solid var(--surface-card-border)',
+              backgroundColor: 'var(--surface-card-bg)',
+              boxShadow: 'var(--surface-card-shadow)',
+            }}
             onScroll={handleScroll}
           />
           <ScrollTopButton onClick={scrollToTop} show={showScrollTop} />

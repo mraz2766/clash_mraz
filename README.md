@@ -21,13 +21,17 @@
 
 基于 [Clash Verge Rev](https://github.com/clash-verge-rev/clash-verge-rev) 二次开发，内核为 [Mihomo](https://github.com/MetaCubeX/mihomo)。保留原有的代理能力，重新整理了界面与安装体验。
 
-## 本次更新 · 2.6.1
+## 本次更新 · 2.6.2
+
+应用内鲸鱼 Logo 默认隐藏，侧栏与 Windows 标题栏都可在 **设置 → 外观 → 显示鲸鱼 Logo** 中统一打开。卡片改为柔和圆角、细描边与轻微投影，订阅卡片更紧凑，单个订阅不再占满整行。
+
+## 近期调整
 
 首页选择器更紧凑，节点菜单限高滚动。外观在设置页调整；首页模块在 **设置 → 通用 → 首页显示内容** 中调整。运行 `powershell -ExecutionPolicy Bypass -File scripts\build-windows.ps1 -Install` 可在本地构建并覆盖安装，EXE 位于 `releases/`。GitHub 自动构建保持关闭。
 
 ## 特点
 
-- **贴近 Windows 11**：系统默认强调色，4px 控件与 8px 卡片圆角，统一的开关与分段控件，浅色和深色同样自然。
+- **克制的桌面风格**：Windows 默认强调色，6px 控件与 14px 卡片圆角，细描边与轻投影带来层次，浅色和深色同样自然。
 - **首页即工作台**：系统代理、TUN 与代理模式放在最上方，实时速度、关注的代理组和流量趋势一屏可见，诊断信息按需展开。
 - **状态一目了然**：选中的节点和页面带强调色竖条，切换中、延迟和失败都有明确反馈。
 - **轻量常驻**：窗口隐藏到托盘时暂停界面刷新，页面按需加载，规则等大数据只在用到时读取。
@@ -38,6 +42,8 @@
 <br />
 
 ![设置](docs/preview_settings.jpg)
+
+![紧凑订阅](docs/preview_profiles.jpg)
 
 ![网站出口查看](docs/preview_dialog.jpg)
 

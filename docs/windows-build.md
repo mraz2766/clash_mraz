@@ -51,7 +51,7 @@ pnpm build:fast
 ```text
 clash_mraz/
   releases/
-    Clash_2.6.1_x64-setup.exe
+    Clash_2.6.2_x64-setup.exe
 ```
 
 文件名随版本与架构变化，以构建输出为准。Cargo 的中间产物仍在 `target/` 中，这是编译缓存；无需手动进入它寻找安装包。`releases/` 不提交到 Git。
