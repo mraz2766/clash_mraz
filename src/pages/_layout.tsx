@@ -1,5 +1,5 @@
 import { DragDropProvider, KeyboardSensor, PointerSensor } from '@dnd-kit/react'
-import { ViewSidebarRounded } from '@mui/icons-material'
+import { SearchRounded, ViewSidebarRounded } from '@mui/icons-material'
 import {
   Box,
   IconButton,
@@ -12,8 +12,10 @@ import {
 } from '@mui/material'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
+import { AnimatePresence } from 'motion/react'
 import {
   Suspense,
+  lazy,
   useCallback,
   useEffect,
   useMemo,
@@ -25,6 +27,7 @@ import { Outlet, useNavigate } from 'react-router'
 
 import mascot from '@/assets/image/brand-icon.png'
 import { BaseErrorBoundary, SortableItem } from '@/components/base'
+import { MotionProvider } from '@/components/base/motion-provider'
 import { LayoutItem } from '@/components/layout/layout-item'
 import { LayoutTraffic } from '@/components/layout/layout-traffic'
 import { NoticeManager } from '@/components/layout/notice-manager'
@@ -35,6 +38,7 @@ import {
   WindowControls,
   WindowResizeHandles,
 } from '@/components/layout/window-controller'
+import { useDesktopText } from '@/hooks/use-desktop-text'
 import { useI18n } from '@/hooks/use-i18n'
 import { useLogoPreference } from '@/hooks/use-logo-preference'
 import { useVerge } from '@/hooks/use-verge'
@@ -61,6 +65,9 @@ type MenuContextPosition = { top: number; left: number }
 
 dayjs.extend(relativeTime)
 
+// Loaded on first open so the palette never weighs on startup.
+const CommandPalette = lazy(() => import('@/components/layout/command-palette'))
+
 const OS = getSystem()
 const SENSORS = [PointerSensor, KeyboardSensor]
 
@@ -73,10 +80,12 @@ const Layout = () => {
   const navCollapsed = verge?.collapse_navbar ?? false
   const { showLogo } = useLogoPreference()
   const { switchLanguage } = useI18n()
+  const text = useDesktopText()
   const navigate = useNavigate()
   const themeReady = useMemo(() => Boolean(theme), [theme])
 
   const [menuUnlocked, setMenuUnlocked] = useState(false)
+  const [paletteOpen, setPaletteOpen] = useState(false)
   const [menuContextPosition, setMenuContextPosition] =
     useState<MenuContextPosition | null>(null)
 
@@ -164,7 +173,10 @@ const Layout = () => {
         )
       )
         return
-      if (event.key === ',') {
+      if (event.key.toLowerCase() === 'k') {
+        event.preventDefault()
+        setPaletteOpen(true)
+      } else if (event.key === ',') {
         event.preventDefault()
         navigate('/settings')
       } else if (event.key.toLowerCase() === 'b') {
@@ -275,210 +287,233 @@ const Layout = () => {
 
   return (
     <ThemeProvider theme={theme}>
-      {/* 左侧底部窗口控制按钮 */}
-      <NoticeManager position={verge?.notice_position} />
-      <ServiceMigrationDialog />
-      <SysproxyPrivilegeDialog />
-      <div
-        style={{
-          animation: 'fadeIn 0.5s',
-          WebkitAnimation: 'fadeIn 0.5s',
-        }}
-      />
-      <style>
-        {`
+      <MotionProvider>
+        {/* 左侧底部窗口控制按钮 */}
+        <NoticeManager position={verge?.notice_position} />
+        <AnimatePresence>
+          {paletteOpen && (
+            <Suspense key="command-palette" fallback={null}>
+              <CommandPalette onClose={() => setPaletteOpen(false)} />
+            </Suspense>
+          )}
+        </AnimatePresence>
+        <ServiceMigrationDialog />
+        <SysproxyPrivilegeDialog />
+        <div
+          style={{
+            animation: 'fadeIn 0.5s',
+            WebkitAnimation: 'fadeIn 0.5s',
+          }}
+        />
+        <style>
+          {`
             @keyframes fadeIn {
               from { opacity: 0; }
               to { opacity: 1; }
             }
           `}
-      </style>
-      <Paper
-        square
-        elevation={0}
-        className={`${OS} desktop-workspace layout${navCollapsed ? ' layout--nav-collapsed' : ''}`}
-        style={{
-          borderTopLeftRadius: '0px',
-          borderTopRightRadius: '0px',
-        }}
-        onContextMenu={(e) => {
-          if (
-            OS === 'windows' &&
-            !['input', 'textarea'].includes(
-              e.currentTarget.tagName.toLowerCase(),
-            ) &&
-            !e.currentTarget.isContentEditable
-          ) {
-            e.preventDefault()
-          }
-        }}
-        sx={[
-          ({ palette }) => ({ bgcolor: palette.background.default }),
-          OS === 'linux'
-            ? {
-                borderRadius: '8px',
-                width: '100vw',
-                height: '100vh',
-              }
-            : {},
-        ]}
-      >
-        {decorated === false && <WindowResizeHandles />}
+        </style>
+        <Paper
+          square
+          elevation={0}
+          className={`${OS} desktop-workspace layout${navCollapsed ? ' layout--nav-collapsed' : ''}`}
+          style={{
+            borderTopLeftRadius: '0px',
+            borderTopRightRadius: '0px',
+          }}
+          onContextMenu={(e) => {
+            if (
+              OS === 'windows' &&
+              !['input', 'textarea'].includes(
+                e.currentTarget.tagName.toLowerCase(),
+              ) &&
+              !e.currentTarget.isContentEditable
+            ) {
+              e.preventDefault()
+            }
+          }}
+          sx={[
+            ({ palette }) => ({ bgcolor: palette.background.default }),
+            OS === 'linux'
+              ? {
+                  borderRadius: '8px',
+                  width: '100vw',
+                  height: '100vh',
+                }
+              : {},
+          ]}
+        >
+          {decorated === false && <WindowResizeHandles />}
 
-        {/* Custom titlebar - rendered only when decorated is false, memoized for performance */}
-        {customTitlebar}
+          {/* Custom titlebar - rendered only when decorated is false, memoized for performance */}
+          {customTitlebar}
 
-        <div className="layout-content">
-          <div className="layout-content__left">
-            <div
-              className="workspace-window-toolbar"
-              data-tauri-drag-region="true"
-            >
-              <Tooltip
-                title={`${t(navCollapsed ? 'layout.components.navigation.menu.expandNavBar' : 'layout.components.navigation.menu.collapseNavBar')} (${OS === 'macos' ? '⌘' : 'Ctrl+'}B)`}
-              >
-                <IconButton
-                  size="small"
-                  onClick={handleToggleNavCollapsed}
-                  aria-label={t(
-                    navCollapsed
-                      ? 'layout.components.navigation.menu.expandNavBar'
-                      : 'layout.components.navigation.menu.collapseNavBar',
-                  )}
-                >
-                  <ViewSidebarRounded fontSize="small" />
-                </IconButton>
-              </Tooltip>
-            </div>
-            {(!navCollapsed || showLogo) && (
+          <div className="layout-content">
+            <div className="layout-content__left">
               <div
-                className="the-logo"
-                data-show-logo={showLogo}
-                data-tauri-drag-region="false"
+                className="workspace-window-toolbar"
+                data-tauri-drag-region="true"
               >
-                <div
-                  data-tauri-drag-region="true"
-                  style={{
-                    height: '36px',
-                    alignItems: 'center',
-                    gap: '10px',
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                  }}
+                <Tooltip
+                  title={`${text('搜索', 'Search')} (${OS === 'macos' ? '⌘' : 'Ctrl+'}K)`}
                 >
-                  {showLogo && (
-                    <img
-                      className="brand-icon"
-                      src={mascot}
-                      alt="Clash"
-                      draggable={false}
-                    />
-                  )}
-                  <span className="brand-name">Clash</span>
-                </div>
-                <UpdateButton className="the-newbtn" />
-                <span
-                  className="workspace-edition"
-                  style={showLogo ? undefined : { marginLeft: 0 }}
+                  <IconButton
+                    size="small"
+                    onClick={() => setPaletteOpen(true)}
+                    aria-label={text('搜索', 'Search')}
+                  >
+                    <SearchRounded fontSize="small" />
+                  </IconButton>
+                </Tooltip>
+                <Tooltip
+                  title={`${t(navCollapsed ? 'layout.components.navigation.menu.expandNavBar' : 'layout.components.navigation.menu.collapseNavBar')} (${OS === 'macos' ? '⌘' : 'Ctrl+'}B)`}
                 >
-                  {OS === 'windows'
-                    ? 'for Windows'
-                    : OS === 'macos'
-                      ? 'for Mac'
-                      : 'Desktop'}{' '}
-                  · {appVersion}
-                </span>
+                  <IconButton
+                    size="small"
+                    onClick={handleToggleNavCollapsed}
+                    aria-label={t(
+                      navCollapsed
+                        ? 'layout.components.navigation.menu.expandNavBar'
+                        : 'layout.components.navigation.menu.collapseNavBar',
+                    )}
+                  >
+                    <ViewSidebarRounded fontSize="small" />
+                  </IconButton>
+                </Tooltip>
               </div>
-            )}
+              {(!navCollapsed || showLogo) && (
+                <div
+                  className="the-logo"
+                  data-show-logo={showLogo}
+                  data-tauri-drag-region="false"
+                >
+                  <div
+                    data-tauri-drag-region="true"
+                    style={{
+                      height: '36px',
+                      alignItems: 'center',
+                      gap: '10px',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                    }}
+                  >
+                    {showLogo && (
+                      <img
+                        className="brand-icon"
+                        src={mascot}
+                        alt="Clash"
+                        draggable={false}
+                      />
+                    )}
+                    <span className="brand-name">Clash</span>
+                  </div>
+                  <UpdateButton className="the-newbtn" />
+                  <span
+                    className="workspace-edition"
+                    style={showLogo ? undefined : { marginLeft: 0 }}
+                  >
+                    {OS === 'windows'
+                      ? 'for Windows'
+                      : OS === 'macos'
+                        ? 'for Mac'
+                        : 'Desktop'}{' '}
+                    · {appVersion}
+                  </span>
+                </div>
+              )}
 
-            {menuUnlocked && (
-              <Box
-                sx={(theme) => ({
-                  px: 1.5,
-                  py: 0.75,
-                  mx: 'auto',
-                  mb: 1,
-                  maxWidth: 250,
-                  borderRadius: 1.5,
-                  fontSize: 12,
-                  fontWeight: 600,
-                  textAlign: 'center',
-                  color: theme.palette.warning.contrastText,
-                  bgcolor:
-                    theme.palette.mode === 'light'
-                      ? theme.palette.warning.main
-                      : theme.palette.warning.dark,
-                })}
+              {menuUnlocked && (
+                <Box
+                  sx={(theme) => ({
+                    px: 1.5,
+                    py: 0.75,
+                    mx: 'auto',
+                    mb: 1,
+                    maxWidth: 250,
+                    borderRadius: 1.5,
+                    fontSize: 12,
+                    fontWeight: 600,
+                    textAlign: 'center',
+                    color: theme.palette.warning.contrastText,
+                    bgcolor:
+                      theme.palette.mode === 'light'
+                        ? theme.palette.warning.main
+                        : theme.palette.warning.dark,
+                  })}
+                >
+                  {t('layout.components.navigation.menu.reorderMode')}
+                </Box>
+              )}
+
+              {/* Navigation menu */}
+              <List className="the-menu" onContextMenu={handleMenuContextMenu}>
+                <DragDropProvider
+                  sensors={SENSORS}
+                  onDragEnd={handleMenuDragEnd}
+                >
+                  {navMenuItems}
+                </DragDropProvider>
+              </List>
+
+              <Menu
+                open={Boolean(menuContextPosition)}
+                onClose={handleMenuContextClose}
+                anchorReference="anchorPosition"
+                anchorPosition={
+                  menuContextPosition
+                    ? {
+                        top: menuContextPosition.top,
+                        left: menuContextPosition.left,
+                      }
+                    : undefined
+                }
+                transitionDuration={200}
+                slotProps={{
+                  list: {
+                    sx: { py: 0.5 },
+                  },
+                }}
               >
-                {t('layout.components.navigation.menu.reorderMode')}
-              </Box>
-            )}
+                <MenuItem onClick={handleToggleNavCollapsed} dense>
+                  {navCollapsed
+                    ? t('layout.components.navigation.menu.expandNavBar')
+                    : t('layout.components.navigation.menu.collapseNavBar')}
+                </MenuItem>
+                <MenuItem
+                  onClick={menuUnlocked ? handleLockMenu : handleUnlockMenu}
+                  dense
+                >
+                  {menuUnlocked
+                    ? t('layout.components.navigation.menu.lock')
+                    : t('layout.components.navigation.menu.unlock')}
+                </MenuItem>
+                <MenuItem
+                  onClick={handleResetMenuOrder}
+                  dense
+                  disabled={isDefaultOrder}
+                >
+                  {t('layout.components.navigation.menu.restoreDefaultOrder')}
+                </MenuItem>
+              </Menu>
 
-            {/* Navigation menu */}
-            <List className="the-menu" onContextMenu={handleMenuContextMenu}>
-              <DragDropProvider sensors={SENSORS} onDragEnd={handleMenuDragEnd}>
-                {navMenuItems}
-              </DragDropProvider>
-            </List>
+              <div className="the-traffic">
+                <LayoutTraffic />
+              </div>
+            </div>
 
-            <Menu
-              open={Boolean(menuContextPosition)}
-              onClose={handleMenuContextClose}
-              anchorReference="anchorPosition"
-              anchorPosition={
-                menuContextPosition
-                  ? {
-                      top: menuContextPosition.top,
-                      left: menuContextPosition.left,
-                    }
-                  : undefined
-              }
-              transitionDuration={200}
-              slotProps={{
-                list: {
-                  sx: { py: 0.5 },
-                },
-              }}
-            >
-              <MenuItem onClick={handleToggleNavCollapsed} dense>
-                {navCollapsed
-                  ? t('layout.components.navigation.menu.expandNavBar')
-                  : t('layout.components.navigation.menu.collapseNavBar')}
-              </MenuItem>
-              <MenuItem
-                onClick={menuUnlocked ? handleLockMenu : handleUnlockMenu}
-                dense
-              >
-                {menuUnlocked
-                  ? t('layout.components.navigation.menu.lock')
-                  : t('layout.components.navigation.menu.unlock')}
-              </MenuItem>
-              <MenuItem
-                onClick={handleResetMenuOrder}
-                dense
-                disabled={isDefaultOrder}
-              >
-                {t('layout.components.navigation.menu.restoreDefaultOrder')}
-              </MenuItem>
-            </Menu>
-
-            <div className="the-traffic">
-              <LayoutTraffic />
+            <div className="layout-content__right">
+              <div className="the-bar"></div>
+              <div className="the-content">
+                <BaseErrorBoundary>
+                  <Suspense fallback={null}>
+                    <Outlet />
+                  </Suspense>
+                </BaseErrorBoundary>
+              </div>
             </div>
           </div>
-
-          <div className="layout-content__right">
-            <div className="the-bar"></div>
-            <div className="the-content">
-              <BaseErrorBoundary>
-                <Suspense fallback={null}>
-                  <Outlet />
-                </Suspense>
-              </BaseErrorBoundary>
-            </div>
-          </div>
-        </div>
-      </Paper>
+        </Paper>
+      </MotionProvider>
     </ThemeProvider>
   )
 }

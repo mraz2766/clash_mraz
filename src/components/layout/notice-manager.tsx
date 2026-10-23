@@ -1,15 +1,16 @@
 import { CloseRounded } from '@mui/icons-material'
 import {
-  Snackbar,
   Alert,
   IconButton,
   Box,
   Stack,
   type SnackbarOrigin,
 } from '@mui/material'
+import { AnimatePresence, m } from 'motion/react'
 import React, { useCallback, useMemo, useSyncExternalStore } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import { springs } from '@/lib/motion'
 import {
   boundNoticeText,
   subscribeNotices,
@@ -18,6 +19,9 @@ import {
   showNotice,
 } from '@/services/notice-service'
 import type { TranslationKey } from '@/types/generated/i18n-keys'
+
+// Distance a notice must be flung sideways before it is dismissed.
+const SWIPE_DISMISS_PX = 80
 
 type NoticePosition = NonNullable<IVergeConfig['notice_position']>
 type NoticeItem = ReturnType<typeof getSnapshotNotices>[number]
@@ -163,6 +167,8 @@ export const NoticeManager: React.FC<NoticeManagerProps> = ({ position }) => {
     getSnapshotNotices,
   )
 
+  const enterOffset = anchorOrigin.horizontal === 'left' ? -32 : 32
+
   const handleClose = (id: number) => {
     hideNotice(id)
   }
@@ -199,50 +205,56 @@ export const NoticeManager: React.FC<NoticeManagerProps> = ({ position }) => {
         maxWidth: '360px',
       }}
     >
-      {currentNotices.map((notice) => (
-        <Snackbar
-          key={notice.id}
-          open={true}
-          anchorOrigin={anchorOrigin}
-          sx={{
-            position: 'relative',
-            transform: 'none',
-            top: 'auto',
-            right: 'auto',
-            bottom: 'auto',
-            left: 'auto',
-            width: '100%',
-          }}
-        >
-          <Alert
-            severity={notice.type}
-            variant="filled"
-            sx={{ width: '100%' }}
-            onContextMenu={(event) => {
-              event.preventDefault()
-              event.stopPropagation()
-              void handleNoticeCopy(notice)
+      {/* Notices slide in from their edge, reflow as others leave, and can be swiped away. */}
+      <AnimatePresence initial={false}>
+        {currentNotices.map((notice) => (
+          <m.div
+            key={notice.id}
+            layout
+            initial={{ opacity: 0, x: enterOffset, scale: 0.96 }}
+            animate={{ opacity: 1, x: 0, scale: 1 }}
+            exit={{ opacity: 0, x: enterOffset, scale: 0.96 }}
+            transition={springs.gentle}
+            drag="x"
+            dragSnapToOrigin
+            dragElastic={0.4}
+            onDragEnd={(_, info) => {
+              if (Math.abs(info.offset.x) > SWIPE_DISMISS_PX) {
+                handleClose(notice.id)
+              }
             }}
-            action={
-              <Stack
-                direction="row"
-                spacing={0.5}
-                sx={{ alignItems: 'center' }}
-              >
-                <IconButton
-                  size="small"
-                  color="inherit"
-                  onClick={() => handleClose(notice.id)}
-                >
-                  <CloseRounded fontSize="inherit" />
-                </IconButton>
-              </Stack>
-            }
+            style={{ width: '100%', cursor: 'grab' }}
           >
-            {resolveNoticeMessage(notice, t)}
-          </Alert>
-        </Snackbar>
-      ))}
+            <Alert
+              severity={notice.type}
+              variant="filled"
+              sx={{ width: '100%', boxShadow: '0 6px 20px rgba(0,0,0,0.14)' }}
+              onContextMenu={(event) => {
+                event.preventDefault()
+                event.stopPropagation()
+                void handleNoticeCopy(notice)
+              }}
+              action={
+                <Stack
+                  direction="row"
+                  spacing={0.5}
+                  sx={{ alignItems: 'center' }}
+                >
+                  <IconButton
+                    size="small"
+                    color="inherit"
+                    onClick={() => handleClose(notice.id)}
+                  >
+                    <CloseRounded fontSize="inherit" />
+                  </IconButton>
+                </Stack>
+              }
+            >
+              {resolveNoticeMessage(notice, t)}
+            </Alert>
+          </m.div>
+        ))}
+      </AnimatePresence>
     </Box>
   )
 }

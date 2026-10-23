@@ -65,6 +65,7 @@
     "meta-json-schema": "^1.19.25",
     "monaco-editor": "^0.56.0",
     "monaco-yaml": "^5.5.0",
+    "motion": "^14.5.0",
     "nanoid": "^6.0.0",
     "qrcode.react": "^4.2.0",
     "react": "19.2.8",

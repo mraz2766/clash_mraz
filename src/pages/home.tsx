@@ -4,10 +4,12 @@ import {
   SpeedOutlined,
 } from '@mui/icons-material'
 import { Box, Button, Grid, IconButton, Skeleton, Tooltip } from '@mui/material'
+import { AnimatePresence, m } from 'motion/react'
 import { Suspense, lazy, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { BasePage } from '@/components/base'
+import { Reveal } from '@/components/base/reveal'
 import { ClashModeCard } from '@/components/home/clash-mode-card'
 import { CurrentProxyCard } from '@/components/home/current-proxy-card'
 import { EnhancedCard } from '@/components/home/enhanced-card'
@@ -78,68 +80,76 @@ const HomePage = () => {
       }
     >
       {(homeCards.network || homeCards.mode) && (
+        <Reveal index={0}>
+          <Box
+            className="workspace-control-deck"
+            sx={
+              !(homeCards.network && homeCards.mode)
+                ? { gridTemplateColumns: '1fr !important' }
+                : undefined
+            }
+          >
+            {homeCards.network && (
+              <section>
+                <h2>{t('home.page.cards.networkSettings')}</h2>
+                <ProxyTunCard />
+              </section>
+            )}
+            {homeCards.mode && (
+              <section>
+                <h2>{t('home.page.cards.proxyMode')}</h2>
+                <ClashModeCard />
+              </section>
+            )}
+          </Box>
+        </Reveal>
+      )}
+      {homeCards.traffic && (
+        <Reveal index={1}>
+          <section className="home-metrics">
+            <EnhancedTrafficStats view="summary" />
+          </section>
+        </Reveal>
+      )}
+      <Reveal index={2}>
         <Box
-          className="workspace-control-deck"
+          className="workspace-home-workspace"
           sx={
-            !(homeCards.network && homeCards.mode)
+            !(
+              homeCards.traffic &&
+              (verge?.traffic_graph ?? true) &&
+              homeCards.proxy
+            )
               ? { gridTemplateColumns: '1fr !important' }
               : undefined
           }
         >
-          {homeCards.network && (
-            <section>
-              <h2>{t('home.page.cards.networkSettings')}</h2>
-              <ProxyTunCard />
+          {homeCards.traffic && (verge?.traffic_graph ?? true) && (
+            <section className="home-traffic">
+              <EnhancedCard
+                title={t('home.page.cards.trafficStats')}
+                icon={<SpeedOutlined />}
+              >
+                <EnhancedTrafficStats view="detail" />
+              </EnhancedCard>
             </section>
           )}
-          {homeCards.mode && (
-            <section>
-              <h2>{t('home.page.cards.proxyMode')}</h2>
-              <ClashModeCard />
+          {homeCards.proxy && (
+            <section className="home-node">
+              <CurrentProxyCard />
             </section>
           )}
         </Box>
-      )}
-      {homeCards.traffic && (
-        <section className="home-metrics">
-          <EnhancedTrafficStats view="summary" />
-        </section>
-      )}
-      <Box
-        className="workspace-home-workspace"
-        sx={
-          !(
-            homeCards.traffic &&
-            (verge?.traffic_graph ?? true) &&
-            homeCards.proxy
-          )
-            ? { gridTemplateColumns: '1fr !important' }
-            : undefined
-        }
-      >
-        {homeCards.traffic && (verge?.traffic_graph ?? true) && (
-          <section className="home-traffic">
-            <EnhancedCard
-              title={t('home.page.cards.trafficStats')}
-              icon={<SpeedOutlined />}
-            >
-              <EnhancedTrafficStats view="detail" />
-            </EnhancedCard>
-          </section>
-        )}
-        {homeCards.proxy && (
-          <section className="home-node">
-            <CurrentProxyCard />
-          </section>
-        )}
-      </Box>
+      </Reveal>
       {homeCards.profile && (
-        <section className="home-subscription">
-          <HomeProfileCard
-            current={current}
-            onProfileUpdated={mutateProfiles}
-          />
-        </section>
+        <Reveal index={3}>
+          <section className="home-subscription">
+            <HomeProfileCard
+              current={current}
+              onProfileUpdated={mutateProfiles}
+            />
+          </section>
+        </Reveal>
       )}
       {hasDiagnostics && (
         <section className="home-diagnostics">
@@ -153,7 +163,7 @@ const HomePage = () => {
               <ExpandMoreRounded
                 sx={{
                   transform: diagnosticsOpen ? 'rotate(180deg)' : 'none',
-                  transition: 'transform 180ms',
+                  transition: 'transform var(--md-motion)',
                 }}
               />
             }
@@ -162,44 +172,55 @@ const HomePage = () => {
             {t('home.components.ipInfo.title')} ·{' '}
             {t('home.components.systemInfo.title')}
           </Button>
-          {diagnosticsOpen && (
-            <Grid
-              id="home-diagnostics-panel"
-              container
-              spacing={2}
-              columns={12}
-              className="workspace-home-grid"
-            >
-              {homeCards.test && (
-                <Grid size={{ xs: 12, md: 6 }}>
-                  <Suspense fallback={<Skeleton height={160} />}>
-                    <LazyTestCard />
-                  </Suspense>
+          {/* Height eases open and closed instead of popping. */}
+          <AnimatePresence initial={false}>
+            {diagnosticsOpen && (
+              <m.div
+                key="diagnostics"
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                style={{ overflow: 'hidden' }}
+              >
+                <Grid
+                  id="home-diagnostics-panel"
+                  container
+                  spacing={2}
+                  columns={12}
+                  className="workspace-home-grid"
+                >
+                  {homeCards.test && (
+                    <Grid size={{ xs: 12, md: 6 }}>
+                      <Suspense fallback={<Skeleton height={160} />}>
+                        <LazyTestCard />
+                      </Suspense>
+                    </Grid>
+                  )}
+                  {homeCards.ip && (
+                    <Grid size={{ xs: 12, md: 6 }}>
+                      <Suspense fallback={<Skeleton height={160} />}>
+                        <LazyIpInfoCard />
+                      </Suspense>
+                    </Grid>
+                  )}
+                  {homeCards.clashinfo && (
+                    <Grid size={{ xs: 12, md: 6 }}>
+                      <Suspense fallback={<Skeleton height={160} />}>
+                        <LazyClashInfoCard />
+                      </Suspense>
+                    </Grid>
+                  )}
+                  {homeCards.systeminfo && (
+                    <Grid size={{ xs: 12, md: 6 }}>
+                      <Suspense fallback={<Skeleton height={160} />}>
+                        <LazySystemInfoCard />
+                      </Suspense>
+                    </Grid>
+                  )}
                 </Grid>
-              )}
-              {homeCards.ip && (
-                <Grid size={{ xs: 12, md: 6 }}>
-                  <Suspense fallback={<Skeleton height={160} />}>
-                    <LazyIpInfoCard />
-                  </Suspense>
-                </Grid>
-              )}
-              {homeCards.clashinfo && (
-                <Grid size={{ xs: 12, md: 6 }}>
-                  <Suspense fallback={<Skeleton height={160} />}>
-                    <LazyClashInfoCard />
-                  </Suspense>
-                </Grid>
-              )}
-              {homeCards.systeminfo && (
-                <Grid size={{ xs: 12, md: 6 }}>
-                  <Suspense fallback={<Skeleton height={160} />}>
-                    <LazySystemInfoCard />
-                  </Suspense>
-                </Grid>
-              )}
-            </Grid>
-          )}
+              </m.div>
+            )}
+          </AnimatePresence>
         </section>
       )}
     </BasePage>

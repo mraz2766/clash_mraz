@@ -162,7 +162,8 @@ try {
   await page.locator('.diagnostics-toggle').click()
   await page.waitForFunction(() => window.__uiCalls.includes('get_system_info'))
   await page.locator('.diagnostics-toggle').click()
-  assert.equal(await page.locator('#home-diagnostics-panel').count(), 0)
+  // The panel collapses with a short height animation before unmounting.
+  await page.locator('#home-diagnostics-panel').waitFor({ state: 'detached' })
   await navigate('/proxies')
   await page
     .getByRole('group', { name: '节点选择', exact: true })

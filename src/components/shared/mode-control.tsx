@@ -1,5 +1,8 @@
-import { ToggleButton, ToggleButtonGroup } from '@mui/material'
 import { useTranslation } from 'react-i18next'
+
+import { SegmentedControl } from '@/components/base/segmented-control'
+
+const MODES = ['rule', 'global', 'direct'] as const
 
 export const ModeControl = ({
   value,
@@ -12,22 +15,15 @@ export const ModeControl = ({
 }) => {
   const { t } = useTranslation()
   return (
-    <ToggleButtonGroup
-      className="workspace-segmented"
-      exclusive
-      size="small"
-      value={value ?? null}
+    <SegmentedControl
+      value={MODES.find((mode) => mode === value)}
       disabled={disabled}
-      aria-label={t('home.page.settings.cards.proxyMode')}
-      onChange={(_, next) => {
-        if (next) onChange(next)
-      }}
-    >
-      {(['rule', 'global', 'direct'] as const).map((mode) => (
-        <ToggleButton value={mode} key={mode}>
-          {t(`proxies.page.modes.${mode}`)}
-        </ToggleButton>
-      ))}
-    </ToggleButtonGroup>
+      ariaLabel={t('home.page.settings.cards.proxyMode')}
+      options={MODES.map((mode) => ({
+        value: mode,
+        label: t(`proxies.page.modes.${mode}`),
+      }))}
+      onChange={onChange}
+    />
   )
 }

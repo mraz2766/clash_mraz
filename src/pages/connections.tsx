@@ -10,8 +10,6 @@ import {
   Fab,
   IconButton,
   MenuItem,
-  ToggleButton,
-  ToggleButtonGroup,
   Tooltip,
   Zoom,
 } from '@mui/material'
@@ -28,6 +26,7 @@ import {
   type SearchState,
   VirtualList,
 } from '@/components/base'
+import { SegmentedControl } from '@/components/base/segmented-control'
 import {
   ConnectionDetail,
   ConnectionDetailRef,
@@ -236,25 +235,21 @@ const ConnectionsPage = () => {
         }}
       >
         {/* Same segmented control as the proxy and theme mode selectors. */}
-        <ToggleButtonGroup
-          className="workspace-segmented"
-          exclusive
-          size="small"
+        <SegmentedControl
           value={connectionsType}
-          sx={{ mr: 1, flexShrink: 0 }}
-          onChange={(_, next: 'active' | 'closed' | null) => {
-            if (next) selectConnectionsType(next)
-          }}
-        >
-          <ToggleButton value="active" sx={{ whiteSpace: 'nowrap' }}>
-            {t('connections.components.actions.active')}{' '}
-            {connections?.activeConnections.length}
-          </ToggleButton>
-          <ToggleButton value="closed" sx={{ whiteSpace: 'nowrap' }}>
-            {t('connections.components.actions.closed')}{' '}
-            {connections?.closedConnections.length}
-          </ToggleButton>
-        </ToggleButtonGroup>
+          sx={{ mr: 1, flexShrink: 0, whiteSpace: 'nowrap' }}
+          options={[
+            {
+              value: 'active',
+              label: `${t('connections.components.actions.active')} ${connections?.activeConnections.length ?? 0}`,
+            },
+            {
+              value: 'closed',
+              label: `${t('connections.components.actions.closed')} ${connections?.closedConnections.length ?? 0}`,
+            },
+          ]}
+          onChange={selectConnectionsType}
+        />
         {!isTableLayout && (
           <BaseStyledSelect
             value={curOrderOpt}

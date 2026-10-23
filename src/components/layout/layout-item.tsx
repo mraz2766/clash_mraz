@@ -4,14 +4,13 @@ import {
   ListItemIcon,
   ListItemText,
 } from '@mui/material'
-import { type ReactNode, useLayoutEffect, useRef } from 'react'
+import { m } from 'motion/react'
+import type { ReactNode } from 'react'
 import { useMatch, useNavigate, useResolvedPath } from 'react-router'
 
 import type { SortableItemRenderProps } from '@/components/base/sortable-item'
 import { useVerge } from '@/hooks/use-verge'
-import { desktopMotion } from '@/lib/motion'
-
-const selectedButtons = new WeakMap<HTMLElement, HTMLElement>()
+import { springs } from '@/lib/motion'
 
 interface Props {
   to: string
@@ -27,32 +26,6 @@ export const LayoutItem = (props: Props) => {
   const resolved = useResolvedPath(to)
   const match = useMatch({ path: resolved.pathname, end: true })
   const navigate = useNavigate()
-  const indicatorRef = useRef<HTMLSpanElement>(null)
-
-  useLayoutEffect(() => {
-    const node = indicatorRef.current
-    const button = node?.parentElement
-    const list = button?.closest<HTMLElement>('.the-menu')
-    if (!match || !node || !button || !list) return
-    const previous = selectedButtons.get(list)
-    selectedButtons.set(list, button)
-    if (
-      !previous?.isConnected ||
-      previous === button ||
-      window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    )
-      return
-    const distance =
-      previous.getBoundingClientRect().top - button.getBoundingClientRect().top
-    const animation = node.animate?.(
-      [{ transform: `translateY(${distance}px)` }, { transform: 'none' }],
-      {
-        duration: desktopMotion.standard,
-        easing: desktopMotion.easing,
-      },
-    )
-    return () => animation?.cancel()
-  }, [match])
 
   const effectiveMenuIcon =
     navCollapsed && menu_icon === 'disable' ? 'monochrome' : menu_icon
@@ -96,10 +69,12 @@ export const LayoutItem = (props: Props) => {
         aria-label={navCollapsed ? children : undefined}
         onClick={() => navigate(to)}
       >
+        {/* One shared pill that glides to the active page. */}
         {match && (
-          <span
-            ref={indicatorRef}
+          <m.span
+            layoutId="nav-indicator"
             className="md-nav-indicator"
+            transition={springs.snappy}
             aria-hidden="true"
           />
         )}

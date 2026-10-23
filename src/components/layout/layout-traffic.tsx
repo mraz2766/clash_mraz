@@ -9,6 +9,7 @@ import { useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useLocation } from 'react-router'
 
+import { AnimatedNumber } from '@/components/base/animated-number'
 import { LightweightTrafficErrorBoundary } from '@/components/shared/traffic-error-boundary'
 import { useMemoryData } from '@/hooks/use-memory-data'
 import { useTrafficColors } from '@/hooks/use-traffic-colors'
@@ -116,7 +117,7 @@ export const LayoutTraffic = () => {
               {...valStyle}
               sx={{ ...valStyle.sx, fontVariantNumeric: 'tabular-nums' }}
             >
-              {up}
+              <AnimatedNumber value={up} resetKey={upUnit} />
             </Typography>
             <Typography {...unitStyle}>{upUnit}/s</Typography>
           </Box>
@@ -141,7 +142,7 @@ export const LayoutTraffic = () => {
               {...valStyle}
               sx={{ ...valStyle.sx, fontVariantNumeric: 'tabular-nums' }}
             >
-              {down}
+              <AnimatedNumber value={down} resetKey={downUnit} />
             </Typography>
             <Typography {...unitStyle}>{downUnit}/s</Typography>
           </Box>
@@ -164,7 +165,7 @@ export const LayoutTraffic = () => {
                 {...valStyle}
                 sx={{ ...valStyle.sx, fontVariantNumeric: 'tabular-nums' }}
               >
-                {inuse}
+                <AnimatedNumber value={inuse} resetKey={inuseUnit} />
               </Typography>
               <Typography {...unitStyle}>{inuseUnit}</Typography>
             </Box>
