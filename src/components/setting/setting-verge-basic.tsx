@@ -133,15 +133,12 @@ const SettingVergeBasic = ({ onError }: Props) => {
         </GuardState>
       </SettingItem>
 
-      <SettingItem
-        category="appearance"
-        label={text('显示鲸鱼 Logo', 'Show whale logo')}
-      >
+      <SettingItem category="appearance" label={text('显示 Logo', 'Show logo')}>
         <Switch
           checked={showLogo}
           onChange={(_, checked) => setShowLogo(checked)}
           slotProps={{
-            input: { 'aria-label': text('显示鲸鱼 Logo', 'Show whale logo') },
+            input: { 'aria-label': text('显示 Logo', 'Show logo') },
           }}
         />
       </SettingItem>

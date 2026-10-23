@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <!-- Clash · 环流 Orbit. Master for the app icon; generated assets come from scripts/generate-icons.py. -->
+  <rect x="2" y="2" width="1020" height="1020" rx="227" fill="#FFFFFF" stroke="#E3E3E1" stroke-width="4" />
+  <path d="M 787.3 411.8 A 293 293 0 1 1 612.2 236.7" fill="none" stroke="#005FB8" stroke-width="75" stroke-linecap="round" />
+  <circle cx="719.2" cy="304.8" r="55" fill="#005FB8" />
+</svg>

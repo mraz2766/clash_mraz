@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="src/assets/image/mascot.png" width="96" alt="Clash" />
+  <img src="src/assets/image/logo.png" width="96" alt="Clash" />
 </p>
 
 <h1 align="center">Clash</h1>
@@ -23,7 +23,7 @@
 
 ## 本次更新 · 2.6.2
 
-应用内鲸鱼 Logo 默认隐藏，侧栏与 Windows 标题栏都可在 **设置 → 外观 → 显示鲸鱼 Logo** 中统一打开。卡片改为柔和圆角、细描边与轻微投影，订阅卡片更紧凑，单个订阅不再占满整行。
+应用内 Logo 默认隐藏，侧栏与 Windows 标题栏都可在 **设置 → 外观 → 显示 Logo** 中统一打开。卡片改为柔和圆角、细描边与轻微投影，订阅卡片更紧凑，单个订阅不再占满整行。
 
 ## 近期调整
 

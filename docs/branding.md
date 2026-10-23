@@ -1,47 +1,52 @@
-> Windows 2.6.0：沿用 clash-mac 2.9.7 的黑色线稿白鲸与浅蓝水花。
+# 品牌与图标
 
-# 品牌资源
+显示名称统一为 **Clash**。Logo 为「环流」：一个开口的圆环，加一个停在缺口里的节点，表达“连接正在经过”。单色几何线条、圆头描边、无渐变与阴影，以 Windows 11 默认强调色 `#005FB8` 绘制在白色圆角底板上。
 
-## 名称与形象
+## 设计规格
 
-显示名称统一为 **Clash**。Logo 直接采用用户提供的白鲸原图：中性黑线勾勒圆润鲸身，浅蓝水花作为唯一彩色点缀，近白背景与双白界面协调。
+矢量原稿位于 `design/logo/`：`clash-orbit.svg` 为带底板的应用图标，`clash-orbit-mark.svg` 为不带底板、继承 `currentColor` 的图形；`concepts.html` 保留三个候选方案的对比。
 
-用户提供的 1254×1254 原图原样保存在 `src/assets/image/mascot-source.png`。最终展示图位于 `src/assets/image/mascot.png`：生成脚本只检测主体边界、裁去大块近白留白并等比放大，不重绘白鲸，也不改变线条与配色；随后再派生 ICO、ICNS 和各尺寸 PNG。
+以画布边长为 1 计：
 
-最终 `mascot.png` 使用透明圆角，半径为边长的 22%。运行 `python scripts/round-icons.py`（需要 Pillow）可重建界面 PNG、通用尺寸 PNG、ICO、ICNS、彩色托盘图标与 macOS 单色模板图标。脚本只负责裁切和格式派生。
+| 版本 | 圆环半径 | 描边 | 缺口（逆时针，自 3 点钟方向） | 节点半径 | 用于 |
+| --- | --- | --- | --- | --- | --- |
+| 标准 | 0.286 | 0.073 | 20°–70° | 0.054 | 48px 及以上、README、侧栏 |
+| 小尺寸 | 0.29 | 0.10 | 5°–85° | 0.10 | 32px 及以下 |
+| 托盘 | 0.30 | 0.11 | 5°–85° | 0.10 | 托盘 |
+
+底板为全幅圆角方形，圆角为边长的 22.17%，48px 及以上带 `#E3E3E1` 细描边，在白色背景上仍有边界。小尺寸加宽缺口、放大节点，16px 下节点不会与圆环端点粘连。
+
+## 生成
+
+运行 `python scripts/generate-icons.py`（需要 Pillow）重建全部资源。脚本按上表几何直接绘制，每个尺寸单独以 4 倍超采样渲染后缩小，ICO 的每一帧都是对应尺寸的独立渲染，而不是同一张大图缩放。
 
 ## 资源映射
 
 | 用途 | 文件 |
 | --- | --- |
-| 界面与 README 原稿 | `src/assets/image/mascot.png` |
+| README 与文档 | `src/assets/image/logo.png`（1024px） |
+| 侧栏品牌图 | `src/assets/image/brand-icon.png`（128px） |
 | 浏览器图标 | `src/assets/image/logo.ico` |
-| Windows 应用、安装器 | `src-tauri/icons/icon.ico` |
+| Windows 应用、安装器与快捷方式 | `src-tauri/icons/icon.ico` |
 | macOS 应用 | `src-tauri/icons/icon.icns` |
-| 通用尺寸 | `src-tauri/icons/32x32.png`、`64x64.png`、`128x128.png`、`128x128@2x.png` 与 `icon.png` |
-| 普通托盘 | `src-tauri/icons/tray-icon.ico` |
-| 系统代理托盘 | `src-tauri/icons/tray-icon-sys.ico`，蓝色圆形标记 |
-| TUN 托盘 | `src-tauri/icons/tray-icon-tun.ico`，绿色方形标记 |
-| macOS 单色托盘 | 对应 `tray-icon-*-mono*.ico`，圆环与方形区分状态 |
+| 通用尺寸与 Windows 磁贴 | `src-tauri/icons/*.png` |
+| 普通托盘 | `src-tauri/icons/tray-icon.ico`，蓝色节点 |
+| 系统代理托盘 | `src-tauri/icons/tray-icon-sys.ico`，绿色圆形节点 |
+| TUN 托盘 | `src-tauri/icons/tray-icon-tun.ico`，紫色方形节点 |
+| macOS 单色托盘 | `tray-icon-*-mono*.ico`，黑色图形；系统代理为空心圆、TUN 为空心方形 |
 
-托盘 PNG 原稿在 `src/assets/image/tray-*.png`。所有 ICO 都包含多个尺寸；这些转换只调整文件规格，不改变代理状态判定。用户自定义托盘图标优先级保持原样。
+托盘的状态只由缺口里的节点表达：形状区分系统代理（圆）与 TUN（方），颜色辅助辨认，圆环保持不变。彩色托盘带白色底板，在浅色与深色任务栏上都清晰。单色版本只在 macOS 使用。托盘 PNG 原稿在 `src/assets/image/tray-*.png`。用户自定义托盘图标的优先级保持原样。
 
-旧 Apple Icon Composer 的 `Assets.car` 已停止引用，macOS 使用更新后的标准 ICNS，避免旧猫形象覆盖新图标。
-
-## 图像处理记录
-
-本版未使用图像生成工具、外部 API 或下载字体，最终形象直接以用户提供的参考图为准。脚本按近白背景与主体的色差计算裁切边界，保留 10% 安全边距后放大为正方形，再生成圆角资源。
-
-菜单栏模板图标使用同一白鲸轮廓生成透明背景剪影：普通状态无标记，系统代理增加右上圆环，TUN 增加右上方形标记。彩色版本分别使用蓝色圆形和绿色方形。
+ICO 编码要求：内嵌 PNG 必须使用 RGBA（PNG color type 6）。`pnpm test` 会检查全部应用与托盘 ICO 的每个图像帧，防止 Tauri 解码报错。
 
 ## 保留的内部名称
 
 `clash-verge` 可执行文件、系统服务、应用标识、配置目录、协议和历史迁移字符串保留兼容性。原作者、第三方依赖和历史记录中的名称保留真实归属。
 
-界面导航使用 `src/assets/image/brand-icon.png`（128×128），高清 `mascot.png` 仅用于文档和图标原稿，避免导航加载完整原图。
+界面导航使用 `src/assets/image/brand-icon.png`（128×128），1024px 的 `logo.png` 只用于 README 与文档，避免导航加载大图。
 
 ICO 编码要求：内嵌 PNG 必须使用 RGBA（PNG color type 6）。从 RGB 原稿转换时，先转为 RGBA 再写入 ICO。`pnpm test` 会检查全部应用与托盘 ICO 的每个图像帧，防止 Tauri 解码报错再次出现。
 
-macOS 的产品名覆盖项同步为 Clash；DMG 使用系统默认背景，不再显示旧项目的猫图标与名称。原生窗口初始标题、托盘提示、系统通知和界面文案也统一使用 Clash。
+macOS 的产品名覆盖项同步为 Clash；DMG 使用系统默认背景。原生窗口初始标题、托盘提示、系统通知和界面文案也统一使用 Clash。
 
 Windows 安装时使用带版本号的独立 ICO 刷新本应用的既有快捷方式图标，避免 Explorer 继续显示旧缓存；安装目录、EXE 名称和用户数据目录不变。

@@ -25,7 +25,7 @@ import {
 import { useTranslation } from 'react-i18next'
 import { Outlet, useNavigate } from 'react-router'
 
-import mascot from '@/assets/image/brand-icon.png'
+import brandIcon from '@/assets/image/brand-icon.png'
 import { BaseErrorBoundary, SortableItem } from '@/components/base'
 import { MotionProvider } from '@/components/base/motion-provider'
 import { LayoutItem } from '@/components/layout/layout-item'
@@ -400,7 +400,7 @@ const Layout = () => {
                     {showLogo && (
                       <img
                         className="brand-icon"
-                        src={mascot}
+                        src={brandIcon}
                         alt="Clash"
                         draggable={false}
                       />

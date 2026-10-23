@@ -104,7 +104,7 @@ try {
   await page.getByRole('tab', { name: '外观', exact: true }).click()
   await page.getByRole('switch', { name: '显示流量图', exact: true }).waitFor()
   const logoSwitch = page.getByRole('switch', {
-    name: '显示鲸鱼 Logo',
+    name: '显示 Logo',
     exact: true,
   })
   assert.equal(await logoSwitch.isChecked(), false)

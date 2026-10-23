@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Logo Concepts</title>
+<style>
+  :root { --bg: #f5f5f4; --text: #1c1c1e; --muted: #6b6b70; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 14px/1.6 "Segoe UI Variable", "Segoe UI", -apple-system, sans-serif; padding: 40px 32px; }
+  h1 { font-size: 20px; font-weight: 600; margin: 0 0 4px; }
+  p.lead { color: var(--muted); margin: 0 0 32px; }
+  .concept { display: grid; grid-template-columns: 220px 220px 1fr; gap: 24px; align-items: center; padding: 24px 0; border-top: 1px solid #e3e3e1; }
+  .concept svg.tile { width: 220px; height: 220px; display: block; }
+  .meta h2 { font-size: 16px; font-weight: 600; margin: 0 0 6px; }
+  .meta p { margin: 0 0 14px; color: var(--muted); max-width: 420px; }
+  .sizes { display: flex; align-items: flex-end; gap: 16px; }
+  .sizes svg { display: block; }
+  .sizes span { display: block; text-align: center; font-size: 11px; color: var(--muted); margin-top: 4px; }
+</style>
+</head>
+<body>
+<h1>Clash · Logo 方案</h1>
+<p class="lead">单色几何线条，统一 60px 圆头描边（1024 网格），macOS 圆角方形底板。左为浅色、中为深色，右侧检查 64 / 32 / 16px 可读性。</p>
+
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <!-- 分流 Route: one line enters a node and leaves on two paths. -->
+    <g id="route" fill="none" stroke-width="60" stroke-linecap="round" stroke-linejoin="round" transform="translate(0 -40)">
+      <path d="M268 600 H380" />
+      <circle cx="476" cy="600" r="96" />
+      <path d="M572 600 H756" />
+      <path d="M537.7 526.5 C 590 470, 626 380, 756 380" />
+    </g>
+    <!-- 环流 Orbit: an open ring with one node resting in the gap. -->
+    <g id="orbit" fill="none" stroke-width="60" stroke-linecap="round">
+      <path d="M 733.8 431.3 A 236 236 0 1 1 592.7 290.2" />
+      <circle cx="678.9" cy="345.1" r="44" class="solid" stroke="none" />
+    </g>
+    <!-- 中继 Relay: a single S-curve relayed through a hollow node. -->
+    <g id="relay" fill="none" stroke-width="60" stroke-linecap="round">
+      <path d="M268 756 C 268 610, 330 512, 416 512" />
+      <circle cx="512" cy="512" r="96" />
+      <path d="M608 512 C 694 512, 756 414, 756 268" />
+    </g>
+  </defs>
+</svg>
+
+<template id="tile">
+  <svg class="tile" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+    <rect x="100" y="100" width="824" height="824" rx="185" />
+    <use />
+  </svg>
+</template>
+
+<div id="list"></div>
+
+<script>
+  const concepts = [
+    { id: 'route', name: '方案一 · 分流', desc: '一条线进入节点后分成两路，像铁路道岔。对应代理客户端的核心动作：按规则把流量分到不同出口。轮廓不对称但重心稳定，小尺寸下节点和分叉依然清楚。' },
+    { id: 'orbit', name: '方案二 · 环流', desc: '开口的环加一个停在缺口里的节点，表达“连接正在经过”。最简洁，剪影最强，16px 下也只是一个圆和一个点。' },
+    { id: 'relay', name: '方案三 · 中继', desc: '一条 S 形曲线穿过中间的空心节点，流量经由代理中转。对角线构图更有动势，曲线最柔和。' },
+  ]
+  const themes = {
+    light: { tile: '#ffffff', ink: '#005FB8' },
+    dark: { tile: '#1c1c1e', ink: '#60CDFF' },
+  }
+  const make = (id, theme, size) => {
+    const t = themes[theme]
+    const svg = document.getElementById('tile').content.firstElementChild.cloneNode(true)
+    if (size) { svg.setAttribute('width', size); svg.setAttribute('height', size); svg.classList.remove('tile') }
+    const rect = svg.querySelector('rect')
+    rect.setAttribute('fill', t.tile)
+    if (theme === 'light') { rect.setAttribute('stroke', '#e3e3e1'); rect.setAttribute('stroke-width', '4') }
+    const use = svg.querySelector('use')
+    use.setAttribute('href', '#' + id)
+    use.setAttribute('stroke', t.ink)
+    use.style.fill = 'none'
+    svg.style.setProperty('--ink', t.ink)
+    return svg
+  }
+  // Solid parts follow the stroke colour.
+  document.head.insertAdjacentHTML('beforeend', '<style>.solid{fill:currentColor}</style>')
+  const list = document.getElementById('list')
+  for (const c of concepts) {
+    const row = document.createElement('section')
+    row.className = 'concept'
+    const light = make(c.id, 'light'); light.style.color = themes.light.ink
+    const dark = make(c.id, 'dark'); dark.style.color = themes.dark.ink
+    const meta = document.createElement('div')
+    meta.className = 'meta'
+    meta.innerHTML = `<h2>${c.name}</h2><p>${c.desc}</p><div class="sizes"></div>`
+    for (const s of [64, 32, 16]) {
+      const wrap = document.createElement('div')
+      const icon = make(c.id, 'light', s); icon.style.color = themes.light.ink
+      wrap.append(icon)
+      wrap.insertAdjacentHTML('beforeend', `<span>${s}px</span>`)
+      meta.querySelector('.sizes').append(wrap)
+    }
+    row.append(light, dark, meta)
+    list.append(row)
+  }
+</script>
+</body>
+</html>
