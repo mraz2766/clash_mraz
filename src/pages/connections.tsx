@@ -19,6 +19,7 @@ import { useTranslation } from 'react-i18next'
 import { closeAllConnections } from 'tauri-plugin-mihomo-api'
 
 import {
+  BaseDialog,
   BaseEmpty,
   BasePage,
   BaseSearchBox,
@@ -39,6 +40,7 @@ import {
 import { ConnectionTable } from '@/components/connection/connection-table'
 import { useConnectionData } from '@/hooks/use-connection-data'
 import { useConnectionSetting } from '@/hooks/use-connection-setting'
+import { useDesktopText } from '@/hooks/use-desktop-text'
 import { useTrafficData } from '@/hooks/use-traffic-data'
 import { useVisibility } from '@/hooks/use-visibility'
 import parseTraffic from '@/utils/parse-traffic'
@@ -152,7 +154,14 @@ const ConnectionsPage = () => {
     [connectionsType, filterConn],
   )
 
-  const onCloseAll = useLockFn(closeAllConnections)
+  const text = useDesktopText()
+  // Closing every connection interrupts downloads and streams, so ask first.
+  const [confirmCloseAll, setConfirmCloseAll] = useState(false)
+  const activeCount = connections?.activeConnections.length ?? 0
+  const onCloseAll = useLockFn(async () => {
+    setConfirmCloseAll(false)
+    await closeAllConnections()
+  })
 
   const handleSearch = useCallback(
     (match: (content: string) => boolean, state: SearchState) => {
@@ -212,7 +221,12 @@ const ConnectionsPage = () => {
               <TableChartRounded titleAccess={t('shared.actions.tableView')} />
             )}
           </IconButton>
-          <Button size="small" variant="outlined" onClick={onCloseAll}>
+          <Button
+            size="small"
+            variant="outlined"
+            disabled={activeCount === 0}
+            onClick={() => setConfirmCloseAll(true)}
+          >
             <span style={{ whiteSpace: 'nowrap' }}>
               {t('shared.actions.closeAll')}
             </span>
@@ -340,6 +354,20 @@ const ConnectionsPage = () => {
           {t('shared.actions.clear')}
         </Fab>
       </Zoom>
+      <BaseDialog
+        open={confirmCloseAll}
+        title={text('关闭全部连接？', 'Close all connections?')}
+        okBtn={t('shared.actions.closeAll')}
+        cancelBtn={t('shared.actions.cancel')}
+        onOk={onCloseAll}
+        onCancel={() => setConfirmCloseAll(false)}
+        onClose={() => setConfirmCloseAll(false)}
+      >
+        {text(
+          `将断开 ${activeCount} 个活跃连接，正在进行的下载、视频或通话可能会中断，应用会自动重新建立连接。`,
+          `This disconnects ${activeCount} active connections. Downloads, videos or calls in progress may be interrupted; apps reconnect on their own.`,
+        )}
+      </BaseDialog>
     </BasePage>
   )
 }

@@ -25,7 +25,9 @@ import {
 import { useTranslation } from 'react-i18next'
 import { Outlet, useNavigate } from 'react-router'
 
-import brandIcon from '@/assets/image/brand-icon.png'
+import brandIcon15x from '@/assets/image/brand-icon@1.5x.png'
+import brandIcon from '@/assets/image/brand-icon@1x.png'
+import brandIcon2x from '@/assets/image/brand-icon@2x.png'
 import { BaseErrorBoundary, SortableItem } from '@/components/base'
 import { MotionProvider } from '@/components/base/motion-provider'
 import { LayoutItem } from '@/components/layout/layout-item'
@@ -401,6 +403,7 @@ const Layout = () => {
                       <img
                         className="brand-icon"
                         src={brandIcon}
+                        srcSet={`${brandIcon} 1x, ${brandIcon15x} 1.5x, ${brandIcon2x} 2x`}
                         alt="Clash"
                         draggable={false}
                       />

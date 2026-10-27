@@ -3,6 +3,13 @@
 import { mockIPC, mockWindows } from '@tauri-apps/api/mocks'
 
 const query = new URLSearchParams(location.search)
+const unlockItems = (status) =>
+  ['Netflix', 'YouTube Premium', 'ChatGPT', 'Disney+'].map((name, index) => ({
+    name,
+    status: status === 'Pending' ? 'Pending' : index === 3 ? 'No' : 'Yes',
+    region: status === 'Pending' ? null : 'SG',
+    check_time: status === 'Pending' ? null : '2026-10-27 09:00:00',
+  }))
 const verge = {
   language: 'zh',
   theme_mode: query.get('theme') || 'light',
@@ -262,6 +269,16 @@ mockIPC(
     if (command === 'read_profile_file') return '# 演示配置\n'
     if (command === 'get_system_info')
       return { system_name: 'Windows', system_version: '11 (UI preview)' }
+    // Media unlock checks: demo services so the unlock page is exercised too.
+    if (command === 'get_unlock_items') return unlockItems('Pending')
+    if (command === 'check_media_unlock') return unlockItems('Yes')
+    if (command === 'check_media_unlock_item')
+      return (
+        unlockItems('Yes').find((item) => item.name === args.name) ?? {
+          name: args.name,
+          status: 'Yes',
+        }
+      )
     if (command === 'get_network_interfaces') return []
     if (command === 'get_network_config') return {}
     if (command === 'get_webdav_config') return {}

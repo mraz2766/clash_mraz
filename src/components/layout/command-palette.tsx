@@ -1,6 +1,8 @@
 import {
   CheckRounded,
+  DnsOutlined,
   LanguageRounded,
+  PowerSettingsNewRounded,
   SearchRounded,
   TuneRounded,
 } from '@mui/icons-material'
@@ -16,9 +18,14 @@ import {
 } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router'
+import { closeAllConnections } from 'tauri-plugin-mihomo-api'
 
 import { useDesktopText } from '@/hooks/use-desktop-text'
+import { useProfiles } from '@/hooks/use-profiles'
 import { useProxySelection } from '@/hooks/use-proxy-selection'
+import { useSystemProxyState } from '@/hooks/use-system-proxy-state'
+import { useSystemState } from '@/hooks/use-system-state'
+import { useVerge } from '@/hooks/use-verge'
 import { easeOut, springs } from '@/lib/motion'
 import { navItems } from '@/pages/_navigation'
 import {
@@ -28,11 +35,14 @@ import {
 } from '@/providers/app-data-context'
 import { patchClashMode } from '@/services/cmds'
 import { showNotice } from '@/services/notice-service'
+import { requestService } from '@/services/service-request'
 
 // Manually switchable groups, matching the proxies page.
 const SWITCHABLE_GROUPS = new Set(['Selector', 'URLTest', 'Fallback'])
 const MODES = ['rule', 'global', 'direct'] as const
 const MAX_RESULTS = 60
+// Profile entries that are subscriptions; merge and script entries are enhancements.
+const SWITCHABLE_PROFILES = new Set(['remote', 'local'])
 
 interface Command {
   id: string
@@ -48,7 +58,10 @@ interface Props {
   onClose: () => void
 }
 
-/** Ctrl+K palette: jump to a page, switch proxy mode or pick a node from any group. */
+/**
+ * Ctrl+K palette: jump to a page, toggle system proxy or TUN, switch proxy mode,
+ * subscription, or pick a node from any group.
+ */
 export default function CommandPalette({ onClose }: Props) {
   const { t } = useTranslation()
   const text = useDesktopText()
@@ -57,6 +70,66 @@ export default function CommandPalette({ onClose }: Props) {
   const { clashConfig } = useClashConfigData()
   const { refreshProxy, refreshClashConfig } = useAppRefreshers()
   const { changeProxy } = useProxySelection({ onSuccess: refreshProxy })
+  const { profiles, patchProfiles } = useProfiles()
+  const { verge, mutateVerge, patchVerge } = useVerge()
+  const { indicator: systemProxyOn, toggleSystemProxy } = useSystemProxyState()
+  const { isTunModeAvailable } = useSystemState()
+  const tunOn = Boolean(verge?.enable_tun_mode && isTunModeAvailable)
+
+  // Same guarded paths as the home switches and the profiles page; read through
+  // a ref so the command list does not rebuild on every render.
+  const actionsRef = useRef({
+    toggleSystemProxy: async () => {},
+    toggleTun: async () => {},
+    switchProfile: async (_uid: string) => {},
+  })
+  actionsRef.current = {
+    toggleSystemProxy: async () => {
+      try {
+        await toggleSystemProxy(!systemProxyOn)
+      } catch (error) {
+        showNotice.error(error)
+      }
+    },
+    toggleTun: async () => {
+      const next = !tunOn
+      if (next && !isTunModeAvailable) {
+        requestService({
+          reason: 'tunNeedsService',
+          restore: { enable_tun_mode: next },
+        })
+        return
+      }
+      try {
+        mutateVerge(
+          (prev) => (prev ? { ...prev, enable_tun_mode: next } : prev),
+          false,
+        )
+        await patchVerge({ enable_tun_mode: next })
+      } catch (error) {
+        showNotice.error(error)
+      }
+    },
+    switchProfile: async (uid: string) => {
+      try {
+        const outcome = await patchProfiles({ current: uid })
+        if (outcome.status === 'busy') {
+          showNotice.info(
+            'profiles.page.feedback.notifications.switchBusy',
+            2000,
+          )
+        } else if (outcome.status === 'valid') {
+          void closeAllConnections().catch(() => {})
+          showNotice.success(
+            'profiles.page.feedback.notifications.profileSwitched',
+            1000,
+          )
+        }
+      } catch (error) {
+        showNotice.error(error, 4000)
+      }
+    },
+  }
 
   const [query, setQuery] = useState('')
   const [active, setActive] = useState(0)
@@ -119,7 +192,43 @@ export default function CommandPalette({ onClose }: Props) {
         })),
     )
 
-    return [...pages, ...modes, ...nodes]
+    const systemProxyLabel = t(
+      'settings.sections.proxyControl.fields.systemProxy',
+    )
+    const tunLabel = t('settings.sections.proxyControl.fields.tunMode')
+    const quick: Command[] = [
+      {
+        id: 'action:system-proxy',
+        section: text('快捷操作', 'Quick actions'),
+        label: systemProxyOn
+          ? text(`关闭${systemProxyLabel}`, `Turn off ${systemProxyLabel}`)
+          : text(`开启${systemProxyLabel}`, `Turn on ${systemProxyLabel}`),
+        icon: <PowerSettingsNewRounded />,
+        run: () => actionsRef.current.toggleSystemProxy(),
+      },
+      {
+        id: 'action:tun',
+        section: text('快捷操作', 'Quick actions'),
+        label: tunOn
+          ? text(`关闭${tunLabel}`, `Turn off ${tunLabel}`)
+          : text(`开启${tunLabel}`, `Turn on ${tunLabel}`),
+        icon: <PowerSettingsNewRounded />,
+        run: () => actionsRef.current.toggleTun(),
+      },
+    ]
+
+    const subscriptions: Command[] = (profiles?.items ?? [])
+      .filter((item) => item?.uid && SWITCHABLE_PROFILES.has(item.type ?? ''))
+      .map((item) => ({
+        id: `profile:${item.uid}`,
+        section: text('订阅', 'Subscriptions'),
+        label: item.name || item.uid,
+        icon: <DnsOutlined />,
+        current: profiles?.current === item.uid,
+        run: () => actionsRef.current.switchProfile(item.uid),
+      }))
+
+    return [...quick, ...pages, ...modes, ...subscriptions, ...nodes]
   }, [
     t,
     text,
@@ -128,6 +237,9 @@ export default function CommandPalette({ onClose }: Props) {
     proxyView,
     refreshClashConfig,
     changeProxy,
+    profiles,
+    systemProxyOn,
+    tunOn,
   ])
 
   const results = useMemo(() => {
@@ -205,8 +317,8 @@ export default function CommandPalette({ onClose }: Props) {
               fullWidth
               value={query}
               placeholder={text(
-                '搜索页面、模式或节点…',
-                'Search pages, modes or nodes…',
+                '搜索操作、页面、订阅或节点…',
+                'Search actions, pages, subscriptions or nodes…',
               )}
               onChange={(event) => {
                 setQuery(event.target.value)

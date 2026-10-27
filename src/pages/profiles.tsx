@@ -8,15 +8,27 @@ import { isSortable } from '@dnd-kit/react/sortable'
 import {
   CheckBoxOutlineBlankRounded,
   CheckBoxRounded,
+  ChecklistRounded,
   ClearRounded,
   ContentPasteRounded,
   DeleteRounded,
   IndeterminateCheckBoxRounded,
   LocalFireDepartmentRounded,
+  MoreHorizRounded,
   RefreshRounded,
   TextSnippetOutlined,
 } from '@mui/icons-material'
-import { Box, Button, Grid, IconButton, Stack } from '@mui/material'
+import {
+  Box,
+  Button,
+  Grid,
+  IconButton,
+  ListItemIcon,
+  Menu,
+  MenuItem,
+  Stack,
+  Tooltip,
+} from '@mui/material'
 import { TauriEvent } from '@tauri-apps/api/event'
 import { readText } from '@tauri-apps/plugin-clipboard-manager'
 import { readTextFile } from '@tauri-apps/plugin-fs'
@@ -84,6 +96,7 @@ const debugProfileSwitch = (action: string, profile: string, extra?: any) => {
 const ProfilePage = () => {
   const text = useDesktopText()
   const { t } = useTranslation()
+  const [moreAnchor, setMoreAnchor] = useState<HTMLElement | null>(null)
   const location = useLocation()
   const { addListener } = useListen()
   const [url, setUrl] = useState('')
@@ -713,24 +726,16 @@ const ProfilePage = () => {
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           {!batchMode ? (
             <>
-              {/* Batch mode toggle button */}
-              <IconButton
+              {/* The frequent action is labelled; the rest sit in a labelled menu. */}
+              <Button
                 size="small"
-                color="inherit"
-                title={t('profiles.page.batch.title')}
-                onClick={toggleBatchMode}
-              >
-                <CheckBoxOutlineBlankRounded />
-              </IconButton>
-
-              <IconButton
-                size="small"
-                color="inherit"
-                title={t('profiles.page.actions.updateAll')}
+                variant="outlined"
                 onClick={onUpdateAll}
                 disabled={loadingCache.size > 0}
+                startIcon={<RefreshRounded />}
                 sx={{
-                  '& svg': {
+                  whiteSpace: 'nowrap',
+                  '& .MuiButton-startIcon svg': {
                     animation:
                       loadingCache.size > 0
                         ? 'workspace-spin 900ms linear infinite'
@@ -738,47 +743,88 @@ const ProfilePage = () => {
                   },
                 }}
               >
-                <RefreshRounded />
-              </IconButton>
+                {t('profiles.page.actions.updateAll')}
+              </Button>
 
-              <IconButton
+              <Button
                 size="small"
-                color="inherit"
-                title={t('profiles.page.actions.viewRuntimeConfig')}
-                onClick={() => configRef.current?.open()}
+                variant="outlined"
+                startIcon={<MoreHorizRounded />}
+                aria-haspopup="menu"
+                aria-expanded={Boolean(moreAnchor)}
+                onClick={(event) => setMoreAnchor(event.currentTarget)}
+                sx={{ whiteSpace: 'nowrap' }}
               >
-                <TextSnippetOutlined />
-              </IconButton>
-
-              <IconButton
-                size="small"
-                color="inherit"
-                title={t('profiles.page.actions.reactivate')}
-                onClick={() => onEnhance(true)}
+                {text('更多操作', 'More')}
+              </Button>
+              <Menu
+                anchorEl={moreAnchor}
+                open={Boolean(moreAnchor)}
+                onClose={() => setMoreAnchor(null)}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                transformOrigin={{ vertical: 'top', horizontal: 'right' }}
               >
-                <LocalFireDepartmentRounded />
-              </IconButton>
+                <MenuItem
+                  onClick={() => {
+                    setMoreAnchor(null)
+                    toggleBatchMode()
+                  }}
+                >
+                  <ListItemIcon>
+                    <ChecklistRounded fontSize="small" />
+                  </ListItemIcon>
+                  {t('profiles.page.batch.title')}
+                </MenuItem>
+                <MenuItem
+                  onClick={() => {
+                    setMoreAnchor(null)
+                    configRef.current?.open()
+                  }}
+                >
+                  <ListItemIcon>
+                    <TextSnippetOutlined fontSize="small" />
+                  </ListItemIcon>
+                  {t('profiles.page.actions.viewRuntimeConfig')}
+                </MenuItem>
+                <MenuItem
+                  onClick={() => {
+                    setMoreAnchor(null)
+                    void onEnhance(true)
+                  }}
+                >
+                  <ListItemIcon>
+                    <LocalFireDepartmentRounded fontSize="small" />
+                  </ListItemIcon>
+                  {t('profiles.page.actions.reactivate')}
+                </MenuItem>
+              </Menu>
 
               {/* 故障检测和紧急恢复按钮 */}
               {(error || isStale) && (
-                <IconButton
-                  size="small"
-                  color="warning"
+                <Tooltip
                   title={t(
                     'profiles.page.feedback.tooltips.forceRefreshStaleData',
                   )}
-                  onClick={onEmergencyRefresh}
-                  sx={{
-                    animation: 'pulse 2s infinite',
-                    '@keyframes pulse': {
-                      '0%': { opacity: 1 },
-                      '50%': { opacity: 0.5 },
-                      '100%': { opacity: 1 },
-                    },
-                  }}
                 >
-                  <ClearRounded />
-                </IconButton>
+                  <IconButton
+                    size="small"
+                    color="warning"
+                    aria-label={t(
+                      'profiles.page.feedback.tooltips.forceRefreshStaleData',
+                    )}
+                    onClick={onEmergencyRefresh}
+                    sx={{
+                      animation: 'pulse 2s infinite',
+                      '@keyframes pulse': {
+                        '0%': { opacity: 1 },
+                        '50%': { opacity: 0.5 },
+                        '100%': { opacity: 1 },
+                      },
+                    }}
+                  >
+                    <ClearRounded />
+                  </IconButton>
+                </Tooltip>
               )}
             </>
           ) : (

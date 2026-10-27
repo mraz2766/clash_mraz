@@ -197,6 +197,47 @@ try {
   await page.getByRole('menu').waitFor()
   await page.keyboard.press('Escape')
   await page.getByRole('menu').waitFor({ state: 'hidden' })
+  // Command palette: search a node across groups and switch to it.
+  await page.evaluate(() => {
+    window.__uiFailSelection = false
+  })
+  await page.locator('.base-page > header').click()
+  await page.keyboard.press('Control+k')
+  await page
+    .getByRole('combobox', { name: '搜索命令', exact: true })
+    .fill('美国')
+  await page.keyboard.press('Enter')
+  await page.waitForFunction(
+    () => window.__uiFixture.groups[0].now === '美国 · 西部',
+  )
+  // Closing every connection asks first; cancelling leaves them alone.
+  await navigate('/connections')
+  await page.getByRole('button', { name: '关闭全部', exact: true }).click()
+  await page.getByRole('dialog').getByText('关闭全部连接？').waitFor()
+  await page.getByRole('button', { name: '取消', exact: true }).click()
+  await page.getByRole('dialog').waitFor({ state: 'hidden' })
+  assert.equal(
+    await page.evaluate(() =>
+      window.__uiCalls.includes('plugin:mihomo|close_all_connections'),
+    ),
+    false,
+  )
+  // Profiles: frequent action labelled, the rest in a labelled menu.
+  await navigate('/profile')
+  await page
+    .getByRole('button', { name: '更新所有订阅', exact: true })
+    .waitFor()
+  await page.getByRole('button', { name: '更多操作', exact: true }).click()
+  await page.getByRole('menuitem', { name: '批量操作', exact: true }).waitFor()
+  await page.keyboard.press('Escape')
+  await page.getByRole('menu').waitFor({ state: 'hidden' })
+  // Unlock page lists the demo services and runs a full check.
+  await navigate('/unlock')
+  await page.getByText('Netflix', { exact: true }).waitFor()
+  await page.getByRole('button', { name: '测试全部', exact: true }).click()
+  await page.waitForFunction(() =>
+    window.__uiCalls.includes('check_media_unlock'),
+  )
   await page.evaluate(() =>
     localStorage.setItem('clash.ui.traffic-color-mode', 'soft'),
   )
