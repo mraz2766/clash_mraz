@@ -80,8 +80,15 @@ export const SettingList: React.FC<{
   title: string
   children: ReactNode
   category?: SettingsCategory
-}> = ({ title, children, category = 'general' }) => {
+  /** Heading per category tab, for lists whose rows span several tabs. */
+  titles?: Partial<Record<SettingsCategory, string>>
+}> = ({ title, children, category = 'general', titles }) => {
   const filter = use(SettingsFilterContext)
+  // Searches can mix categories, so only a plain tab view uses the per-tab heading.
+  const heading =
+    filter && !filter.query.trim()
+      ? (titles?.[filter.category] ?? title)
+      : title
   // These four setting sections expose labeled direct children; preserve their keys and mounted dialogs.
   // eslint-disable-next-line @eslint-react/no-children-to-array
   const items = React.Children.toArray(children)
@@ -142,7 +149,7 @@ export const SettingList: React.FC<{
           ]}
           disableSticky
         >
-          {title.replaceAll('Verge', 'Clash')}
+          {heading.replaceAll('Verge', 'Clash')}
         </ListSubheader>
 
         {items.filter(

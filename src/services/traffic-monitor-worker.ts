@@ -27,16 +27,14 @@ let throttleTimer: ReturnType<typeof setTimeout> | null = null
 let lastTimestamp: number | undefined
 
 const broadcastSnapshot = (reason: ITrafficWorkerSnapshotMessage['reason']) => {
+  // Post only the selected range: cloning the full hour every second is wasted
+  // work, and a range change already triggers a fresh snapshot.
   const dataPoints = sampler.getDataForTimeRange(currentRangeMinutes)
-  const availableDataPoints = sampler.getDataForTimeRange(
-    config.compressedDataMinutes,
-  )
   const samplerStats = sampler.getStats()
 
   const message: ITrafficWorkerSnapshotMessage = {
     type: 'snapshot',
     dataPoints,
-    availableDataPoints,
     samplerStats,
     rangeMinutes: currentRangeMinutes,
     lastTimestamp,

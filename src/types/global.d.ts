@@ -1028,7 +1028,8 @@ type TrafficWorkerRequestMessage =
 interface ITrafficWorkerSnapshotMessage {
   type: 'snapshot'
   dataPoints: ITrafficDataPoint[]
-  availableDataPoints: ITrafficDataPoint[]
+  /** Optional wider history; snapshots normally carry only the selected range. */
+  availableDataPoints?: ITrafficDataPoint[]
   samplerStats: ISamplerStats
   rangeMinutes: number
   lastTimestamp?: number

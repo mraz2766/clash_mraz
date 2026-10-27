@@ -85,7 +85,13 @@ const SettingVergeBasic = ({ onError }: Props) => {
   }, [])
 
   return (
-    <SettingList title={t('settings.components.verge.basic.title')}>
+    <SettingList
+      title={t('settings.components.verge.basic.title')}
+      titles={{
+        appearance: text('外观设置', 'Appearance'),
+        advanced: text('工具与脚本', 'Tools and scripts'),
+      }}
+    >
       {homeContentOpen && (
         <HomeContentDialog onClose={() => setHomeContentOpen(false)} />
       )}

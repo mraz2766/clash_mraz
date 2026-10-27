@@ -96,22 +96,28 @@ export default function CommandPalette({ onClose }: Props) {
       },
     }))
 
-    const nodes: Command[] = (proxyView?.groups ?? [])
-      .filter((group) => !group.hidden && SWITCHABLE_GROUPS.has(group.type))
-      .flatMap((group) =>
-        group.members
-          .filter((member) => member.kind !== 'unresolved')
-          .map((member) => ({
-            id: `node:${group.name}:${member.name}`,
-            section: text('节点', 'Nodes'),
-            label: member.name,
-            detail: group.name,
-            icon: <LanguageRounded />,
-            current: group.now === member.name,
-            run: () =>
-              changeProxy(group.name, member.name, group.now, group.fixed),
-          })),
-      )
+    // In global mode traffic follows the GLOBAL group, so offer its nodes first.
+    const switchable = (proxyView?.groups ?? []).filter(
+      (group) => !group.hidden && SWITCHABLE_GROUPS.has(group.type),
+    )
+    const groups =
+      currentMode === 'global' && proxyView?.global
+        ? [proxyView.global, ...switchable]
+        : switchable
+    const nodes: Command[] = groups.flatMap((group) =>
+      group.members
+        .filter((member) => member.kind !== 'unresolved')
+        .map((member) => ({
+          id: `node:${group.name}:${member.name}`,
+          section: text('节点', 'Nodes'),
+          label: member.name,
+          detail: group.name,
+          icon: <LanguageRounded />,
+          current: group.now === member.name,
+          run: () =>
+            changeProxy(group.name, member.name, group.now, group.fixed),
+        })),
+    )
 
     return [...pages, ...modes, ...nodes]
   }, [

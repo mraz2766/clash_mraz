@@ -1042,9 +1042,14 @@ export const CurrentProxyCard = () => {
                   slotProps: { paper: { sx: compactMenuSx } },
                 }}
               >
-                {selectableGroups.map((group) => (
-                  <MenuItem key={group.name} value={group.name}>
-                    {group.name}
+                {/* Global mode pins the GLOBAL group, which is not a selectable
+                    group; list it so the disabled field shows a valid value. */}
+                {(isGlobalMode
+                  ? [selectedGroupName].filter(Boolean)
+                  : selectableGroups.map((group) => group.name)
+                ).map((name) => (
+                  <MenuItem key={name} value={name}>
+                    {name}
                   </MenuItem>
                 ))}
               </Select>

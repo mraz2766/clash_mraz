@@ -132,15 +132,12 @@ class InlineTrafficMonitor {
   }
 
   private emitSnapshot(reason: ITrafficWorkerSnapshotMessage['reason']) {
+    // Only the selected range is sent; a range change emits a fresh snapshot.
     const dataPoints = this.sampler.getDataForTimeRange(this.currentRange)
-    const availableDataPoints = this.sampler.getDataForTimeRange(
-      this.config.compressedDataMinutes,
-    )
 
     this.emit({
       type: 'snapshot',
       dataPoints,
-      availableDataPoints,
       samplerStats: this.sampler.getStats(),
       rangeMinutes: this.currentRange,
       lastTimestamp: this.lastTimestamp,
