@@ -7,7 +7,7 @@ const DEFAULT_CONFIG: ISamplingConfig & {
   rawDataMinutes: 10,
   compressedDataMinutes: 60,
   compressionRatio: 5,
-  snapshotIntervalMs: 250,
+  snapshotIntervalMs: 1000,
   defaultRangeMinutes: 10,
 }
 

@@ -10,7 +10,6 @@ import { Box, Paper, Typography } from '@mui/material'
 import { ReactNode, memo, useMemo, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import { AnimatedNumber } from '@/components/base/animated-number'
 import { TrafficErrorBoundary } from '@/components/shared/traffic-error-boundary'
 import { useConnectionSummaryData } from '@/hooks/use-connection-data'
 import { useMemoryData } from '@/hooks/use-memory-data'
@@ -83,7 +82,7 @@ const CompactStatCard = memo(
             fontWeight: 600,
           }}
         >
-          <AnimatedNumber value={value} resetKey={unit} />{' '}
+          {value}{' '}
           <Typography component="span" variant="caption" color="text.secondary">
             {unit}
           </Typography>

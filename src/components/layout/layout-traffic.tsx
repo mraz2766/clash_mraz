@@ -117,7 +117,7 @@ export const LayoutTraffic = () => {
               {...valStyle}
               sx={{ ...valStyle.sx, fontVariantNumeric: 'tabular-nums' }}
             >
-              <AnimatedNumber value={up} resetKey={upUnit} />
+              {up}
             </Typography>
             <Typography {...unitStyle}>{upUnit}/s</Typography>
           </Box>
@@ -142,7 +142,7 @@ export const LayoutTraffic = () => {
               {...valStyle}
               sx={{ ...valStyle.sx, fontVariantNumeric: 'tabular-nums' }}
             >
-              <AnimatedNumber value={down} resetKey={downUnit} />
+              {down}
             </Typography>
             <Typography {...unitStyle}>{downUnit}/s</Typography>
           </Box>
