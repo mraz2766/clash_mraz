@@ -160,15 +160,34 @@ impl CoreManager {
         let pid = child.pid();
         logging!(trace, Type::Core, "Sidecar started with PID: {}", pid);
 
-        let readiness = poll_sidecar_readiness(SIDECAR_READINESS_ATTEMPTS, SIDECAR_READINESS_INTERVAL, || async {
+        let readiness_probe = poll_sidecar_readiness(SIDECAR_READINESS_ATTEMPTS, SIDECAR_READINESS_INTERVAL, || async {
             tokio::time::timeout(SIDECAR_READINESS_PROBE_TIMEOUT, async {
                 handle::Handle::mihomo().get_version().await
             })
             .await
             .context("Mihomo readiness probe timed out")??;
             Ok(())
-        })
-        .await;
+        });
+        // Drain startup output while probing. A full shell event channel otherwise
+        // blocks the child before its API can become ready.
+        tokio::pin!(readiness_probe);
+        let readiness = loop {
+            tokio::select! {
+                result = &mut readiness_probe => break result,
+                event = rx.recv() => match event {
+                    Some(tauri_plugin_shell::process::CommandEvent::Stdout(line))
+                    | Some(tauri_plugin_shell::process::CommandEvent::Stderr(line)) => {
+                        let message = CompactString::from(&*String::from_utf8_lossy(&line));
+                        Logger::global().writer_sidecar_log(Level::Info, &message);
+                        CLASH_LOGGER.append_log(message).await;
+                    }
+                    Some(tauri_plugin_shell::process::CommandEvent::Terminated(_)) | None => {
+                        break Err(anyhow::anyhow!("Sidecar exited before its API became ready"));
+                    }
+                    _ => {}
+                }
+            }
+        };
         if let Err(readiness_error) = readiness {
             proxy_control::stop_guard().await;
             self.core_stopped();
