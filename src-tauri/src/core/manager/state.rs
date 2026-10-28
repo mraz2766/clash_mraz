@@ -160,14 +160,15 @@ impl CoreManager {
         let pid = child.pid();
         logging!(trace, Type::Core, "Sidecar started with PID: {}", pid);
 
-        let readiness_probe = poll_sidecar_readiness(SIDECAR_READINESS_ATTEMPTS, SIDECAR_READINESS_INTERVAL, || async {
-            tokio::time::timeout(SIDECAR_READINESS_PROBE_TIMEOUT, async {
-                handle::Handle::mihomo().get_version().await
-            })
-            .await
-            .context("Mihomo readiness probe timed out")??;
-            Ok(())
-        });
+        let readiness_probe =
+            poll_sidecar_readiness(SIDECAR_READINESS_ATTEMPTS, SIDECAR_READINESS_INTERVAL, || async {
+                tokio::time::timeout(SIDECAR_READINESS_PROBE_TIMEOUT, async {
+                    handle::Handle::mihomo().get_version().await
+                })
+                .await
+                .context("Mihomo readiness probe timed out")??;
+                Ok(())
+            });
         // Drain startup output while probing. A full shell event channel otherwise
         // blocks the child before its API can become ready.
         tokio::pin!(readiness_probe);
